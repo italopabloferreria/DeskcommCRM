@@ -1,6 +1,12 @@
 # LimpaxCRM — vertical sobre DeskcommCRM
 
-Esta branch local `vertical/limpax` integra a vertical Limpax sem transformar o Deskcomm core em produto específico de uma empresa. O fork `origin` é `italopabloferreria/DeskcommCRM`; `upstream` é `melgarafael/DeskcommCRM`. A branch foi aberta a partir do mesmo commit `50d14bd` em ambos, em 30/09/2026. Ainda não houve push nem deploy.
+## Vitrine fictícia e publicação — 30/09/2026
+
+A branch `vertical/limpax` foi enviada ao fork `italopabloferreria/DeskcommCRM` até o commit `6cdc891fd`. O Supabase isolado `bzretxzwnudtpxmoqjyv` recebeu um conjunto idempotente marcado `[DEMO]`: 12 empresas, 12 pessoas vinculadas, 12 contatos, 12 oportunidades no funil Teste, 12 tarefas internas e 6 reuniões históricas concluídas. `scripts/seed-limpax-demo.mjs` teve execução posterior com zero inserções planejadas. O navegador autenticado mostrou empresas, pessoas, contatos, cartões do funil, tarefas e reuniões na Agenda. Não há endereço, telefone, e-mail ou CNPJ de cliente nesses registros.
+
+A tela Conexões mostrou o botão de novo WhatsApp desativado e a ausência de `WAHA_API_BASE_URL` e `WAHA_API_KEY`; não existe sessão de canal nem QR real. Testes relacionados a transporte e pareamento passaram 42/42, e a rota QR recusou acesso sem login (401). A instalação local também não tem credencial OpenRouter. IA, conversas, mensagens e indicadores de canal não foram simulados como se fossem operacionais. O build de produção Next.js concluiu com sucesso, inclusive a verificação TypeScript; isso não valida o boot em produção. O painel Vercel não lista projeto para este fork, e o app em produção exige outros serviços e segredos além dos usados pela demonstração local. Não tratar push no GitHub como publicação do CRM.
+
+Esta branch `vertical/limpax` integra a vertical Limpax sem transformar o Deskcomm core em produto específico de uma empresa. O fork `origin` é `italopabloferreria/DeskcommCRM`; `upstream` é `melgarafael/DeskcommCRM`. A branch foi aberta a partir do mesmo commit `50d14bd` em ambos, em 30/09/2026. O push da branch ocorreu; deploy do fork ainda não.
 
 ## Primeira decisão de interface e acesso
 

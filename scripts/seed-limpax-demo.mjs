@@ -58,8 +58,17 @@ const stages = check(
 const stageBySlug = Object.fromEntries(stages.map((stage) => [stage.slug, stage.id]));
 if (!stageBySlug.novo || !stageBySlug.em_andamento) throw new Error("Etapas de demonstração ausentes.");
 
-const counts = { companies: 0, people: 0, links: 0, contacts: 0, leads: 0, lead_links: 0 };
-for (const [business, personName, role, progress] of cases) {
+const eventType = check(
+  await client.from("calendar_event_types").select("id,reminder_enabled")
+    .eq("organization_id", ORG_ID).eq("slug", "reuniao").maybeSingle(),
+  "tipo de compromisso",
+);
+if (!eventType || eventType.reminder_enabled) {
+  throw new Error("Agenda de demonstração recusada: reunião inexistente ou com lembrete ativo.");
+}
+
+const counts = { companies: 0, people: 0, links: 0, contacts: 0, leads: 0, lead_links: 0, tasks: 0, appointments: 0 };
+for (const [index, [business, personName, role, progress]] of cases.entries()) {
   const tradeName = `[DEMO] ${business}`;
   const fullName = `[DEMO] ${personName}`;
   const title = `[DEMO] ${business} — ${progress}`;
@@ -147,6 +156,58 @@ for (const [business, personName, role, progress] of cases) {
       await client.from("crm_leads").update({ contact_id: contact.id }).eq("id", lead.id).eq("organization_id", ORG_ID).select("id").single(),
       "vincular oportunidade ao contato",
     );
+  }
+  const taskTitle = `[DEMO] Revisar oportunidade — ${business}`;
+  const task = check(
+    await client.from("crm_tasks").select("id").eq("organization_id", ORG_ID)
+      .eq("title", taskTitle).maybeSingle(),
+    "buscar tarefa",
+  );
+  if (!task) {
+    counts.tasks++;
+    if (APPLY) check(
+      await client.from("crm_tasks").insert({
+        organization_id: ORG_ID,
+        title: taskTitle,
+        description: "[DEMO] Tarefa interna fictícia; nenhum contato será realizado.",
+        priority: index % 3 === 0 ? "high" : "medium",
+        status: index % 4 === 0 ? "in_progress" : "pending",
+        lead_id: lead?.id ?? null,
+        contact_id: contact?.id ?? null,
+      }).select("id").single(),
+      "criar tarefa",
+    );
+  }
+  // Compromissos históricos completos mostram a Agenda sem agendar envio real.
+  if (index < 6) {
+    const appointmentTitle = `[DEMO] Reunião de apresentação — ${business}`;
+    const appointment = check(
+      await client.from("calendar_appointments").select("id").eq("organization_id", ORG_ID)
+        .eq("title", appointmentTitle).maybeSingle(),
+      "buscar compromisso",
+    );
+    if (!appointment) {
+      counts.appointments++;
+      if (APPLY) {
+        const start = new Date(Date.now() - (index + 1) * 86400000);
+        const end = new Date(start.getTime() + 30 * 60000);
+        check(
+          await client.from("calendar_appointments").insert({
+            organization_id: ORG_ID,
+            event_type_id: eventType.id,
+            contact_id: contact?.id ?? null,
+            title: appointmentTitle,
+            description: "[DEMO] Compromisso fictício, já concluído; sem convite ou lembrete.",
+            starts_at: start.toISOString(),
+            ends_at: end.toISOString(),
+            time_zone: "America/Sao_Paulo",
+            status: "completed",
+            source: "ui",
+          }).select("id").single(),
+          "criar compromisso",
+        );
+      }
+    }
   }
 }
 

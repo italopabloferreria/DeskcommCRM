@@ -4,6 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useT } from "@/hooks/i18n/useT";
 
 interface Props {
@@ -18,6 +27,12 @@ export function CompanyDetailClient({ id }: Props) {
     contacts: Array<Record<string, unknown>>;
   } | null>(null);
   const [enriching, setEnriching] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [people, setPeople] = useState<Array<{ id: string; full_name: string }>>([]);
+  const [selectedPerson, setSelectedPerson] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [linking, setLinking] = useState(false);
+  const [linkError, setLinkError] = useState("");
   const load = useCallback(async () => {
     const res = await fetch(`/api/v1/companies/${id}`);
     const json = await res.json();
@@ -33,6 +48,41 @@ export function CompanyDetailClient({ id }: Props) {
     await fetch(`/api/v1/companies/${id}/enrich`, { method: "POST" });
     setEnriching(false);
     void load();
+  }
+
+  async function openLink() {
+    setLinkError("");
+    setSelectedPerson("");
+    setJobTitle("");
+    setLinkOpen(true);
+    try {
+      const res = await fetch("/api/v1/people?limit=100");
+      if (!res.ok) throw new Error("people_request_failed");
+      const json = await res.json();
+      setPeople(Array.isArray(json.data) ? json.data : []);
+    } catch {
+      setLinkError(t("Não foi possível carregar as pessoas. Tente novamente."));
+    }
+  }
+
+  async function linkPerson() {
+    if (!selectedPerson) return;
+    setLinking(true);
+    setLinkError("");
+    try {
+      const res = await fetch("/api/v1/company-people", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_id: id, person_id: selectedPerson, job_title: jobTitle || null }),
+      });
+      if (!res.ok) throw new Error("link_request_failed");
+      setLinkOpen(false);
+      await load();
+    } catch {
+      setLinkError(t("Não foi possível vincular a pessoa. Verifique se ela já está vinculada."));
+    } finally {
+      setLinking(false);
+    }
   }
 
   if (!data) {
@@ -87,7 +137,12 @@ export function CompanyDetailClient({ id }: Props) {
         </Card>
 
         <Card className="space-y-2 p-4">
-          <h2 className="font-medium">{t("Pessoas / decisores")}</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-medium">{t("Pessoas / decisores")}</h2>
+            <Button variant="outline" size="sm" onClick={() => void openLink()}>
+              {t("Vincular pessoa")}
+            </Button>
+          </div>
           {data.people.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("Nenhuma pessoa vinculada.")}</p>
           ) : (
@@ -134,6 +189,45 @@ export function CompanyDetailClient({ id }: Props) {
         </Card>
 
       </div>
+      <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("Vincular pessoa à empresa")}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="company-person-select">{t("Pessoa")}</Label>
+              <select
+                id="company-person-select"
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={selectedPerson}
+                onChange={(event) => setSelectedPerson(event.target.value)}
+              >
+                <option value="">{t("Selecione uma pessoa")}</option>
+                {people
+                  .filter((person) => !data.people.some((link) => (link.people as { id?: string } | null)?.id === person.id))
+                  .map((person) => (
+                    <option key={person.id} value={person.id}>{person.full_name}</option>
+                  ))}
+              </select>
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="company-person-job">{t("Cargo (opcional)")}</Label>
+              <Input id="company-person-job" value={jobTitle} maxLength={200} onChange={(event) => setJobTitle(event.target.value)} />
+            </div>
+            {linkError && <p role="alert" className="text-sm text-destructive">{linkError}</p>}
+            <Link href="/app/people" className="text-sm underline underline-offset-2">
+              {t("Cadastrar nova pessoa")}
+            </Link>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkOpen(false)}>{t("Cancelar")}</Button>
+            <Button disabled={!selectedPerson || linking} onClick={() => void linkPerson()}>
+              {linking ? t("Vinculando…") : t("Vincular")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

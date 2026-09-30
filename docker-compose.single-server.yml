@@ -37,4 +37,4 @@ services:
 networks:
   supabase_private:
     external: true
-    name: ${SINGLE_SERVER_NETWORK:-deskcomm_single_server}
+    name: ${SINGLE_SERVER_NETWORK:-icantbelievecrm_single_server}

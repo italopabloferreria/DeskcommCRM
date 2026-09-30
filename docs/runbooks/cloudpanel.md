@@ -1,4 +1,4 @@
-# Runbook — DeskcommCRM em VPS com CloudPanel (Nginx)
+# Runbook — I Can't Believe CRM em VPS com CloudPanel (Nginx)
 
 > Cenário: VPS com **CloudPanel** já instalado, com o Nginx dele ocupando as
 > portas 80 e 443. O instalador do CRM sobe um Caddy nessas mesmas portas, então
@@ -58,8 +58,8 @@ CRM que abre a tela de login e não deixa ninguém entrar.
 
 ```bash
 cd /var/www
-git clone https://github.com/melgarafael/DeskcommCRM.git DeskcommCRM
-cd /var/www/DeskcommCRM
+git clone https://github.com/italopabloferreria/icantbelievecrm.git I Can't Believe CRM
+cd /var/www/I Can't Believe CRM
 cp .env.hostgator.example .env
 nano .env
 ```
@@ -88,7 +88,7 @@ TRAEFIK_NETWORK=deskcommcrm_proxy
 ```
 
 `deskcommcrm_proxy` não é um nome livre: é `<nome do projeto compose>_proxy`, e
-o nome do projeto é o da pasta em minúsculas. Clonando em `/var/www/DeskcommCRM`
+o nome do projeto é o da pasta em minúsculas. Clonando em `/var/www/I Can't Believe CRM`
 como acima, é `deskcommcrm` — logo, `deskcommcrm_proxy`. Clonou em outra pasta?
 Rode `basename "$PWD" | tr '[:upper:]' '[:lower:]'` e acrescente `_proxy`.
 
@@ -103,7 +103,7 @@ Rode `basename "$PWD" | tr '[:upper:]' '[:lower:]'` e acrescente `_proxy`.
 ## Passo 2 — Rodar o instalador (até o fim, sem Ctrl+C)
 
 ```bash
-cd /var/www/DeskcommCRM
+cd /var/www/I Can't Believe CRM
 bash hostgator-setup-kit/install.sh --yes
 ```
 
@@ -286,7 +286,7 @@ curl -s -o /dev/null -w 'webhook global: %{http_code}\n' \
 ## Atualizações futuras
 
 ```bash
-cd /var/www/DeskcommCRM
+cd /var/www/I Can't Believe CRM
 bash hostgator-setup-kit/update.sh
 ```
 

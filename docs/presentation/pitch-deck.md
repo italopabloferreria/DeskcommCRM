@@ -3,14 +3,14 @@ marp: true
 theme: default
 class: invert
 paginate: true
-title: DeskcommCRM — Pitch Deck v0.1
+title: I Can't Believe CRM — Pitch Deck v0.1
 description: CRM operacional com IA pra e-commerce brasileiro
 date: 2026-04-29
 ---
 
 > **Registro de 2026-04-29.** Este deck foi montado quando o alvo de deploy era a Vercel — daí os slides de arquitetura e de custo. Hoje o CRM é self-host em VPS, e o deploy que vale está em [`docs/runbooks/deploy.md`](../runbooks/deploy.md).
 
-# DeskcommCRM
+# I Can't Believe CRM
 
 ### O CRM operacional onde **IA e humanos atendem juntos** os clientes finais de PMEs de e-commerce no WhatsApp.
 
@@ -36,7 +36,7 @@ PME de e-commerce brasileiro hoje atende cliente final num caos:
 
 ## 2. A nossa visão
 
-DeskcommCRM é a plataforma onde:
+I Can't Believe CRM é a plataforma onde:
 
 | Atendimento | Tecnologia | Compliance |
 |---|---|---|
@@ -291,6 +291,6 @@ Adotamos integralmente o **bundle herdado** da referência *Aula CRM Nichado WAH
 
 📧 rafael@maudibrasil.com.br
 📍 São Paulo, BR
-🔗 docs: github.com/melgarafael/DeskcommCRM (em breve)
+🔗 docs: github.com/italopabloferreria/icantbelievecrm (em breve)
 
 **Perguntas?**

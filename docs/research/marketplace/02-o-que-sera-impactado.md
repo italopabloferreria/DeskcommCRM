@@ -1,6 +1,6 @@
 # Investigação B — O que será impactado (guardião do que já funciona)
 
-> Épico **Marketplace e Extensões** · DeskcommCRM
+> Épico **Marketplace e Extensões** · I Can't Believe CRM
 > Pergunta: **o que, hoje funcionando, muda de comportamento ou corre risco de regressão quando o marketplace entrar?**
 
 ## 0. Cabeçalho — régua da medição
@@ -479,7 +479,7 @@ Nenhum arquivo de extensão aparece na `MARCA_CONGELADA` (`tests/unit/branding.t
 1. **Marca** (`:168`): `/deskcomm/i` sobre `.ts`/`.tsx` de `app|components|hooks|lib|workers`,
    **fora de comentário** (`:553-556` prova que comentário não conta e código conta).
 2. **Templates do GoTrue** (`:635-641`): os `.html`/`.toml` que a primeira varredura nunca viu —
-   nasceu porque o revendedor recebia "Confirme seu e-mail — DeskcommCRM".
+   nasceu porque o revendedor recebia "Confirme seu e-mail — I Can't Believe CRM".
 3. **Host de terceiro** (`:760-790`): **21 hosts** declarados na `main`, por HOST e não por
    arquivo, com categorias `FORNECEDOR` (pode crescer) e `CONSOLE`/`AMOSTRA`/`PLATAFORMA`/
    `PROTOCOLO` (**conjunto FECHADO fixado por nome**, "porque é nessas que a pressa tentaria
@@ -498,7 +498,7 @@ A `MARCA_CONGELADA` tem **5 categorias** (`:186-198`): `PROTOCOLO` (contrato de 
 
 | Porta | O que aconteceria | O gate pega? |
 |---|---|---|
-| **(a) Texto de UI da vitrine** — "Extensões para o DeskcommCRM", "Certificado pelo DeskcommCRM" num `.tsx` de `components/` ou `app/` | marca em código, fora de comentário, numa das 5 raízes | **SIM — CONFIRMADO.** `branding.test.ts:168` reprova. É o caminho seguro |
+| **(a) Texto de UI da vitrine** — "Extensões para o I Can't Believe CRM", "Certificado pelo I Can't Believe CRM" num `.tsx` de `components/` ou `app/` | marca em código, fora de comentário, numa das 5 raízes | **SIM — CONFIRMADO.** `branding.test.ts:168` reprova. É o caminho seguro |
 | **(b) Origem padrão do catálogo** — algo como `https://extensions.deskcomm.com.br` embutido como default | é host de terceiro **e** contém a marca | **SIM para a marca**, e a 3ª varredura exigiria categoria. Mas `FORNECEDOR` "pode crescer" — alguém declara ali e segue. **PROPOSTO: uma origem NOSSA não é `FORNECEDOR`; é vazamento de marca com outro nome** |
 | **(c) Conteúdo que vem do catálogo remoto** — `display.title`, `display.summary`, os textos dos cards, o nome do publicador | renderizado em runtime, a partir de bytes baixados | **NÃO — CONFIRMADO.** As três varreduras leem **arquivos do repositório** (`fs.readFileSync` / `readdirSync`, `:505`). Texto que chega por HTTP não existe para elas |
 
@@ -507,7 +507,7 @@ de ensaio e os pacotes são da fixture. Com uma vitrine pública, **o conteúdo 
 nós publicamos e que aparece dentro da instalação de um revendedor com marca própria** — e
 `branding.test.ts` é estruturalmente cego para ele: ele varre o disco, e isso vem da rede.
 
-Concretamente: um pacote oficial chamado *"Assistente DeskcommCRM de Vendas"* apareceria na
+Concretamente: um pacote oficial chamado *"Assistente I Can't Believe CRM de Vendas"* apareceria na
 vitrine de um revendedor chamado "Vendas Turbo", com o gate de marca **verde**, porque o texto
 nunca esteve num `.ts`.
 
@@ -708,7 +708,7 @@ teste que **falta**.
 | R5 | Egress novo da vitrine (ícone/captura por URL) sem `validateCatalogOrigin` | nada visível — é o servidor do cliente varrendo a rede interna dele | **NÃO.** `download.test.ts` (5) e `download-rebinding.test.ts` (3) cobrem `downloadArtifact`, não um caminho novo. **FALTA:** `toda saída HTTP de extensões passa pela política de origem` (varredura de AST, no molde de `cron-audita-so-quando-ha-efeito.test.ts`) |
 | R6 | Caminho de instalação novo (comando de kit / cron de vitrine) que não passa por `prepare` | `update.sh` roda no meio de uma instalação; instalação corrompida | **NÃO.** Os invariantes 18–22 provam o caminho existente. **FALTA:** `nenhuma escrita em extension_installations fora da RPC de prepare/finish` |
 | R7 | Tela nova da vitrine sem porta no `catalogo.ts` | a loja existe e só se chega digitando a URL | **SIM.** `navegacao-completude.test.ts:74` reprova o `verify` |
-| R8 | Nome do produto no `.tsx` da vitrine | revendedor "Vendas Turbo" vê "DeskcommCRM" na loja | **SIM.** `branding.test.ts:168` |
+| R8 | Nome do produto no `.tsx` da vitrine | revendedor "Vendas Turbo" vê "I Can't Believe CRM" na loja | **SIM.** `branding.test.ts:168` |
 | R9 | Nome do produto **dentro do catálogo remoto** (título/descrição de pacote) | idem R8, com **todos os gates verdes** | **NÃO — e é estrutural.** As 3 varreduras leem o disco (`branding.test.ts:505`). **FALTA:** varredura de marca sobre o catálogo publicado |
 | R10 | Origem padrão da vitrine embutida como host nosso | domínio nosso viaja na imagem do revendedor | **PARCIAL.** 3ª varredura (`:760`) exige categoria, mas `FORNECEDOR` "pode crescer" — declarar ali passa. **FALTA:** categoria `NOSSO_HOST` que reprove por definição |
 | R11 | Chave nova obrigatória em `lib/env.ts` sem função no `update.sh` | **o app não sobe** depois de atualizar; domínio fora do ar | **PARCIAL.** `test:shell` (163 casos de `test-validators.sh`) exercita o `install.sh`. **FALTA:** `toda chave sem default tem escrita no update.sh` |

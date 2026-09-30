@@ -500,7 +500,7 @@ A fala que a vitrine **não pode** ter — cada linha contradiz o código medido
 13. ⚠️ **"Marketplace oficial"** — a palavra *oficial* só é honesta se houver namespace reservado e
     a origem do catálogo aparecer na tela ao lado de cada nome. Hoje não há nem uma coisa nem outra.
 
-**O que a vitrine PODE dizer hoje, sem mentir:** que o DeskcommCRM tem um **contrato de extensão
+**O que a vitrine PODE dizer hoje, sem mentir:** que o I Can't Believe CRM tem um **contrato de extensão
 declarativa v1**, aberto e documentado; que o núcleo funciona inteiro com zero extensões; que
 instalar é uma decisão de quem administra a instalação, e ativar é de quem administra a organização;
 e que a distribuição pública **está em construção**. Isso é menos empolgante e é verdade — e o

@@ -342,8 +342,8 @@ segunda forma dá dois PRs revisáveis em vez de cinco.
    escrita antes do código, não durante.
 3. **Rota pública nova é superfície de abuso.** O rate limit não é opcional; a do
    Google já trata isso e a razão está escrita no cabeçalho dela.
-4. **Trabalhar em `DeskcommCRM-contrib`.** Nunca na instalação de produção
-   (`DeskcommCRM-crm-advanx`) — ver o incidente registrado no plano antecessor.
+4. **Trabalhar em `I Can't Believe CRM-contrib`.** Nunca na instalação de produção
+   (`I Can't Believe CRM-crm-advanx`) — ver o incidente registrado no plano antecessor.
 
 ## Fora do escopo
 

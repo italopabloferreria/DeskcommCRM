@@ -105,6 +105,6 @@ Commit de experimento na branch, **para reverter depois**. Mede o mecanismo, nã
 ## Higiene desta branch
 
 `cb/963` é cópia local de `refs/pull/963/head` — de um **fork**. O push vai para
-`https://github.com/saraivabr/DeskcommCRM.git HEAD:saraiva/social-native`, nunca para
+`https://github.com/saraivabr/I Can't Believe CRM.git HEAD:saraiva/social-native`, nunca para
 `origin` (lá ele cria uma branch nova e o trabalho não chega ao PR). Um experimento
 anterior já foi revertido (`eb86b07d0`); `InboxFilters.tsx` bate byte a byte com a base.

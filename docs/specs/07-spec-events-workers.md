@@ -19,7 +19,7 @@ related:
 
 # Spec 07 — Event Log + Workers + Crons (transversal)
 
-> Esta spec define o **bus interno** do DeskcommCRM: como módulos publicam eventos no banco, como workers consomem, quais crons rodam (no serviço `scheduler` do `docker-compose.prod.yml`, na infraestrutura de quem instala), como tratamos retries, dead-letter, idempotência e observabilidade. É **transversal** — todos os outros sub-PRDs (02–06) emitem ou consomem deste bus.
+> Esta spec define o **bus interno** do I Can't Believe CRM: como módulos publicam eventos no banco, como workers consomem, quais crons rodam (no serviço `scheduler` do `docker-compose.prod.yml`, na infraestrutura de quem instala), como tratamos retries, dead-letter, idempotência e observabilidade. É **transversal** — todos os outros sub-PRDs (02–06) emitem ou consomem deste bus.
 
 ---
 
@@ -539,10 +539,10 @@ await boss.start();
 - **Consome:** **todos** eventos cuja org tem `webhook_subscriptions` configuradas pra esse `event_type`.
 - **Faz:** POST com HMAC SHA-256 signature, header `X-Deskcomm-Signature`, timeout 10s. Sucesso = 2xx.
 - **Retry:** backoff (§8). Após 8 falhas → DLQ. Após **10 falhas consecutivas** numa subscription → `webhook.subscription_disabled` + desabilita `webhook_subscriptions.enabled = false`.
-- **Idempotência:** header `X-Deskcomm-Idempotency-Key = event.id`.
+- **Idempotência:** header `X-!AI-Idempotency-Key = event.id`.
 
 > **Estado real (#1529).** Não existe `webhook-dispatch-worker` nem o header
-> `X-Deskcomm-Idempotency-Key`. O envio é a ação `call_webhook` das automações
+> `X-!AI-Idempotency-Key`. O envio é a ação `call_webhook` das automações
 > (`lib/automation/actions/call-webhook.ts`), e a chave de deduplicação é o
 > `X-Webhook-Delivery` — estável entre retentativas e no Reenviar —, ao lado de
 > `X-Webhook-Attempt`, `X-Webhook-Timestamp` e `X-Webhook-Signature`. O
@@ -697,7 +697,7 @@ if (msg.status === 'sent' || msg.waha_message_id) {
 ### 9.3 Idempotência em side-effects
 
 - **DB:** `unique constraint` em `(messages.organization_id, waha_message_id)`, `(orders.organization_id, ns_order_id)`.
-- **HTTP outbound (webhooks):** header `X-Deskcomm-Idempotency-Key = event_id`.
+- **HTTP outbound (webhooks):** header `X-!AI-Idempotency-Key = event_id`.
   > **Estado real (#1529):** a chave é o `X-Webhook-Delivery` (uuid v5 de
   > evento + regra + posição da ação + lista de ações da regra), não o
   > `event_id` — ver §6.7 e

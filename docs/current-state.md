@@ -1,6 +1,6 @@
 ---
 type: current-state
-project: DeskcommCRM
+project: I Can't Believe CRM
 status: draft
 last_updated: 2026-07-29
 generated_by: auditoria documental (Claude Code) — leitura de código, HANDOFFs, plan/, loop/, CI
@@ -8,7 +8,7 @@ confidence: média-alta (métricas de código são CONFIRMADO; estado de épico 
 audited_against: origin/main @ 789dfa6 (v1.0.0, 2026-07-29)
 ---
 
-# Estado atual — DeskcommCRM
+# Estado atual — I Can't Believe CRM
 
 > # ⚠️ ESTE DOCUMENTO É UM RETRATO, NÃO O ESTADO DE HOJE
 >

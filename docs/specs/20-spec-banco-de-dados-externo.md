@@ -126,4 +126,4 @@ resposta ensina o modelo a repetir com um trecho menor do termo.
 
 - Sincronizar/importar tabelas externas para entidades do CRM.
 - Console SQL livre pelo operador.
-- Escrita no banco externo pelo DeskcommCRM.
+- Escrita no banco externo pelo I Can't Believe CRM.

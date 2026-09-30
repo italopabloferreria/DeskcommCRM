@@ -1,16 +1,16 @@
 ---
 type: research
-assunto: Jev (TypeSafe AI) — modelo System One e o que ele resolve no DeskcommCRM
+assunto: Jev (TypeSafe AI) — modelo System One e o que ele resolve no I Can't Believe CRM
 data: 2026-09-19
 medido_contra: branch fix/agente-pausado-nao-atende @ 1ecf1ab04
 fontes_externas: docs.typesafe.ai (API + llms.txt), typesafe.ai, vídeo de referência (transcrição), registro npm
 ---
 
-# Jev no DeskcommCRM — relatório de decisão
+# Jev no I Can't Believe CRM — relatório de decisão
 
 > **Aviso de régua.** Tudo sobre o Jev abaixo é **afirmação do fornecedor** ou leitura da
 > documentação dele — não medi nada contra a API real (não temos chave). Tudo sobre o
-> DeskcommCRM foi medido neste repo, e cada afirmação traz o arquivo:linha. As duas
+> I Can't Believe CRM foi medido neste repo, e cada afirmação traz o arquivo:linha. As duas
 > categorias não se misturam: onde escrevo "eles dizem", ninguém verificou.
 
 
@@ -79,7 +79,7 @@ errada; o que não acontece é vir um JSON quebrado.
 
 ## 2. Por que isto interessa a este produto especificamente
 
-O DeskcommCRM já organizou a própria vida de um jeito que torna a pergunta trivial de
+O I Can't Believe CRM já organizou a própria vida de um jeito que torna a pergunta trivial de
 responder: **`lib/ai/pontos/registro.ts` cataloga os 24 pontos onde o sistema chama IA**, cada
 um com papel e capacidade exigida, e `ai_purpose_bindings` permite ao operador escolher
 provedor **por ponto**, sem deploy (`lib/agent-engine/edge/llm/binding-do-ponto.ts`).

@@ -1,6 +1,6 @@
 # Handoffs arquivados
 
-Toda a documentação de **processo** do DeskcommCRM está nesta pasta. Handoff é o
+Toda a documentação de **processo** do I Can't Believe CRM está nesta pasta. Handoff é o
 diário de um épico: o que foi tentado, o que foi medido, o que ficou aberto. É
 documentação de *processo*, não contrato de produto — **trate como estado, não
 como verdade**. O que é verdade está em [`../index.md`](../index.md) e no

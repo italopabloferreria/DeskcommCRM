@@ -4,7 +4,7 @@
 
 ## 1. Problema
 
-O DeskcommCRM é um sistema fechado: leads só nascem por ação interna (atendente ou mensagem WhatsApp via WAHA). Não há porta de entrada para sistemas externos (landing page, formulário de newsletter, Zapier) criarem leads, nem mecanismo para o sistema **agir** a partir desses eventos (ex.: novo lead → iniciar conversa). E quando sistemas têm isso, ninguém acha nem sabe configurar. Três requisitos:
+O I Can't Believe CRM é um sistema fechado: leads só nascem por ação interna (atendente ou mensagem WhatsApp via WAHA). Não há porta de entrada para sistemas externos (landing page, formulário de newsletter, Zapier) criarem leads, nem mecanismo para o sistema **agir** a partir desses eventos (ex.: novo lead → iniciar conversa). E quando sistemas têm isso, ninguém acha nem sabe configurar. Três requisitos:
 
 1. **Funcionalidade**: receber dados de fora (inbound) e notificar sistemas externos (outbound).
 2. **Reação**: mini motor de regras gatilho → condições → ações.
@@ -18,7 +18,7 @@ O DeskcommCRM é um sistema fechado: leads só nascem por ação interna (atende
 - **Gatilhos v1**: `lead.created` (via webhook), `lead.stage_changed`, `message.received`, tag adicionada (`lead.tag_added` / `contact.tag_added`).
 - **Ações v1**: `create_or_move_lead`, `send_whatsapp_message` (template com variáveis, anti-banimento), `add_tag`, `assign_owner`, `call_webhook` (outbound).
 - **Condições**: filtros simples — `[{field, op: eq|neq|contains, value}]` combinados com E. Sem OU/grupos no v1.
-- **Captação combinada**: mesma URL aceita `application/json` e `application/x-www-form-urlencoded` (form HTML puro, zero JS). Formulário hospedado pelo Deskcomm fica para v2.
+- **Captação combinada**: mesma URL aceita `application/json` e `application/x-www-form-urlencoded` (form HTML puro, zero JS). Formulário hospedado pelo !AI fica para v2.
 - **Naming/local**: "Webhooks" no sidebar (universal, não só captação).
 
 ## 3. Arquitetura (Abordagem A — tudo sobre o event_log)

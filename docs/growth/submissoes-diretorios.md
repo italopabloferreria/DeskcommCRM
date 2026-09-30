@@ -57,7 +57,7 @@ Critérios: ser open source · ser alternativa a um software proprietário · at
 | Intercom | intercom.com |
 | Octadesk | octadesk.com |
 
-Nome da alternativa: `DeskcommCRM` · Repositório: `https://github.com/melgarafael/DeskcommCRM`
+Nome da alternativa: `I Can't Believe CRM` · Repositório: `https://github.com/italopabloferreria/icantbelievecrm`
 
 ---
 
@@ -65,7 +65,7 @@ Nome da alternativa: `DeskcommCRM` · Repositório: `https://github.com/melgaraf
 
 Exige conta no site. Sem custo, sem trava de idade.
 
-- **Nome:** DeskcommCRM
+- **Nome:** I Can't Believe CRM
 - **Categoria:** CRM / Customer Support
 - **Licença:** Open Source (MIT)
 - **Plataformas:** Self-Hosted, Web, Docker

@@ -152,7 +152,7 @@ volumes:
 
 ### 2.2 Variáveis de ambiente
 
-A `WAHA_API_KEY` do servidor é o **hash SHA512 hex (lowercase) do plaintext**. O backend DeskcommCRM guarda **só** o plaintext no `.env` da instalação (modo 0600, como o `install.sh` o grava); nunca a hash duplicada. Geração:
+A `WAHA_API_KEY` do servidor é o **hash SHA512 hex (lowercase) do plaintext**. O backend I Can't Believe CRM guarda **só** o plaintext no `.env` da instalação (modo 0600, como o `install.sh` o grava); nunca a hash duplicada. Geração:
 
 ```bash
 # Gerar plaintext seguro (nunca commitar; guardar num gerenciador de senhas)
@@ -176,7 +176,7 @@ WAHA_S3_BUCKET=deskcomm-waha-media
 WAHA_S3_ACCESS_KEY_ID=<r2/s3 access key>
 WAHA_S3_SECRET_ACCESS_KEY=<r2/s3 secret>
 
-# === Backend DeskcommCRM (`.env` da instalação) ===
+# === Backend I Can't Believe CRM (`.env` da instalação) ===
 WAHA_API_KEY=<plaintext — só aqui>
 WAHA_BASE_URL=https://waha.deskcomm.internal
 WAHA_WEBHOOK_PUBLIC_BASE_URL=https://api.deskcomm.com
@@ -2053,7 +2053,7 @@ select indexname from pg_indexes where schemaname = 'public'
 
 ## Confirmação
 
-Spec 03 escrita em `/Users/rafaelmelgaco/DeskcommCRM/docs/specs/03-spec-whatsapp-waha.md`. Contém: schema SQL completo das 5 tabelas (channel_sessions + warmup, conversations, messages, webhook_events_log) com RLS e indexes; wrapper TypeScript do WAHA com classes de erro; handlers completos de criação de sessão, webhook receiver com HMAC-SHA512 timing-safe, send pipeline com optimistic UI e pg_boss; rate limiter Redis (1msg/1.2s + jitter), spinning de copy DSL, daily limit, janela horária, detector STOP, warm-up; 3 crons; 7 edge cases tratados; hospedagem Railway → Hostgator; 14 testes de integração mapeados; 9 migrations ordenadas. Todas as regras W-01 a W-12, T-07 e AT-07 estão materializadas em código. Pronto pra crítica e Epics.
+Spec 03 escrita em `/Users/rafaelmelgaco/I Can't Believe CRM/docs/specs/03-spec-whatsapp-waha.md`. Contém: schema SQL completo das 5 tabelas (channel_sessions + warmup, conversations, messages, webhook_events_log) com RLS e indexes; wrapper TypeScript do WAHA com classes de erro; handlers completos de criação de sessão, webhook receiver com HMAC-SHA512 timing-safe, send pipeline com optimistic UI e pg_boss; rate limiter Redis (1msg/1.2s + jitter), spinning de copy DSL, daily limit, janela horária, detector STOP, warm-up; 3 crons; 7 edge cases tratados; hospedagem Railway → Hostgator; 14 testes de integração mapeados; 9 migrations ordenadas. Todas as regras W-01 a W-12, T-07 e AT-07 estão materializadas em código. Pronto pra crítica e Epics.
 
 ## Conexão por código de pareamento (extensão da sessão existente)
 

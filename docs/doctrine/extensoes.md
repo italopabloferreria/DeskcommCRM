@@ -1,6 +1,6 @@
 # Doutrina de Extensões
 
-> Lei sobre o que entra no **núcleo** do DeskcommCRM e o que entra como **extensão** instalável, e
+> Lei sobre o que entra no **núcleo** do I Can't Believe CRM e o que entra como **extensão** instalável, e
 > sobre o que uma extensão pode ou não fazer dentro de uma instalação. Complementa
 > [`sistema-vivo.md`](./sistema-vivo.md) (toda peça tem entrada, saída, registro e laço de retorno)
 > e [`packaging.md`](./packaging.md) (nada constrói na VPS do cliente). Amarrada ao item 18 do

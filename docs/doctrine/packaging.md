@@ -1,6 +1,6 @@
 # Doutrina de Packaging e Distribuição
 
-> Lei de arquitetura para tudo que roda no disco de quem instalou o DeskcommCRM: imagens,
+> Lei de arquitetura para tudo que roda no disco de quem instalou o I Can't Believe CRM: imagens,
 > composes, tags e o kit de instalação. Complementa [`sistema-vivo.md`](./sistema-vivo.md) —
 > não é aspiração, é critério de aceite. Amarrada ao item 15 do Definition of Done
 > (`CLAUDE.md`).
@@ -251,7 +251,7 @@ Só a árvore que criou os contêineres pode atualizá-los. Uma segunda cópia d
 mesma VPS **recusa** mexer, e diz por quê.
 
 - **Por quê:** `docker compose` deriva o nome do projeto do *basename* do diretório.
-  `/root/DeskcommCRM` e `/root/apagar6/DeskcommCRM` viram ambos `deskcommcrm` — um
+  `/root/I Can't Believe CRM` e `/root/apagar6/I Can't Believe CRM` viram ambos `deskcommcrm` — um
   conjunto só de contêineres, dois `.env` diferentes. Cada `up -d` recria o parque com as
   credenciais da sua árvore, e a outra passa a falar com serviços que não a reconhecem.
 - **Anti-exemplo real (medido, 2026-08):** o cron rodava o `agent.sh` das duas árvores a
@@ -280,8 +280,8 @@ mesma VPS **recusa** mexer, e diz por quê.
   `update.sh` chamavam o guarda; o `install.sh` não — ele é standalone de propósito (roda
   antes do clone) e tinha a própria varredura de portas, que perguntava só pelo **nome do
   projeto**. Como o nome colide justamente entre cópias irmãs, o instalador de uma aula em
-  `/root/apagar7/DeskcommCRM` concluiu "é a re-execução" ao ver o Caddy de
-  `/root/DeskcommCRM`, subiu por cima e trocou o banco da produção. O sintoma que chegou
+  `/root/apagar7/I Can't Believe CRM` concluiu "é a re-execução" ao ver o Caddy de
+  `/root/I Can't Believe CRM`, subiu por cima e trocou o banco da produção. O sintoma que chegou
   primeiro foi "minha senha parou de funcionar" — no outro banco a conta é outra —, o que
   manda a investigação para o lado errado por horas. **Nome de projeto igual não é
   identidade: só a árvore é.**

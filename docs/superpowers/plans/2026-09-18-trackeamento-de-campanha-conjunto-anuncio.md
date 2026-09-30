@@ -92,13 +92,13 @@ nome, e não quebra (a resolução devolve nulo e a ficha esconde a linha).
 ## O incidente da pasta de produção — 2026-09-20
 
 Este trabalho foi feito, do começo ao fim, dentro de
-`/root/projects/DeskcommCRM-crm-advanx`, que é a **instalação de produção** de
+`/root/projects/I Can't Believe CRM-crm-advanx`, que é a **instalação de produção** de
 `crm.advanx.com.br` — os contêineres sobem dali, nesta mesma máquina. A regra que
 proíbe isso já estava escrita em `CLAUDE.local.md` do próprio repo, datada de
 13/09/2026, e não foi lida antes de começar:
 
 > Produção = imagem OFICIAL do melgarafael. Nunca editar código na instalação.
-> Bug/melhoria: corrigir em `/root/projects/DeskcommCRM-contrib` → PR.
+> Bug/melhoria: corrigir em `/root/projects/I Can't Believe CRM-contrib` → PR.
 
 **O dano não foi no código.** `update.sh` decide qual versão está instalada com
 `git merge-base --is-ancestor <tag> HEAD` sobre o **git HEAD da pasta**
@@ -114,7 +114,7 @@ medir a verdade e a instalação subiu para 1.41.0. As cinco branches e o remote
 `fork` foram removidos da pasta de produção, que voltou a `HEAD detached at
 v1.41.0`, limpa. Nada do trabalho se perdeu: tudo estava publicado no fork.
 
-**Para quem retomar:** este plano agora vive em `DeskcommCRM-contrib`, e as duas
+**Para quem retomar:** este plano agora vive em `I Can't Believe CRM-contrib`, e as duas
 branches pendentes já estão visíveis lá por `origin` (o fork). Trabalhar dali.
 
 ## Diário de execução

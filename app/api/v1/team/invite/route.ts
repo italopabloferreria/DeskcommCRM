@@ -1,16 +1,14 @@
 import type { EmailDeliveryError } from "@/lib/email/roteador";
 import { requireSupportWrite } from "@/lib/impersonate/support";
-import { issueInvite } from "@/lib/auth/issue-invite";
 import { emitirConvite } from "@/lib/team/convites";
 import { isServiceRoleConfigured } from "@/lib/audit";
 /**
  * POST /api/v1/team/invite — bulk-invite up to 20 emails.
  *
  * O que viaja no e-mail é um token HMAC stateless (`lib/auth/invite-token.ts`).
- * Quando o service-role está configurado, cada convite também vira uma linha em
- * `team_invites` (migration 0238) — é o que a tela de Equipe lista e o que
- * torna a revogação possível. Reconvidar um e-mail com convite pendente RENOVA
- * a linha. Sem service-role, degrada para só-token (nada some, só não persiste).
+ * Cada convite precisa de uma linha em `team_invites` (migration 0238), para
+ * poder ser listado e revogado. Sem service-role, a emissão falha fechada:
+ * gerar apenas um token criaria acesso impossível de cancelar pela equipe.
  *
  * Se o e-mail já tem membership ATIVA na org, pula com `already_member`.
  *
@@ -52,6 +50,10 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (!authz.ok) return authz.response;
   const { user: authUser, org: activeOrg } = authz;
 
+  if (!isServiceRoleConfigured()) {
+    return fail("unavailable", "Convites indisponíveis nesta instalação.", 503, { requestId });
+  }
+
   let input;
   try {
     input = await validateRequest(inviteMemberSchema, req);
@@ -68,24 +70,22 @@ export async function POST(req: NextRequest): Promise<Response> {
   const sent: SentItem[] = [];
   const failed: FailedItem[] = [];
 
-  const admin = isServiceRoleConfigured() ? createAdminClient() : null;
+  const admin = createAdminClient();
   const inviterName = authUser.full_name ?? authUser.email ?? "Um colega";
   // Emails com membership ATIVA na org — para pular o reconvite de quem já é membro.
   // O schema `auth` NÃO é acessível via PostgREST (erro "Invalid schema: auth"), então
   // resolvemos email↔usuário pela GoTrue admin API (getUserById) — mesmo padrão de
   // app/api/v1/team/route.ts. N pequeno (poucos membros por org no perfil BPO).
   const memberEmails = new Set<string>();
-  if (admin) {
-    const { data: members } = await admin
-      .from("user_organizations")
-      .select("user_id")
-      .eq("organization_id", activeOrg.orgId)
-      .is("revoked_at", null);
-    for (const m of members ?? []) {
-      const { data: u } = await admin.auth.admin.getUserById(m.user_id as string);
-      const memberEmail = u?.user?.email?.trim().toLowerCase();
-      if (memberEmail) memberEmails.add(memberEmail);
-    }
+  const { data: members } = await admin
+    .from("user_organizations")
+    .select("user_id")
+    .eq("organization_id", activeOrg.orgId)
+    .is("revoked_at", null);
+  for (const m of members ?? []) {
+    const { data: u } = await admin.auth.admin.getUserById(m.user_id as string);
+    const memberEmail = u?.user?.email?.trim().toLowerCase();
+    if (memberEmail) memberEmails.add(memberEmail);
   }
 
   for (const inv of input.invitations) {
@@ -97,39 +97,24 @@ export async function POST(req: NextRequest): Promise<Response> {
       continue;
     }
 
-    if (admin) {
-      const { convite, accept_url, email_dispatched, email_error } = await emitirConvite(admin, {
-        email,
-        role: inv.role,
-        interfaceSettings: inv.interface_settings,
-        organizationId: activeOrg.orgId,
-        orgName: activeOrg.name,
-        inviterId: authUser.id,
-        inviterName,
-        requestId,
-      });
-      sent.push({
-        email,
-        invite_id: convite.id,
-        expires_at: convite.expires_at,
-        email_dispatched,
-        email_error,
-        accept_url,
-      });
-    } else {
-      sent.push(
-        await issueInvite({
-          email,
-          role: inv.role,
-          interfaceSettings: inv.interface_settings,
-          organizationId: activeOrg.orgId,
-          orgName: activeOrg.name,
-          inviterId: authUser.id,
-          inviterName,
-          requestId,
-        }),
-      );
-    }
+    const { convite, accept_url, email_dispatched, email_error } = await emitirConvite(admin, {
+      email,
+      role: inv.role,
+      interfaceSettings: inv.interface_settings,
+      organizationId: activeOrg.orgId,
+      orgName: activeOrg.name,
+      inviterId: authUser.id,
+      inviterName,
+      requestId,
+    });
+    sent.push({
+      email,
+      invite_id: convite.id,
+      expires_at: convite.expires_at,
+      email_dispatched,
+      email_error,
+      accept_url,
+    });
   }
 
   return ok({ sent, failed }, { status: 201, requestId });

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 216 216" width="216" height="216" role="img" aria-labelledby="title desc">
+  <title id="title">!AI</title>
+  <desc id="desc">Placeholder minimalista da !AI.</desc>
+  <rect width="216" height="216" rx="48" fill="#080808"/>
+  <path d="M108 14 194 64v88l-86 50-86-50V64l86-50Z" fill="#6D28D9"/>
+  <text x="108" y="129" text-anchor="middle" fill="#F5F5F5" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">!AI</text>
+  <rect x="88" y="150" width="40" height="12" rx="6" fill="#B6FF4D"/>
+</svg>

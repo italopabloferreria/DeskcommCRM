@@ -6,9 +6,9 @@ export type Theme = "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
 // Exportada para o teste reusar em vez de duplicar o literal — duplicar
-// acionaria `tests/unit/branding.test.ts` (a mesma marca hardcoded, fora da
+// acionaria `tests/unit/branding.test.ts` (a mesmo literal hardcoded, fora da
 // lista congelada, num segundo arquivo).
-export const STORAGE_KEY = "deskcomm-theme";
+export const STORAGE_KEY = "icantbelievecrm-theme";
 
 type ThemeContextValue = {
   /** User preference: light, dark, or system. */

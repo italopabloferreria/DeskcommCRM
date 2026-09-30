@@ -4,7 +4,7 @@ Esta branch local `vertical/limpax` integra a vertical Limpax sem transformar o 
 
 ## Primeira decisão de interface e acesso
 
-Usar a tela e o frontend padrão do Deskcomm, incluindo `/login`, Google e o fluxo existente de convite. Não portar a tela de login nem o shell do CRM antigo da Limpax. A instalação Limpax deverá ser configurada em `so_convite` e testada com contas reais autorizadas antes de ser exposta. O proprietário quer ser o único criador de usuários; verificar se a administração/convites atuais do Deskcomm cumprem essa regra ou exigem uma configuração/extensão de RBAC. Não afirmar que esse requisito está pronto apenas porque o cadastro por convite existe.
+Usar a tela e o frontend padrão do Deskcomm, incluindo `/login`, Google e o fluxo existente de convite. Não portar a tela de login nem o shell do CRM antigo da Limpax. A instalação Limpax deverá ser configurada em `so_convite` e testada com contas reais autorizadas antes de ser exposta. Decisão do proprietário: Ítalo e demais administradores da organização podem convidar; manager, agent e viewer não podem. O Deskcomm já exige admin na página e no POST de convite, no reenvio/revogação e na RLS de team_invites. Isso foi conferido no código; a matriz com identidades reais ainda depende da instalação.
 
 ## Modelo e separação
 
@@ -19,9 +19,9 @@ A entrada de leads do site Limpax deve usar uma integração autenticada e idemp
 ## Sequência verificável
 
 1. Preparar instalação local separada conforme `CLAUDE.md` e `docs/deploy-selfhost/README.md`.
-2. Verificar login padrão, Google, `so_convite`, recusa de não convidados, saída e autoridade exclusiva do proprietário; corrigir lacunas no menor escopo.
+2. Verificar login padrão, Google, `so_convite`, recusa de não convidados, saída e convite por admin da organização; corrigir lacunas no menor escopo.
 3. Ativar CRM B2B em ambiente de teste e validar empresa, pessoas, contatos e lead.
 4. Desenhar e implementar múltiplos locais como módulo reutilizável, com autorização por organização.
 5. Só então integrar leads do site e evoluir OS/campo/financeiro, com migração reversível se houver dados antigos a aproveitar.
 
-Estado em 30/09/2026: branch e plano locais; nenhuma instalação funcional, migração, ativação de módulo ou publicação do LIMPAX OS foi concluída.
+Estado em 30/09/2026: dependências locais instaladas com pnpm 9.15.9; 64 testes de callback, convite e CRM B2B passaram em 8 arquivos. O Windows não tem Docker nem WSL; sem .env.local e sem banco isolado conectado, não há instalação funcional nem teste E2E. Na organização Supabase Limpax há dois projetos no plano grátis. O projeto bzretxzwnudtpxmoqjyv está separado do CRM antigo. Preflight SQL somente de leitura: 0 tabelas públicas, 0 usuários, 0 buckets, migration_table NULL; 0 extensões vector/citext/pg_trgm instaladas. O painel indica Unhealthy, embora as consultas SQL funcionem. É apenas candidato a ambiente LIMPAX OS, sem alteração remota nesta etapa. Um .env.local ignorado pelo Git foi criado só com SIGNUP_MODE=so_convite e NEXT_PUBLIC_APP_URL=http://localhost:3000; não há chaves. Nenhuma migração, ativação de módulo ou publicação foi concluída.

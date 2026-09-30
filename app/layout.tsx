@@ -172,6 +172,10 @@ async function EstiloDaMarca() {
   await headers();
   const { linha, marca } = await marcaResolvida();
   const { css, motivos } = cssDaMarca(marca.cor);
+  const logoSurface = env.APP_LOGO_SURFACE_HEX.trim();
+  const logoSurfaceCss = /^#[0-9a-fA-F]{6}$/.test(logoSurface)
+    ? `:root{--app-logo-surface:${logoSurface};}`
+    : "";
 
   // O ESTADO da recusa vai para o banco, não só para o log. Sem isto, o degrade
   // ("o produto ficou com a cor dele") é indistinguível de "a feature nunca foi
@@ -206,7 +210,7 @@ async function EstiloDaMarca() {
 
   // `null` sem motivo é o caso de fábrica (nenhuma cor configurada): não há o
   // que injetar, e o produto fica com a cor dele.
-  if (!css) return null;
+  if (!css && !logoSurfaceCss) return null;
   // Conteúdo derivado do `.env` do servidor e já passado pela allowlist de forma
   // de `lib/branding/css.ts`, que recusa `<` e devolve `null` em vez de string
   // parcial. Mesmo contrato do `THEME_INIT_SCRIPT` acima.
@@ -216,7 +220,7 @@ async function EstiloDaMarca() {
   // no texto (foi como a prova em tela deste marco teve de fazer), e distinguir
   // o bloco da INSTALAÇÃO do bloco da ORGANIZAÇÃO — que a fase seguinte injeta —
   // seria impossível. Vale para diagnóstico, para spec de e2e e para o suporte.
-  return <style id="marca-instalacao" dangerouslySetInnerHTML={{ __html: css }} />;
+  return <style id="marca-instalacao" dangerouslySetInnerHTML={{ __html: `${css ?? ""}${logoSurfaceCss}` }} />;
 }
 
 /**

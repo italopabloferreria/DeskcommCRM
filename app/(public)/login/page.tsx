@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EntrarComGoogle } from "@/components/auth/EntrarComGoogle";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { branding } from "@/lib/branding";
+import { modoDeCadastro } from "@/lib/auth/politica-de-cadastro";
 import { createClient } from "@/lib/supabase/server";
 import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
@@ -27,6 +28,7 @@ export default async function LoginPage({
     (user?.user_metadata?.locale as string | undefined) ?? null,
   );
   const t = (texto: string) => traduzir(texto, idioma);
+  const cadastroSomentePorConvite = (await modoDeCadastro()) === "so_convite";
 
   return (
     <div className="space-y-6">
@@ -149,15 +151,19 @@ export default async function LoginPage({
             {t("Esqueci minha senha")}
           </Link>
         </p>
-        <p className="text-muted-foreground">
-          {t("Não tem conta?")}{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-foreground underline underline-offset-4"
-          >
-            {t("Criar conta")}
-          </Link>
-        </p>
+        {cadastroSomentePorConvite ? (
+          <p className="text-muted-foreground">{t("Cadastro apenas por convite")}</p>
+        ) : (
+          <p className="text-muted-foreground">
+            {t("Não tem conta?")}{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              {t("Criar conta")}
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );

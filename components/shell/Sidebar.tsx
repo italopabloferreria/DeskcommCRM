@@ -137,9 +137,10 @@ export function SidebarContent({
           // Sem arte própria para o escuro, preserva a proteção de contraste.
           <div
             className={cn(
-              "rounded-md",
-              !logoEscuro && "dark:bg-white dark:px-2 dark:py-1 dark:shadow-sm",
+              "rounded-md px-2 py-1",
+              !logoEscuro && "dark:bg-white dark:shadow-sm",
             )}
+            style={logoEscuro ? undefined : { backgroundColor: "var(--app-logo-surface, #fff)" }}
           >
             {/* <img> em vez de next/image de propósito: a URL vem de quem hospeda
               (banco ou .env), e next/image exige allowlist de domínios fechada em

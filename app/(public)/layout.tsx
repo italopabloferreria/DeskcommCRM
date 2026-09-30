@@ -75,8 +75,9 @@ export default async function PublicLayout({ children }: { children: React.React
                 className={
                   marca.logoDarkUrl
                     ? "rounded-md"
-                    : "rounded-md dark:bg-white dark:px-3 dark:py-2 dark:shadow-sm"
+                    : "rounded-md px-3 py-2 dark:bg-white dark:shadow-sm"
                 }
+                style={marca.logoDarkUrl ? undefined : { backgroundColor: "var(--app-logo-surface, #fff)" }}
               >
                 {marca.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -110,6 +111,7 @@ export default async function PublicLayout({ children }: { children: React.React
             </div>
           ) : null}
           {children}
+          <p className="text-center text-xs text-muted-foreground">Produzido por iCBAI</p>
         </div>
       </div>
     </IdiomaProvider>

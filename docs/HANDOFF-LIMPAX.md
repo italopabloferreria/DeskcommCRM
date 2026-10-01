@@ -1,3 +1,10 @@
+## Publicação ARM preparada — 01/10/2026
+
+Nova infraestrutura da vertical: .github/workflows/limpax-arm-release.yml valida qualidade/Compose real/shell, constrói as três imagens ARM, executa as cinco sondas canônicas e publica exatamente as imagens carregadas/testadas em ghcr.io/italopabloferreria/limpaxcrm, limpaxcrm-worker e limpaxcrm-scheduler. Job de escrita exclusivo do fork/branch; GITHUB_TOKEN efêmero packages:write somente no job publicador. Não usa segredos Supabase, não altera tags stable/latest nem acessa VPS. Manifesto contém commit completo e três digests; tag inclui commit/run/tentativa. Helper recusa outra origem/arquitetura/contexto, inspeciona as três antes do primeiro push e não emite manifesto completo após falha parcial.
+
+17 testes locais de publicador/permissões, sintaxe, ESLint dirigido e fragmento passaram. Publicação remota ainda não executada nesta evidência. Workflow roda por push relevante desta infraestrutura ou manual na vertical. Registro=GitHub logs/summary/artefato do manifesto; consumidor=limpax-arm-runtime.mjs; porta=runbook Oracle; falha exige correção/nova prova; mapa ARM inclui publicação e retorno ao instalador. Pacotes novos nascem privados por padrão segundo GitHub; conferir acesso anônimo ou preparar acesso restrito antes da VPS. Chrome retornou User unavailable; sem alterações de visibilidade. Não iniciar serviços pesados locais. Backup/restore,0495, acesso VPS/endereço HTTPS e aceite hospedado seguem pendentes. G13 aberto.
+
+
 ## Entrada de runtime ARM aprovada — 01/10/2026
 
 Código c4bd6a5f99ee9fa5c2b9c2e6756121e5b6194655 enviado ao GitHub. Execução https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36823336516 concluída SUCCESS: testes de recusas/mapa/permissões, ESLint, fragmento, plano usando Compose real com configuração fictícia e suite shell completa no Linux aprovados. A entrada tem23 testes de recusa/sequência/sanitização de JSON. O resultado substitui os status pendentes abaixo.

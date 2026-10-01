@@ -52,6 +52,9 @@ const DIR = join(process.cwd(), ".github/workflows");
  * acrescente, e acrescentar sem razão é visível em code review.
  */
 const ESCRITA_JUSTIFICADA: Record<string, string> = {
+  "limpax-arm-release.yml::packages: write":
+    "publica somente as três imagens próprias da vertical Limpax, depois dos testes e sondas ARM; " +
+    "job exclusivo do fork/branch autorizados, sem deploy ou credenciais de produção",
   "publish-image.yml::packages: write":
     "publica a imagem do app no GHCR — é o artefato que o self-hoster instala",
   "vigia-de-colisao.yml::pull-requests: write":

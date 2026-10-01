@@ -1,0 +1,6 @@
+interface:
+  display_name: "Operar o ICB CRM"
+  short_description: "Consulta código, docs, skills e tutorial para configurar, operar e diagnosticar o fork do CRM"
+  default_prompt: "Use a skill icb-crm-operacao e me ajude a configurar ou operar meu CRM usando o estado atual do projeto."
+policy:
+  allow_implicit_invocation: true

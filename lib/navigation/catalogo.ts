@@ -359,6 +359,16 @@ export const NAV_CATALOG = [
     capacidade: "propostas",
   },
   {
+    href: "/app/documents",
+    label: "Documentos",
+    description: "Prepare prévias em PDF com assinatura e carimbo posicionados por página.",
+    icon: "FileText",
+    group: "crm",
+    section: "Fechar a venda",
+    minRole: "agent",
+    sidebar: true,
+  },
+  {
     // A promessa que o comentário da Agenda fazia desde que ela nasceu. Aqui se
     // decide O QUE se pode marcar, quanto dura e quem atende — e é isto que a
     // tela de marcar e o agente de IA oferecem ao cliente.

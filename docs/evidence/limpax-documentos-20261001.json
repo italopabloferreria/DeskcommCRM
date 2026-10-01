@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-01",
+  "scope": "Manual signature/stamp PNG in document previews",
+  "unit_and_regression": { "files": 7, "passed": 235, "failed": 0, "new_tests": 19 },
+  "targeted_types": "passed, maximum heap 768MB",
+  "targeted_lint": "passed",
+  "diff": "passed",
+  "visual_acceptance": "not performed; local Next remains stopped",
+  "deployment": "not performed",
+  "database_changes": "none",
+  "real_customer_data_in_tests": false,
+  "persistent_registry": false,
+  "ocr_to_template_in_crm": false,
+  "external_signing": "not connected"
+}

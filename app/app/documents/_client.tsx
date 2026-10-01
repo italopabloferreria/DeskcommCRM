@@ -1,0 +1,199 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { previaSchema } from "@/lib/documentos/previa";
+import { EditorImagem, type ImagemDocumento } from "./_imagem";
+
+export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
+  const [titulo, setTitulo] = useState("Ordem de serviço");
+  const [destinatario, setDestinatario] = useState("");
+  const [paginas, setPaginas] = useState([""]);
+  const [imagens, setImagens] = useState<ImagemDocumento[]>([
+    {
+      tipo: "assinatura",
+      nome: "",
+      qualificacao: "",
+      png: "",
+      pagina: 1,
+      x: 120,
+      y: 235,
+      largura: 65,
+      altura: 20,
+    },
+    {
+      tipo: "carimbo",
+      nome: "",
+      qualificacao: "",
+      png: "",
+      pagina: 1,
+      x: 20,
+      y: 235,
+      largura: 65,
+      altura: 20,
+    },
+  ]);
+  const [erro, setErro] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function baixar() {
+    setErro("");
+    const parsed = previaSchema.safeParse({
+      titulo,
+      destinatario,
+      paginas: paginas.map((texto) => ({ texto })),
+      assinaturas: imagens.filter((s) => s.png),
+    });
+    if (!parsed.success) {
+      setErro(parsed.error.issues[0]?.message ?? "Revise os campos.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const response = await fetch("/api/v1/documents/preview", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed.data),
+      });
+      if (!response.ok) {
+        const body = await response.json();
+        throw new Error(body.error?.message ?? "Não foi possível gerar a prévia.");
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "documento-previa.pdf";
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Falha ao gerar o documento.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-8">
+      <div>
+        <h1 className="text-2xl font-semibold">Documentos</h1>
+        <p className="text-muted-foreground">
+          Prepare uma prévia em PDF com assinatura e carimbo nas posições escolhidas.
+        </p>
+      </div>
+      <div className="rounded-lg border p-4 text-sm">
+        Prévia em preparação: os campos e o PNG ficam apenas nesta tela enquanto ela está aberta.
+        Modelos, emissores e arquivos definitivos ainda não são salvos. O PDF identifica o rascunho
+        e não é uma nota fiscal.
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="doc-titulo">Título</Label>
+          <Input
+            id="doc-titulo"
+            value={titulo}
+            maxLength={120}
+            onChange={(e) => setTitulo(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="doc-destinatario">Cliente ou destinatário</Label>
+          <Input
+            id="doc-destinatario"
+            value={destinatario}
+            maxLength={180}
+            onChange={(e) => setDestinatario(e.target.value)}
+          />
+        </div>
+      </div>
+      {paginas.map((texto, i) => (
+        <div key={i} className="space-y-2">
+          <Label htmlFor={`doc-pagina-${i}`}>Texto da página {i + 1}</Label>
+          <Textarea
+            id={`doc-pagina-${i}`}
+            rows={9}
+            value={texto}
+            maxLength={2500}
+            onChange={(e) => setPaginas((p) => p.map((t, n) => (n === i ? e.target.value : t)))}
+          />
+          <p className="text-xs text-muted-foreground">
+            Até 32 linhas de 50 caracteres; divida textos maiores entre páginas.
+          </p>
+        </div>
+      ))}
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          disabled={paginas.length >= 5}
+          onClick={() => setPaginas((p) => [...p, ""])}
+        >
+          Adicionar página
+        </Button>
+        {paginas.length > 1 ? (
+          <Button
+            variant="outline"
+            onClick={() => {
+              setPaginas((p) => p.slice(0, -1));
+              setImagens((s) =>
+                s.map((imagem) => ({
+                  ...imagem,
+                  pagina: Math.min(imagem.pagina, paginas.length - 1),
+                })),
+              );
+            }}
+          >
+            Remover última página
+          </Button>
+        ) : null}
+      </div>
+      {podeUsarPng
+        ? imagens.map((imagem, i) => (
+            <EditorImagem
+              key={imagem.tipo}
+              imagem={imagem}
+              paginas={paginas.length}
+              erro={setErro}
+              atualizar={(value) =>
+                setImagens((s) => s.map((atual, n) => (n === i ? { ...atual, ...value } : atual)))
+              }
+            />
+          ))
+        : null}
+      {erro ? (
+        <p role="alert" className="text-destructive">
+          {erro}
+        </p>
+      ) : null}
+      <Button disabled={busy} onClick={() => void baixar()}>
+        {busy ? "Gerando PDF…" : "Baixar prévia em PDF"}
+      </Button>
+      <div className="flex flex-wrap gap-4 border-t pt-4 text-sm">
+        <Link className="underline" href="/app/proposals">
+          Propostas comerciais
+        </Link>
+        <a
+          className="underline"
+          href="https://assinador.iti.br/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Portal de assinatura Gov.br
+        </a>
+        <a
+          className="underline"
+          href="https://validar.iti.gov.br/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Validar assinatura no ITI
+        </a>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        DocuSign ainda não está conectado. O portal Gov.br abre separadamente; o CRM não envia este
+        arquivo automaticamente.
+      </p>
+    </main>
+  );
+}

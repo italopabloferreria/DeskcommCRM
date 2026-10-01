@@ -1,5 +1,35 @@
 # Retomada da vertical LimpaxCRM
 
+## Tarefa vigente: módulo Documentos — assinatura/carimbo manuais
+
+O proprietário esclareceu: OCR apenas para contratos/documentos virarem modelos
+reutilizáveis no CRM, preenchidos por cliente. Clientes entram por planilha.
+Assinatura e carimbo em PNG transparente enviados manualmente, posicionados
+independentemente. Gov.br pelo portal com retorno manual, não integração API
+para CRM privado; DocuSign ainda sem conta/configuração de integração.
+
+Implementado `/app/documents` e prévia autenticada `/api/v1/documents/preview`:
+até cinco páginas A4, assinatura/carimbo opcionais, posição/tamanho/página,
+PNG privado em memória; upload disponível a administrador. Valida origem,
+organização pelo guard, bytes, expansão/CRC/transparência do PNG e área útil.
+Corrigida altura variável do renderer para manter A4 e não ocultar as imagens.
+235 testes em sete arquivos passaram, incluindo 19 novos, propostas herdadas,
+navegação e mapas; lint focado, tipos focados (heap limitado) e diff aprovados.
+Nenhum Docker/Next/build pesado, migration, envio ou implantação iniciado.
+
+Limites: é PRÉVIA, sem cadastro persistente de imagens/modelos, numeração final
+ou valor fiscal. OCR→modelo ainda NÃO implementado no CRM. Não apresentar
+piloto Windows privado como entrega do produto. Função pura de revisão de
+planilha conserva fontes/histórico e não funde automaticamente; não é nova
+tela de importação. Plano/design em `docs/superpowers/`; comparação comprovada
+em `docs/LIMPAX_DIFFERENCES.md`.
+
+Próximo executável: modelo documental reutilizável com campos do cliente,
+cadastro privado de emissores/PNGs e revisão OCR no CRM. Schema opcional deve
+seguir provisionador/RLS/Storage/auditoria/idempotência; nenhuma aplicação
+remota antes dos gates de backup/restauração. Migração0495 segue não aplicada,
+VPS grátis sem capacidade, G13 aberto. Usar as regras CLAUDE.md/AGENTS.md.
+
 ## Descoberta documental concluída — 01/10/2026
 
 O proprietário autorizou ler a pasta Documentos. Análise sanitizada: docs/LIMPAX_DATA_DISCOVERY.md no repositório Limpax. 346 arquivos; planilha XLSM com9 abas,4.148 linhas com nome na aba CADASTRO, que mistura cadastros e histórico. 1.751 nomes normalizados NÃO equivalem a clientes únicos;79 repetições excedentes de ID.326 PDFs/595 páginas abertos,10 sem texto;ZIPs inventariados e10 PDFs internos lidos,cinco com texto. Imagens/OCR e Word antigo permanecem leitura complementar. Não executar macros/atalhos. Originais intactos;Documentos ignorado no Git;extrações com PII privadas fora dos repos.

@@ -1,0 +1,100 @@
+{
+  "name": "Prévia documental da vertical",
+  "status": "implemented_not_deployed",
+  "destination": "vertical_specialization",
+  "nodes": [
+    {
+      "id": "navigation",
+      "file": "lib/navigation/catalogo.ts",
+      "lane": "ui",
+      "label": "navigation"
+    },
+    {
+      "id": "screen",
+      "file": "app/app/documents/_client.tsx",
+      "lane": "ui",
+      "label": "screen"
+    },
+    {
+      "id": "images",
+      "file": "app/app/documents/_imagem.tsx",
+      "lane": "ui",
+      "label": "images"
+    },
+    {
+      "id": "route",
+      "file": "app/api/v1/documents/preview/route.ts",
+      "lane": "server",
+      "label": "route"
+    },
+    {
+      "id": "validation",
+      "file": "lib/documentos/previa.ts",
+      "lane": "server",
+      "label": "validation"
+    },
+    {
+      "id": "png",
+      "file": "lib/documentos/png.ts",
+      "lane": "server",
+      "label": "png"
+    },
+    {
+      "id": "pdf",
+      "file": "lib/documentos/previa-pdf.tsx",
+      "lane": "server",
+      "label": "pdf"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "navigation",
+      "to": "screen"
+    },
+    {
+      "id": "e2",
+      "from": "screen",
+      "to": "images"
+    },
+    {
+      "id": "e3",
+      "from": "screen",
+      "to": "route"
+    },
+    {
+      "id": "e4",
+      "from": "route",
+      "to": "validation"
+    },
+    {
+      "id": "e5",
+      "from": "route",
+      "to": "png"
+    },
+    {
+      "id": "e6",
+      "from": "route",
+      "to": "pdf"
+    }
+  ],
+  "feedback": "Validation errors shown in screen; failed PDF generation returns generic error and request ID, no file or image logged. No durable issuance or send occurs.",
+  "pending": [
+    "OCR-to-template inside CRM",
+    "private persistent model/issuer registry",
+    "immutable issuance and audit",
+    "DocuSign",
+    "hosted visual acceptance"
+  ],
+  "schema_version": 1,
+  "lanes": [
+    {
+      "label": "Tela",
+      "id": "ui"
+    },
+    {
+      "label": "Servidor",
+      "id": "server"
+    }
+  ]
+}

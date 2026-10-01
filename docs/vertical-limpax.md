@@ -1,5 +1,9 @@
 # LimpaxCRM — vertical sobre DeskcommCRM
 
+## WhatsApp local conectado — 30/09/2026
+
+Após reinício, Docker respondeu com motor 29.8.1. WAHA CORE 2026.9.1 NOWEB está saudável; API autenticada confirma uma única sessão WORKING. O navegador mostra o WhatsApp do proprietário Conectado. Variáveis WAHA ativadas apenas em .env.local ignorado pelo Git; webhooks responderam 200. IA em modo de teste, sem números autorizados. Nenhuma mensagem enviada pelo agente; envio/recebimento ainda não testados. Próximo passo: conversa de teste especificamente autorizada, depois worker, OpenRouter e VPS. Telefone omitido da documentação.
+
 ## Vitrine fictícia e publicação — 30/09/2026
 
 A branch `vertical/limpax` foi enviada ao fork `italopabloferreria/DeskcommCRM` até o commit `6cdc891fd`. O Supabase isolado `bzretxzwnudtpxmoqjyv` recebeu um conjunto idempotente marcado `[DEMO]`: 12 empresas, 12 pessoas vinculadas, 12 contatos, 12 oportunidades no funil Teste, 12 tarefas internas e 6 reuniões históricas concluídas. `scripts/seed-limpax-demo.mjs` teve execução posterior com zero inserções planejadas. O navegador autenticado mostrou empresas, pessoas, contatos, cartões do funil, tarefas e reuniões na Agenda. Não há endereço, telefone, e-mail ou CNPJ de cliente nesses registros.

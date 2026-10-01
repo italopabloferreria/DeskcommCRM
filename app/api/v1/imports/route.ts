@@ -118,53 +118,32 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (invalidMapping) return fail("validation_failed", invalidMapping, 422, { requestId });
 
     const supabase = await createClient();
-    const { data: batch, error: batchErr } = await supabase
-      .from("import_batches")
-      .insert({
-        organization_id: authz.org.orgId,
-        kind: "companies_people",
-        filename: nome,
-        status: "pending",
-        total_rows: parsed.sheet.rows.length,
-        column_mapping: mapping,
-        created_by: authz.user.id,
-      })
-      .select("id")
-      .single();
-
-    if (batchErr || !batch) {
-      return fail("internal_error", batchErr?.message ?? "Falha ao criar lote.", 500, {
-        requestId,
-      });
-    }
-
     const summary = await processCompaniesPeopleImport(supabase, {
       organizationId: authz.org.orgId,
-      batchId: batch.id,
-      userId: authz.user.id,
+      filename: nome,
       sheet: parsed.sheet,
       mapping,
-      enrichCompanies: form.get("enrich") !== "false",
+      requestId,
     });
 
-    await audit({
-      organizationId: authz.org.orgId,
-      actorUserId: authz.user.id,
-      action: "imports.companies_people",
-      resourceType: "import_batches",
-      resourceId: batch.id,
-      requestId,
-      metadata: summary as unknown as Record<string, unknown>,
-    });
+    if (!summary.reused)
+      await audit({
+        organizationId: authz.org.orgId,
+        actorUserId: authz.user.id,
+        action: "imports.companies_people",
+        resourceType: "import_batches",
+        resourceId: summary.batch_id,
+        requestId,
+        metadata: summary as unknown as Record<string, unknown>,
+      });
 
     return ok(
       {
-        batch_id: batch.id,
         suggested_mapping: suggestColumnMapping(parsed.sheet.headers),
         headers: parsed.sheet.headers,
         ...summary,
       },
-      { requestId, status: 201 },
+      { requestId, status: summary.reused ? 200 : 201 },
     );
   } catch (e) {
     return handleRouteError(e, requestId);

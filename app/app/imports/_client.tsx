@@ -88,7 +88,9 @@ export function ImportsListClient() {
         return;
       }
       setMessage(
-        t("Lote processado") +
+        (json.data.reused
+          ? t("Esta planilha já foi processada; nenhum cadastro foi repetido")
+          : t("Lote processado")) +
           `: ${json.data.successful_rows} ok, ${json.data.conflict_rows} conflitos, ${json.data.failed_rows} falhas.`,
       );
       setFile(null);

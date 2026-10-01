@@ -2,6 +2,8 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
+import { processCompaniesPeopleImport } from "@/lib/crm-b2b/import-process";
+import { audit } from "@/lib/audit";
 import { requireRole } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 vi.mock("@/lib/auth/require-role", () => ({ requireRole: vi.fn() }));
@@ -69,4 +71,32 @@ describe("análise sem gravar", () => {
     expect((await POST(request("Empresa\nTeste", { preview: "true" }))).status).toBe(403);
     expect(createClient).not.toHaveBeenCalled();
   });
+});
+
+describe("confirmação transacional pela rota", () => {
+  it.each([false, true])(
+    "reused=%s devolve o lote confirmado sem criar lote por tabela",
+    async (reused) => {
+      const summary = {
+        batch_id: "11111111-1111-4111-8111-111111111111",
+        successful_rows: 1,
+        failed_rows: 0,
+        conflict_rows: 0,
+        processed_rows: 1,
+        reused,
+      };
+      vi.mocked(createClient).mockResolvedValue({} as never);
+      vi.mocked(processCompaniesPeopleImport).mockResolvedValue(summary);
+      const response = await POST(
+        request("Empresa\nTeste", { mapping: JSON.stringify({ company_name: "Empresa" }) }),
+      );
+      expect(response.status).toBe(reused ? 200 : 201);
+      expect((await response.json()).data.batch_id).toBe(summary.batch_id);
+      expect(processCompaniesPeopleImport).toHaveBeenCalledWith(
+        {},
+        expect.objectContaining({ filename: "demo.csv", organizationId: "org" }),
+      );
+      expect(audit).toHaveBeenCalledTimes(reused ? 0 : 1);
+    },
+  );
 });

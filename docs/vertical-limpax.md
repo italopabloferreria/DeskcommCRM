@@ -1,5 +1,12 @@
 # LimpaxCRM — vertical sobre DeskcommCRM
 
+## Importação transacional preparada — 01/10/2026
+
+A migração local 0495 adiciona fingerprint, índice único e fn_import_companies_people_atomic (security invoker + manager). Uma RPC grava o lote, trava por organização até fim da transação, reutiliza lote já confirmado e desfaz cada linha em caso de erro; erros inesperados abortam o lote todo. App novo retorna 503 se a função não estiver instalada, sem fallback inseguro. Não aplicada ao Supabase.
+
+26 testes leves, TypeScript focado e ESLint dirigido passaram. Banco PGlite descartável: 13 provas SQL offline passaram. Prova com baseline completo/duas conexões preparada e não executada; não ligar Docker sem revogar pedido do proprietário. Runbook: docs/runbooks/limpax-import-rollout.md. Falta autorização específica para teste remoto com ROLLBACK/aplicação; backup/recuperação, concorrência real, hospedagem e estrutura da planilha real continuam gates.
+
+
 ## Planilhas para a primeira versão de uso real — 01/10/2026
 
 O fluxo de Importações agora analisa CSV/XLSX sem criar lotes ou clientes, apresenta cinco linhas, permite escolher as oito colunas suportadas e exige confirmação. Mapeamento vazio, cabeçalhos repetidos e colunas inexistentes são recusados antes de gravar. A confirmação pela tela desliga o enriquecimento externo. Empresas, pessoas e contatos têm downloads CSV autenticados para manager/admin, com filtro da organização, paginação de 500, teto explícito de 10.000 sem truncamento silencioso, UTF-8/BOM, no-store e neutralização de fórmulas. São três exportações separadas; não equivalem a backup nem cobrem todos os dados relacionais.

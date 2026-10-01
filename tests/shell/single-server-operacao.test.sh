@@ -52,6 +52,13 @@ case " $* " in
   *" run "*)
     # Só o psql do restore lê a entrada (o dump); com -c ou -f ninguém lê.
     case " $* " in *" -c "*|*" -f "*) ;; *" -i "*) cat >/dev/null ;; esac
+    if [ -f "$FLAGS/psql-falha-sql" ]; then
+      case " $* " in
+        *" psql "*)
+          printf 'ERROR: comando SQL recusado\n' >&2
+          case " $* " in *" ON_ERROR_STOP=1 "*) exit 3 ;; esac ;;
+      esac
+    fi
     case " $* " in
       *platform_smtp_settings*) printf '%b' "${PSQL_SMTP:-}" ;;
       *signup_mode*) printf '%b' "${PSQL_SIGNUP:-}" ;;
@@ -117,6 +124,13 @@ printf '%s\n' 'SUPABASE_DB_URL="postgresql://postgres:x@db.exemplo.supabase.co:5
 (cd "$APROJ" && bash "$KIT_DIR/backup.sh") >/dev/null 2>&1; rc=$?
 check "backup.sh comum termina bem" test "$rc" -eq 0
 check "backup.sh comum não procura Storage local" nao_contem "$LOG" 'volumes/storage'
+if [ "$(uname -s)" = "Linux" ]; then
+  check "pasta de backups só permite acesso ao dono" igual "$(stat -c %a "$APROJ/backups")" '700'
+  dump_privado="$(find "$APROJ/backups" -name 'db-*.sql.gz' -print -quit)"
+  check "dump do banco só permite leitura/escrita ao dono" igual "$(stat -c %a "$dump_privado")" '600'
+else
+  echo "  - pulado: modos POSIX dos backups exigem Linux (prova no CI)"
+fi
 check "backup.sh diz que conferiu o dump" \
   bash -c "cd '$APROJ' && bash '$KIT_DIR/backup.sh' 2>&1 | grep -qF '(conferido)'"
 
@@ -167,6 +181,22 @@ printf 'x' | gzip > "$APROJ/backups/db-20260922-030000.sql.gz"
 check "restore.sh comum termina bem" test "$rc" -eq 0
 [ "$rc" -eq 0 ] || sed 's/^/    | /' "$WORK/rs-comum.out"
 check "restore.sh comum não mexe em Storage local" nao_contem "$LOG" 'volumes/storage'
+
+# psql sem ON_ERROR_STOP imprime ERROR mas termina com zero: isto não pode
+# aparecer para o operador como banco restaurado, nem restaurar anexos depois.
+touch "$FLAGS/psql-falha-sql"
+(cd "$APROJ" && printf 'RESTAURAR\n' | bash "$KIT_DIR/restore.sh" backups/db-20260922-030000.sql.gz) > "$WORK/rs-sql-falha.out" 2>&1; rc=$?
+check "erro SQL reprova a restauração" test "$rc" -ne 0
+check "erro SQL não sai como banco restaurado" nao_contem "$WORK/rs-sql-falha.out" 'banco restaurado'
+rm -f "$FLAGS/psql-falha-sql"
+
+# Um gzip truncado pode entregar SQL antes de avisar do CRC: validar primeiro,
+# antes de executar qualquer comando de restauração no banco.
+printf 'nao-e-gzip' > "$APROJ/backups/db-corrompido.sql.gz"
+: > "$LOG"
+(cd "$APROJ" && printf 'RESTAURAR\n' | bash "$KIT_DIR/restore.sh" backups/db-corrompido.sql.gz) > "$WORK/rs-corrompido.out" 2>&1; rc=$?
+check "arquivo corrompido reprova a restauração" test "$rc" -ne 0
+check "arquivo corrompido nem abre psql" nao_contem "$LOG" ' psql '
 
 # ════════════════════════════════════════════════════════════════════════════
 echo "(a) nome do projeto e dono:"

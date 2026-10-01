@@ -1,3 +1,9 @@
+## Recuperação corrigida; teste Linux e nova imagem pendentes — 01/10/2026
+
+Estado vigente: `restore.sh` confere gzip antes da conexão e usa `psql -X -v ON_ERROR_STOP=1`; erro SQL agora reprova e interrompe antes dos anexos. `backup.sh` aplica umask 077 e restringe a pasta a 700. A suite shell de operação passou com Docker simulado no Git Bash; modos POSIX e Compose real ficaram explicitamente fora dessa prova local. Os casos de erro SQL e gzip corrompido foram vistos falhar antes da correção e passar depois. Syntax check, diff e fragmento de release aprovados. A restauração não é atômica e ainda precisa de prova real em banco descartável. Destino: infraestrutura compartilhada; scripts existentes reaproveitados conforme o guia deskcomm-instalar.
+
+Próximo: executar a validação Linux completa e publicar imagens ARM pelo workflow próprio existente. Nenhuma conexão ao banco real nem migração 0495, VPS, HTTPS ou dado real nesta etapa. Oracle A1 em São Paulo sem capacidade nas tentativas 2/12 e 1/6; recursos gratuitos apenas. O caminho autorizado da credencial administrativa ainda falta para backup real. G13 aberto; Docker e CRM locais OFF. As seções abaixo são histórico.
+
 ## Preparação de instalação e acesso pendente — 01/10/2026
 
 Oracle abriu Cloud Sign In no navegador do Codex; proprietário solicitado a entrar novamente. Chrome indisponível. Ainda sem VM/SSH/IPv4 público confirmado. Não foram geradas chaves nem criados recursos. Senha atual do Supabase continua desconhecida; solicitado apenas o caminho do arquivo autorizado, nunca conteúdo no chat. OpenSSH instalado; pg_dump/psql ausentes do PATH. Local pesado continua OFF.

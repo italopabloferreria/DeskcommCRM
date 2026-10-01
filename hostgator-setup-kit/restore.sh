@@ -8,13 +8,16 @@ enter_project
 
 DUMP="${1:-}"
 [ -n "$DUMP" ] && [ -f "$DUMP" ] || die "Uso: restore.sh <arquivo-db-*.sql.gz>"
+# Conferir antes de abrir o banco: gunzip pode entregar parte do SQL antes de
+# detectar truncamento/CRC inválido, deixando uma restauração parcial.
+gzip -t "$DUMP" 2>/dev/null || die "O arquivo de backup está corrompido ou incompleto. Nenhum comando de restauração foi enviado ao banco."
 
 c_ylw "⚠ Isto vai SOBRESCREVER o banco em $NEXT_PUBLIC_SUPABASE_URL."
 read -r -p "Digite 'RESTAURAR' para confirmar: " a
 [ "$a" = "RESTAURAR" ] || die "Cancelado."
 
 step "Restaurando $DUMP"
-gunzip -c "$DUMP" | pg_container -i postgres:17-alpine psql "$(url_do_schema)" \
+gunzip -c "$DUMP" | pg_container -i postgres:17-alpine psql "$(url_do_schema)" -X -v ON_ERROR_STOP=1 \
   && c_grn "✓ banco restaurado" || die "Falha na restauração — veja o log acima."
 
 # Restaura o estado das sessões do WhatsApp (WAHA) se o snapshot emparelhado existir

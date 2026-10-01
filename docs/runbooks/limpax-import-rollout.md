@@ -25,6 +25,10 @@ Em diretório privado fora do Git, obter uma exportação administrativa consist
 
 Referências: [backups do Supabase](https://supabase.com/docs/guides/platform/backups) e [procedimento de backup/restauração](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore).
 
+O kit `hostgator-setup-kit/backup.sh` já exporta o banco inteiro e pode ser aproveitado quando houver VPS e conexão administrativa verificada. Ele agora restringe a pasta de backups a modo 700 e cria dumps com umask 077. O fallback de conexão do kit ainda exige conferir que o papel utilizado é administrativo: ter um arquivo legível não comprova cobertura de todas as tabelas. Em Supabase hospedado, os binários do Storage continuam fora desse dump.
+
+`hostgator-setup-kit/restore.sh` verifica o gzip antes de abrir a conexão e para no primeiro erro SQL (`ON_ERROR_STOP=1`), sem anunciar sucesso ou restaurar anexos após a falha. **Isso não torna a restauração atômica:** comandos anteriores ao erro podem ter sido aplicados. A prova deve acontecer numa instalação descartável separada, com seu próprio `.env` apontando ao banco de teste; o script carrega o `.env` da instalação e não deve ser executado na pasta ativa para simular recuperação. Nenhum desses scripts foi executado contra o Supabase real nesta etapa.
+
 ## Interrupção e reversão
 
 Se a conexão cair antes do commit, PostgreSQL desfaz o lote. Se cair depois do commit, reenviar a mesma planilha recupera o recibo pelo fingerprint. Não apagar registros para tentar novamente.

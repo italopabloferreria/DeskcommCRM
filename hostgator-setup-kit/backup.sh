@@ -6,8 +6,12 @@
 source "$(dirname "$0")/_common.sh"
 enter_project
 
+# Dumps contêm dados de clientes e Auth. A pasta privada também protege os
+# snapshots criados como root pelos auxiliares Docker.
+umask 077
 BACKUP_DIR="${BACKUP_DIR:-$PROJECT_DIR/backups}"
 mkdir -p "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR" || die "Não consegui restringir o acesso à pasta de backups."
 # Timestamp vem do host (não do script) pra manter determinismo do kit.
 ts="$(date +%Y%m%d-%H%M%S)"
 

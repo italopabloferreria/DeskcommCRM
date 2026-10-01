@@ -29,6 +29,12 @@ O kit `hostgator-setup-kit/backup.sh` já exporta o banco inteiro e pode ser apr
 
 `hostgator-setup-kit/restore.sh` verifica o gzip antes de abrir a conexão e para no primeiro erro SQL (`ON_ERROR_STOP=1`), sem anunciar sucesso ou restaurar anexos após a falha. **Isso não torna a restauração atômica:** comandos anteriores ao erro podem ter sido aplicados. A prova deve acontecer numa instalação descartável separada, com seu próprio `.env` apontando ao banco de teste; o script carrega o `.env` da instalação e não deve ser executado na pasta ativa para simular recuperação. Nenhum desses scripts foi executado contra o Supabase real nesta etapa.
 
+## Backup real exportado em 01/10/2026
+
+Conexão administrativa do projeto isolado validada com CA oficial e hostname. Exportação custom por pg_dump17.11 concluída fora do Git em pasta com ACL restrita ao proprietário. Decodificação integral e checksum aprovados; arquivo contém 186 tabelas public, 27 auth e 8 storage, 632 políticas e 844 entradas ACL. Papéis exportados sem senhas. Nove buckets e nenhum objeto Storage no inventário. Recibo sem credenciais: [limpax-backup-20261001.json](../evidence/limpax-backup-20261001.json).
+
+**Restauração ainda NÃO comprovada.** As extensões incluem vector e supabase_vault; o destino deve ser Supabase compatível e separado do projeto ativo. Nenhum banco local/Docker foi iniciado, nenhuma0495 aplicada. Autenticação/configuração externa e volumes WAHA exigem recuperação própria, além do dump. Próximo: obter o destino isolado e conferir schema, contagens, políticas e login após restore; não aceitar apenas leitura do arquivo como gate.
+
 ## Interrupção e reversão
 
 Se a conexão cair antes do commit, PostgreSQL desfaz o lote. Se cair depois do commit, reenviar a mesma planilha recupera o recibo pelo fingerprint. Não apagar registros para tentar novamente.

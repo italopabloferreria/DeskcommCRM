@@ -1,0 +1,22 @@
+{
+  "project": "bzretxzwnudtpxmoqjyv",
+  "time": "2026-10-01T14:29:58.939Z",
+  "tool": "pg_dump (PostgreSQL) 17.11",
+  "size": 2614004,
+  "sha256": "2b8ec996fdbc2626dbeee06a4735ed33ed932034036068b8eabc17065476f0f1",
+  "archive_readable": true,
+  "restore_proven": false,
+  "contents": {
+    "roles_exported": true,
+    "table_data": {
+      "public": 186,
+      "auth": 27,
+      "storage": 8
+    },
+    "policy_entries": 632,
+    "acl_entries": 844
+  },
+  "storage_objects": 0,
+  "restoration_gate": "pending_separate_supabase_compatible_target",
+  "full_archive_decoded": true
+}

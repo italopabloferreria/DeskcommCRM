@@ -1,3 +1,7 @@
+## ARM aprovado no GitHub — 01/10/2026
+
+Execução https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36820125362 concluída SUCCESS para commit dfa99a5697d5e7abc39c2214adfdfe1a549969b4. App/worker/scheduler construídos em runner nativo ARM, arquitetura conferida e cinco sondas canônicas aprovadas. Essa evidência substitui o status em andamento abaixo. As sondas não validam banco real, WhatsApp, fluxos de usuário ou carga; o worker usa classificador de banco ausente previsto no teste original. Sem publicação de imagem/deploy ou serviço pesado local. Próximo: caminho explícito de instalação ARM/imagens próprias e backup privado antes de0495; instalador ainda recusa ARM novo. G13 aberto.
+
 ## Verificação ARM enviada — 01/10/2026
 
 Commit dfa99a5697d5e7abc39c2214adfdfe1a549969b4 enviado a origin/vertical/limpax. Run https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36820125362 em andamento na última consulta: validação inicial passou, app ARM construindo; demais imagens/sondas pendentes. Consultar conclusão antes de afirmar compatibilidade. Não houve publicação/deploy, alteração do banco ou início de serviços locais. Testes locais8/8 e198/198, lint/TypeScript focado/sintaxe/fragmento passaram. WAHA oficial noweb-arm-2026.9.1 linux/arm64 confirmado por metadados do Docker Hub; digests no runbook. Próximo: resolver eventual falha do run, caminho de instalação ARM e publicação própria; backup privado antes de0495 ainda depende de acesso seguro à senha atual. G13 aberto.

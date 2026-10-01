@@ -1,3 +1,7 @@
+## ARM aprovado no GitHub — 01/10/2026
+
+Execução https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36820125362 concluída SUCCESS para commit dfa99a5697d5e7abc39c2214adfdfe1a549969b4. App/worker/scheduler construídos em runner nativo ARM, arquitetura conferida e cinco sondas canônicas aprovadas. Essa evidência substitui o status em andamento abaixo. As sondas não validam banco real, WhatsApp, fluxos de usuário ou carga; o worker usa classificador de banco ausente previsto no teste original. Sem publicação de imagem/deploy ou serviço pesado local. Próximo: caminho explícito de instalação ARM/imagens próprias e backup privado antes de0495; instalador ainda recusa ARM novo. G13 aberto.
+
 # LimpaxCRM — preparação Oracle Always Free
 
 Estado verificado em 01/10/2026. Nenhuma instância, VCN, chave autorizada na VPS, imagem publicada ou deploy realizado nesta etapa. O formulário é somente rascunho e pode perder opções ao fechar/recarregar.

@@ -4,6 +4,8 @@ Estado vigente: `restore.sh` confere gzip antes da conexão e usa `psql -X -v ON
 
 Próximo: executar a validação Linux completa e publicar imagens ARM pelo workflow próprio existente. Nenhuma conexão ao banco real nem migração 0495, VPS, HTTPS ou dado real nesta etapa. Oracle A1 em São Paulo sem capacidade nas tentativas 2/12 e 1/6; recursos gratuitos apenas. O caminho autorizado da credencial administrativa ainda falta para backup real. G13 aberto; Docker e CRM locais OFF. As seções abaixo são histórico.
 
+O workflow de publicação agora inclui os cinco arquivos de teste da importação/exportação e lint do leitor XLSX antes das imagens. Guardas locais de publicação/permissões passaram (17 casos). GitHub não oferece execução manual deste workflow enquanto ele não existir na branch padrão; o push dessa melhoria dispara a execução prevista no próprio YAML, sem alterar permissões/configurações da conta.
+
 ## Preparação de instalação e acesso pendente — 01/10/2026
 
 Oracle abriu Cloud Sign In no navegador do Codex; proprietário solicitado a entrar novamente. Chrome indisponível. Ainda sem VM/SSH/IPv4 público confirmado. Não foram geradas chaves nem criados recursos. Senha atual do Supabase continua desconhecida; solicitado apenas o caminho do arquivo autorizado, nunca conteúdo no chat. OpenSSH instalado; pg_dump/psql ausentes do PATH. Local pesado continua OFF.

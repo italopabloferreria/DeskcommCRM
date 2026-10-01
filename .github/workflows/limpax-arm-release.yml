@@ -22,13 +22,13 @@ jobs:
       - uses: ./.github/actions/preparar-node
         timeout-minutes: 5
       - name: Testes de recusas, mapa e permissões
-        run: pnpm exec vitest run tests/unit/limpax-arm-runtime.test.mjs tests/unit/limpax-arm-publication.test.mjs tests/unit/limpax-arm-images.test.ts tests/unit/mapas-de-arquitetura.test.ts tests/unit/workflows-tem-permissions.test.ts --maxWorkers=1
+        run: pnpm exec vitest run tests/unit/limpax-arm-runtime.test.mjs tests/unit/limpax-arm-publication.test.mjs tests/unit/limpax-arm-images.test.ts tests/unit/mapas-de-arquitetura.test.ts tests/unit/workflows-tem-permissions.test.ts lib/crm-b2b/spreadsheet.test.ts lib/crm-b2b/import-preview.test.ts lib/crm-b2b/import-process.test.ts app/api/v1/imports/route.test.ts app/api/v1/imports/export/route.test.ts --maxWorkers=1
         env:
           NODE_OPTIONS: --max-old-space-size=1024
       - name: Conferir lint e fragmento
         run: |
           set -euo pipefail
-          pnpm exec eslint scripts/limpax-arm-runtime.mjs tests/unit/limpax-arm-runtime.test.mjs tests/infrastructure/limpax-arm-runtime-config.mjs scripts/publish-limpax-arm-images.mjs tests/unit/limpax-arm-publication.test.mjs tests/unit/workflows-tem-permissions.test.ts
+          pnpm exec eslint scripts/limpax-arm-runtime.mjs tests/unit/limpax-arm-runtime.test.mjs tests/infrastructure/limpax-arm-runtime-config.mjs scripts/publish-limpax-arm-images.mjs tests/unit/limpax-arm-publication.test.mjs tests/unit/workflows-tem-permissions.test.ts lib/crm-b2b/spreadsheet.ts lib/crm-b2b/spreadsheet.test.ts
           pnpm release:conferir
       - name: Provar plano com Compose real e configurações fictícias
         run: node tests/infrastructure/limpax-arm-runtime-config.mjs

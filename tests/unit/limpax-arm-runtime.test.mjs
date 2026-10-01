@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { SERVICES, createOverlay, runRuntime, validateConfig, validateManifest } from "../../scripts/limpax-arm-runtime.mjs";
+import { SERVICES, createOverlay, main, runRuntime, validateConfig, validateManifest } from "../../scripts/limpax-arm-runtime.mjs";
 
 const revision = "a".repeat(40);
 const manifest = () => ({ schema_version: 1, revision, images: {
@@ -50,6 +50,10 @@ function fixture(check, overrides = {}) {
   try { check({ options, calls, config }); } finally { rmSync(cwd, { recursive: true, force: true }); }
 }
 describe("Limpax ARM runtime refuses unsafe installation", () => {
+  it("does not echo a secret accidentally passed as malformed manifest", () => fixture(({ options }) => {
+    const file = path.join(options.cwd, "bad.json"); writeFileSync(file, "secret-password-not-json");
+    expect(() => main(["--check-manifest", file])).toThrow("JSON inválido; conteúdo privado omitido.");
+  }));
   it("pins all owned images and WAHA without changing the original kit", () => {
     expect(validateManifest(manifest()).revision).toBe(revision);
     expect(createOverlay(manifest()).services.waha.image).toContain("@sha256:");

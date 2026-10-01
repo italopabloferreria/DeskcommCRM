@@ -93,12 +93,12 @@ export function runRuntime(manifest, { apply = false, platform = process.platfor
   const overlay = JSON.stringify(createOverlay(manifest));
   const common = ["compose", "--project-name", "limpaxcrm", "--env-file", ".env",
     "-f", "docker-compose.prod.yml", "-f", "-"];
-  const config = JSON.parse(run("docker", [...common, "config", "--format", "json"], overlay));
+  const config = parsePrivateJson(run("docker", [...common, "config", "--format", "json"], overlay));
   validateConfig(config, manifest);
   if (!apply) return "Plano validado; nenhum serviço iniciado e nenhuma imagem baixada.";
   run("docker", [...common, "pull", ...SERVICES], overlay);
   for (const service of SERVICES) {
-    const image = JSON.parse(run("docker", ["image", "inspect", config.services[service].image]))[0];
+    const image = parsePrivateJson(run("docker", ["image", "inspect", config.services[service].image]))[0];
     if (image?.Architecture !== "arm64" || image?.Os !== "linux") throw new Error("Imagem baixada não é Linux ARM: " + service);
     if (manifest.images[service] && (image.Config?.Labels?.["org.opencontainers.image.revision"] !== manifest.revision ||
         image.Config?.Labels?.["org.opencontainers.image.source"] !== "https://github.com/italopabloferreria/DeskcommCRM")) {
@@ -125,11 +125,15 @@ function persistOverlay(destination, content) {
   renameSync(temporary, destination);
 }
 
+function parsePrivateJson(content) {
+  try { return JSON.parse(content); } catch { throw new Error("JSON inválido; conteúdo privado omitido."); }
+}
+
 export function main(args) {
   if (args.length !== 2 || !["--check-manifest", "--plan", "--apply"].includes(args[0])) {
     throw new Error("Uso: node scripts/limpax-arm-runtime.mjs --check-manifest|--plan|--apply caminho/manifesto.json");
   }
-  const manifest = validateManifest(JSON.parse(readFileSync(args[1], "utf8")));
+  const manifest = validateManifest(parsePrivateJson(readFileSync(args[1], "utf8")));
   if (args[0] === "--check-manifest") return "Manifesto válido; não comprova existência nem disponibilidade das imagens.";
   return runRuntime(manifest, { apply: args[0] === "--apply" });
 }

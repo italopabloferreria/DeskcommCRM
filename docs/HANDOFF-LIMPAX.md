@@ -1,5 +1,11 @@
 # Retomada da vertical LimpaxCRM
 
+## Descoberta documental concluída — 01/10/2026
+
+O proprietário autorizou ler a pasta Documentos. Análise sanitizada: docs/LIMPAX_DATA_DISCOVERY.md no repositório Limpax. 346 arquivos; planilha XLSM com9 abas,4.148 linhas com nome na aba CADASTRO, que mistura cadastros e histórico. 1.751 nomes normalizados NÃO equivalem a clientes únicos;79 repetições excedentes de ID.326 PDFs/595 páginas abertos,10 sem texto;ZIPs inventariados e10 PDFs internos lidos,cinco com texto. Imagens/OCR e Word antigo permanecem leitura complementar. Não executar macros/atalhos. Originais intactos;Documentos ignorado no Git;extrações com PII privadas fora dos repos.
+
+Importador atual aceita CSV/XLSX, primeira aba e até2.000 linhas; oito campos mapeáveis não incluem endereço/data/valor/observação de serviço. Próximo de dados: preparar staging privado e plano explícito de cadastro/contato/local/histórico sem perdas e sem importação remota. Backup real existe,restauração isolada/0495/aceite ainda pendentes;VPS gratuita sem capacidade;G13 aberto. Não criar módulos futuros ou transformar condições de contratos históricos em SLA/preço/licença atual.
+
 ## Estado verificado em 01/10/2026
 
 - CRM ativo: C:\Users\italo\Programação\01_PROJETOS\DeskcommCRM, branch vertical/limpax. O repositório Limpax conserva o site público e o histórico; não expandir o CRM antigo.

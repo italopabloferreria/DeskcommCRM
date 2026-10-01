@@ -77,3 +77,8 @@ Preservar alterações alheias: package.json e arquivos antigos de acesso/Storag
 Prompt de nova conversa: `docs/START_NEW_CONVERSATION.md`. Handoff do fork: `docs/HANDOFF-LIMPAX.md`.
 
 ---
+## Importação XLSX e backup — 01/10/2026
+
+O leitor XLSX agora limita a soma dos XML internos descompactados a 40 MB, recusa referências acima de 256 colunas e não quebra com entidade numérica XML inválida. Cinco arquivos de teste do fluxo de importação/exportação passaram (28 casos); ESLint dirigido e `git diff --check` passaram. A tentativa com `pnpm` diretamente quis recriar `node_modules`; foi interrompida sem alteração das dependências, e os testes foram executados pelo Vitest já instalado. Serviços pesados locais continuaram desligados.
+
+O runbook de importação registra expressamente que `scripts/backup-db.sh` não prova backup integral/restauração, pois exporta só `public` e aceita URL de app. Antes de 0495 ainda faltam backup administrativo privado, restauração em banco descartável, preflight e prova ROLLBACK. Nenhum Supabase remoto, dado real ou VPS foi alterado nesta etapa. Oracle A1 permanece sem capacidade na região principal após tentativas 2/12 e 1/6; custo zero mantido. G13 aberto.

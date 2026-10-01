@@ -23,11 +23,11 @@ export type SheetMatrix = { headers: string[]; rows: string[][] };
 export const IMPORT_MAX_BYTES = 2 * 1024 * 1024;
 export const IMPORT_MAX_DATA_ROWS = 2_000;
 /**
- * Teto do XML DESCOMPACTADO por arquivo do zip. Os 2 MB do upload são do zip; XML
- * repetitivo comprime 100x, e sem este teto um arquivo pequeno vira centenas de
- * megabytes de memória no servidor.
+ * Teto do XML DESCOMPACTADO no zip inteiro. Os 2 MB do upload são do zip; XML
+ * repetitivo comprime 100x, inclusive quando dividido em muitas abas.
  */
 const XLSX_MAX_XML_BYTES = 40 * 1024 * 1024;
+const XLSX_MAX_COLUMNS = 256;
 
 type Leitura = { ok: true; sheet: SheetMatrix } | { ok: false; error: string };
 
@@ -79,7 +79,9 @@ function decodificarXml(texto: string): string {
   return texto.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (inteira, e: string) => {
     if (e[0] === "#") {
       const codigo = e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
-      return Number.isFinite(codigo) ? String.fromCodePoint(codigo) : inteira;
+      return Number.isInteger(codigo) && codigo >= 0 && codigo <= 0x10ffff
+        ? String.fromCodePoint(codigo)
+        : inteira;
     }
     return ENTIDADES[e.toLowerCase()] ?? inteira;
   });
@@ -116,6 +118,7 @@ function valorDaCelula(attrs: string, corpo: string, compartilhados: string[]): 
 function parseXlsx(bytes: ArrayBuffer): Leitura {
   let arquivos: Record<string, Uint8Array>;
   let grandeDemais = false;
+  let totalXmlBytes = 0;
   try {
     arquivos = unzipSync(new Uint8Array(bytes), {
       filter: (f) => {
@@ -124,7 +127,10 @@ function parseXlsx(bytes: ArrayBuffer): Leitura {
           f.name === "xl/_rels/workbook.xml.rels" ||
           f.name === "xl/sharedStrings.xml" ||
           /^xl\/worksheets\/[^/]+\.xml$/.test(f.name);
-        if (util && f.originalSize > XLSX_MAX_XML_BYTES) grandeDemais = true;
+        if (util) {
+          totalXmlBytes += f.originalSize;
+          if (totalXmlBytes > XLSX_MAX_XML_BYTES) grandeDemais = true;
+        }
         return util && !grandeDemais;
       },
     });
@@ -162,10 +168,16 @@ function parseXlsx(bytes: ArrayBuffer): Leitura {
       const attrs = c[1] ?? "";
       const ref = /\br="([A-Z]+\d*)"/i.exec(attrs)?.[1];
       const i = ref ? indiceDaColuna(ref) : celulas.length;
+      if (i < 0 || i >= XLSX_MAX_COLUMNS) {
+        return { ok: false, error: `Planilha com mais de ${XLSX_MAX_COLUMNS} colunas.` };
+      }
       while (celulas.length < i) celulas.push("");
       celulas[i] = valorDaCelula(attrs, c[2] ?? "", compartilhados);
     }
     if (celulas.some((v) => v.trim() !== "")) matriz.push(celulas);
+    if (matriz.length > IMPORT_MAX_DATA_ROWS + 1) {
+      return { ok: false, error: `Máximo de ${IMPORT_MAX_DATA_ROWS} linhas de dados.` };
+    }
   }
   return matrizParaPlanilha(matriz);
 }

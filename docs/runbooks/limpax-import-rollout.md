@@ -10,12 +10,20 @@ O código novo recusa com 503 se a função estiver ausente. Não há fallback p
 
 ## Ordem de aplicação
 
-1. Obter autorização específica para migração e testes sintéticos no projeto isolado. Confirmar projeto/branch/versão, políticas das cinco tabelas B2B e contacts, papel do proprietário e contagens antes da mudança. Confirmar backup privado com processo de restauração; CSV não é backup. Nunca salvar dump no Git.
+1. A autorização específica para backup, preflight, prova sintética com ROLLBACK e aplicação condicional da 0495 já foi dada. Confirmar projeto/branch/versão, políticas das cinco tabelas B2B e contacts, papel do proprietário e contagens antes da mudança. Confirmar backup privado com processo de restauração; CSV não é backup. Nunca salvar dump no Git.
 2. Executar a migração e a prova sintética dentro de BEGIN/ROLLBACK primeiro. Não criar nova conta Auth, convidar pessoa ou enviar mensagem. Usar a sessão simulada do proprietário já existente. Se o teste falhar, não persistir a migração.
 3. Aplicar somente a migração 0495 após a prova; conferir coluna/índice, assinatura, security invoker, EXECUTE negado a anon e service_role, e permitido a authenticated, com guard manager no corpo. A migração não modifica clientes existentes.
 4. Executar prova sintética e concorrência com duas conexões em transações revertidas; comparar contagens finais. O teste offline não substitui essa etapa.
 5. Na hospedagem de teste, verificar seleção de colunas, confirmação, replay, erro por linha e os três downloads CSV. Validar com uma cópia fictícia da estrutura da planilha do cliente antes de carga real.
 6. Publicar a imagem verificada, configurar HTTPS/login e concluir o gate de uso real. Cliente real só entra depois de aceite, backup/recuperação e separação dos registros DEMO.
+
+### Prova de backup exigida no passo 1
+
+O `scripts/backup-db.sh` compartilhado **não** satisfaz este gate: exporta apenas `public`, aceita a URL do papel da aplicação (que pode produzir um dump parcial com sucesso) e não prova restauração. Também não inclui os arquivos binários do Storage. Não usá-lo como evidência para aplicar a 0495.
+
+Em diretório privado fora do Git, obter uma exportação administrativa consistente do banco isolado que cubra ao menos `public`, `auth` e metadados de `storage`; registrar versão das ferramentas, projeto, horário, tamanho e checksum sem registrar a URL/senha. Inventariar separadamente objetos do Storage, segredos/configuração de Auth e sessões/volumes do WAHA: o dump SQL sozinho não recupera esses componentes. Restaurar a exportação em **banco descartável separado**, conferir tabelas, funções, contagens e login de teste sintético; não apontar a restauração para o projeto ativo. Se alguma parte não puder ser exportada ou restaurada, registrar a lacuna e interromper a aplicação da 0495 até haver plano de recuperação verificável. Manter os arquivos privados e restritos; nunca anexar dumps a CI, issue ou commit.
+
+Referências: [backups do Supabase](https://supabase.com/docs/guides/platform/backups) e [procedimento de backup/restauração](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore).
 
 ## Interrupção e reversão
 

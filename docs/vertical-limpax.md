@@ -1,5 +1,14 @@
 # LimpaxCRM — vertical sobre DeskcommCRM
 
+## Planilhas para a primeira versão de uso real — 01/10/2026
+
+O fluxo de Importações agora analisa CSV/XLSX sem criar lotes ou clientes, apresenta cinco linhas, permite escolher as oito colunas suportadas e exige confirmação. Mapeamento vazio, cabeçalhos repetidos e colunas inexistentes são recusados antes de gravar. A confirmação pela tela desliga o enriquecimento externo. Empresas, pessoas e contatos têm downloads CSV autenticados para manager/admin, com filtro da organização, paginação de 500, teto explícito de 10.000 sem truncamento silencioso, UTF-8/BOM, no-store e neutralização de fórmulas. São três exportações separadas; não equivalem a backup nem cobrem todos os dados relacionais.
+
+Reimportação sequencial reutiliza empresa por CNPJ ou correspondência exata única de nome sem CNPJ e pessoa por nome normalizado na empresa. Ambiguidades/e-mail diferente retornam conflito, sem sobrescrever silenciosamente. Telefone de pessoa diferente é detectado antes de criar empresa/pessoa. Ainda NÃO há garantia transacional para todas as escritas de uma linha nem proteção completa contra importações simultâneas/reinício no meio do lote. Esses casos, o banco/RLS real e recuperação são gates antes da carga real. Campos como endereços ainda não têm mapeamento de importação.
+
+O proprietário pediu encerramento local por consumo de RAM: Next e Docker continuam desligados, volumes e Supabase preservados. Testes de componente/rotas usam dados fictícios em memória; sem E2E de navegador ou teste Postgres nesta etapa. Validação final: 18/18 testes em seis arquivos passaram, ESLint dirigido e TypeScript focado passaram. Checagem global de tipos excedeu limite de heap 2 GB; checagem focada passou com teto 1,5 GB. Hospedagem do fork ainda pendente de VPS/conta Oracle e imagem própria da branch. Não publicar imagem upstream padrão como se contivesse as alterações.
+
+
 ## WhatsApp local conectado — 30/09/2026
 
 Após reinício, Docker respondeu com motor 29.8.1. WAHA CORE 2026.9.1 NOWEB está saudável; API autenticada confirma uma única sessão WORKING. O navegador mostra o WhatsApp do proprietário Conectado. Variáveis WAHA ativadas apenas em .env.local ignorado pelo Git; webhooks responderam 200. IA em modo de teste, sem números autorizados. Nenhuma mensagem enviada pelo agente; envio/recebimento ainda não testados. Próximo passo: conversa de teste especificamente autorizada, depois worker, OpenRouter e VPS. Telefone omitido da documentação.

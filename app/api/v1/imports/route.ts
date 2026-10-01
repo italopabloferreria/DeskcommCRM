@@ -3,6 +3,7 @@ import { type NextRequest } from "next/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { requireSupportWrite } from "@/lib/impersonate/support";
 import { audit } from "@/lib/audit";
+import { importPreview, mappingError } from "@/lib/crm-b2b/import-preview";
 import { processCompaniesPeopleImport } from "@/lib/crm-b2b/import-process";
 import { importColumnMappingSchema } from "@/lib/crm-b2b/schemas";
 import {
@@ -71,12 +72,9 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
     const nome = file.name ?? "import.csv";
     if (!isCsvFilename(nome) && !isXlsxFilename(nome)) {
-      return fail(
-        "validation_failed",
-        "Formato não suportado — envie .csv ou .xlsx.",
-        422,
-        { requestId },
-      );
+      return fail("validation_failed", "Formato não suportado — envie .csv ou .xlsx.", 422, {
+        requestId,
+      });
     }
     if (file.size > IMPORT_MAX_BYTES) {
       return fail("validation_failed", "Arquivo grande demais.", 422, { requestId });
@@ -85,7 +83,11 @@ export async function POST(req: NextRequest): Promise<Response> {
     let mapping: Partial<Record<MappingField, string>> = {};
     const mappingRaw = form.get("mapping");
     if (typeof mappingRaw === "string" && mappingRaw.trim()) {
-      mapping = importColumnMappingSchema.parse(JSON.parse(mappingRaw));
+      try {
+        mapping = importColumnMappingSchema.parse(JSON.parse(mappingRaw));
+      } catch {
+        return fail("validation_failed", "Mapeamento inválido.", 422, { requestId });
+      }
     }
 
     const bytes = await file.arrayBuffer();
@@ -94,9 +96,26 @@ export async function POST(req: NextRequest): Promise<Response> {
       return fail("validation_failed", parsed.error, 422, { requestId });
     }
 
-    if (Object.keys(mapping).length === 0) {
+    if (!mappingRaw) {
       mapping = suggestColumnMapping(parsed.sheet.headers);
     }
+
+    const headerError = mappingError(
+      parsed.sheet.headers,
+      suggestColumnMapping(parsed.sheet.headers),
+    );
+    // A análise permite cabeçalhos desconhecidos: o usuário os relaciona na tela.
+    if (
+      headerError &&
+      (parsed.sheet.headers.some((h) => !h) ||
+        new Set(parsed.sheet.headers).size !== parsed.sheet.headers.length)
+    ) {
+      return fail("validation_failed", headerError, 422, { requestId });
+    }
+    if (form.get("preview") === "true")
+      return ok(importPreview(parsed.sheet, mapping), { requestId });
+    const invalidMapping = mappingError(parsed.sheet.headers, mapping);
+    if (invalidMapping) return fail("validation_failed", invalidMapping, 422, { requestId });
 
     const supabase = await createClient();
     const { data: batch, error: batchErr } = await supabase

@@ -15,6 +15,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { useT } from "@/hooks/i18n/useT";
 
+import { IMPORT_FIELDS } from "@/lib/crm-b2b/import-preview";
+import type { MappingField } from "@/lib/crm-b2b/spreadsheet";
+interface Preview {
+  headers: string[];
+  total_rows: number;
+  mapping: Partial<Record<MappingField, string>>;
+  raw_sample: string[][];
+  sample: Record<MappingField, string>[];
+}
 interface BatchRow {
   id: string;
   filename: string;
@@ -32,37 +41,64 @@ export function ImportsListClient() {
   const [rows, setRows] = useState<BatchRow[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const [mapping, setMapping] = useState<Partial<Record<MappingField, string>>>({});
   const [message, setMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/v1/imports");
     const json = await res.json();
-    setRows(Array.isArray(json.data) ? json.data : []);
+    if (!res.ok) throw new Error(json.error?.message ?? "Falha ao carregar importações.");
+    return Array.isArray(json.data) ? (json.data as BatchRow[]) : [];
   }, []);
 
   useEffect(() => {
-    void load();
+    let active = true;
+    void load()
+      .then((data) => {
+        if (active) setRows(data);
+      })
+      .catch((err) => {
+        if (active)
+          setMessage(err instanceof Error ? err.message : "Falha ao carregar importações.");
+      });
+    return () => {
+      active = false;
+    };
   }, [load]);
 
-  async function upload() {
+  async function upload(analyze: boolean) {
     if (!file) return;
     setUploading(true);
     setMessage(null);
-    const fd = new FormData();
-    fd.set("file", file);
-    const res = await fetch("/api/v1/imports", { method: "POST", body: fd });
-    const json = await res.json();
-    setUploading(false);
-    if (!res.ok) {
-      setMessage(json.error?.message ?? t("Falha na importação."));
-      return;
+    try {
+      const fd = new FormData();
+      fd.set("file", file);
+      if (analyze) fd.set("preview", "true");
+      else {
+        fd.set("mapping", JSON.stringify(mapping));
+        fd.set("enrich", "false");
+      }
+      const res = await fetch("/api/v1/imports", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error?.message ?? t("Falha na importação."));
+      if (analyze) {
+        setPreview(json.data);
+        setMapping(json.data.mapping);
+        return;
+      }
+      setMessage(
+        t("Lote processado") +
+          `: ${json.data.successful_rows} ok, ${json.data.conflict_rows} conflitos, ${json.data.failed_rows} falhas.`,
+      );
+      setFile(null);
+      setPreview(null);
+      setRows(await load());
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : t("Falha na importação."));
+    } finally {
+      setUploading(false);
     }
-    setMessage(
-      t("Lote processado") +
-        `: ${json.data.successful_rows} ok, ${json.data.conflict_rows} conflitos, ${json.data.failed_rows} falhas.`,
-    );
-    setFile(null);
-    void load();
   }
 
   return (
@@ -74,21 +110,114 @@ export function ImportsListClient() {
         </p>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <a
+          download
+          className="rounded-md border px-3 py-2 text-sm hover:bg-muted focus-visible:outline-2"
+          href="/api/v1/imports/export?kind=companies"
+        >
+          {t("Exportar empresas (CSV)")}
+        </a>
+        <a
+          download
+          className="rounded-md border px-3 py-2 text-sm hover:bg-muted focus-visible:outline-2"
+          href="/api/v1/imports/export?kind=people"
+        >
+          {t("Exportar pessoas (CSV)")}
+        </a>
+        <a
+          download
+          className="rounded-md border px-3 py-2 text-sm hover:bg-muted focus-visible:outline-2"
+          href="/api/v1/imports/export?kind=contacts"
+        >
+          {t("Exportar contatos (CSV)")}
+        </a>
+      </div>
       <Card className="flex flex-wrap items-end gap-3 p-4">
         <div className="grid gap-1.5">
           <label className="text-sm font-medium">{t("Arquivo")}</label>
           <Input
             type="file"
             accept=".csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              setFile(e.target.files?.[0] ?? null);
+              setPreview(null);
+              setMapping({});
+              setMessage(null);
+            }}
           />
         </div>
-        <Button disabled={!file || uploading} onClick={() => void upload()}>
-          {uploading ? t("Importando…") : t("Importar")}
+        <Button disabled={!file || uploading} onClick={() => void upload(true)}>
+          {uploading ? t("Analisando…") : t("Analisar planilha")}
         </Button>
         {message ? <p className="w-full text-sm text-muted-foreground">{message}</p> : null}
       </Card>
 
+      {preview && (
+        <Card className="space-y-4 p-4">
+          <h2 className="font-semibold">
+            {t("Revise as colunas antes de importar")} · {preview.total_rows} {t("linhas")}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {t(
+              "Esta análise não gravou clientes. Sem telefone, o registro fica em Empresas/Pessoas. Não cria oportunidades nem envia mensagens.",
+            )}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {IMPORT_FIELDS.map((field) => (
+              <label key={field.key} className="grid gap-1 text-sm">
+                {t(field.label)}
+                <select
+                  className="rounded-md border bg-background p-2 focus-visible:outline-2"
+                  value={mapping[field.key] ?? ""}
+                  disabled={uploading}
+                  onChange={(e) =>
+                    setMapping((current) => ({ ...current, [field.key]: e.target.value }))
+                  }
+                >
+                  <option value="">{t("Não importar este campo")}</option>
+                  {preview.headers.map((header) => (
+                    <option key={header} value={header}>
+                      {header}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {IMPORT_FIELDS.map((field) => (
+                    <TableHead key={field.key}>{t(field.label)}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {preview.sample.map((_, index) => (
+                  <TableRow key={index}>
+                    {IMPORT_FIELDS.map((field) => (
+                      <TableCell key={field.key}>
+                        {(() => {
+                          const column = preview.headers.indexOf(mapping[field.key] ?? "");
+                          return column >= 0 ? preview.raw_sample[index]?.[column] : "—";
+                        })()}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <Button
+            disabled={uploading || !Object.values(mapping).some(Boolean)}
+            onClick={() => void upload(false)}
+          >
+            {uploading ? t("Importando…") : t("Confirmar importação")}
+          </Button>
+        </Card>
+      )}
       <Card className="overflow-hidden">
         <Table>
           <TableHeader>

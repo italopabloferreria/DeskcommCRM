@@ -6,11 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { enrichCompanyFromBrasilApi } from "@/lib/crm-b2b/enrich";
 import { normalizeCnpj, normalizePersonName } from "@/lib/crm-b2b/normalize";
-import {
-  applyMapping,
-  type MappingField,
-  type SheetMatrix,
-} from "@/lib/crm-b2b/spreadsheet";
+import { applyMapping, type MappingField, type SheetMatrix } from "@/lib/crm-b2b/spreadsheet";
 import { normalizePhoneBR } from "@/lib/webhooks/inbound";
 import { phoneLookupVariants } from "@/lib/channels/phone-variants";
 
@@ -192,10 +188,7 @@ async function processOneRow(
   const normalizedCnpj = mapped.cnpj ? normalizeCnpj(mapped.cnpj) : null;
   const personName = mapped.person_name.trim();
   const trade =
-    mapped.trade_name.trim() ||
-    mapped.company_name.trim() ||
-    mapped.legal_name.trim() ||
-    "";
+    mapped.trade_name.trim() || mapped.company_name.trim() || mapped.legal_name.trim() || "";
   const legal = mapped.legal_name.trim() || mapped.company_name.trim() || trade;
 
   // Linha sem nada útil
@@ -206,6 +199,31 @@ async function processOneRow(
   // Telefone inválido quando informado
   if (mapped.phone.trim() && !phoneE164) {
     return { status: "failed", error: "Telefone inválido.", phoneE164: null, normalizedCnpj };
+  }
+
+  if (mapped.cnpj.trim() && !normalizedCnpj) return { status: "failed", error: "CNPJ inválido." };
+  // Detecta telefone já atribuído a outra pessoa ANTES de criar empresa/pessoa.
+  if (phoneE164 && personName) {
+    const { data: known, error: lookupError } = await supabase
+      .from("contacts")
+      .select("person_id, people:person_id(normalized_name)")
+      .eq("organization_id", organizationId)
+      .in("phone_number", phoneLookupVariants(phoneE164))
+      .is("is_merged_into", null)
+      .limit(2);
+    if (lookupError) throw new Error(lookupError.message);
+    if (
+      (known ?? []).some((contact) => {
+        const person = contact.people as unknown as { normalized_name: string } | null;
+        return contact.person_id && person?.normalized_name !== normalizePersonName(personName);
+      })
+    )
+      return {
+        status: "conflict",
+        error: "Telefone já vinculado a outra pessoa.",
+        phoneE164,
+        normalizedCnpj,
+      };
   }
 
   // --- Company ---
@@ -219,12 +237,13 @@ async function processOneRow(
     if (cached) {
       companyId = cached;
     } else if (normalizedCnpj) {
-      const { data: existing } = await supabase
+      const { data: existing, error: lookupError } = await supabase
         .from("companies")
         .select("id")
         .eq("organization_id", organizationId)
         .eq("normalized_cnpj", normalizedCnpj)
         .maybeSingle();
+      if (lookupError) throw new Error(lookupError.message);
       if (existing) {
         companyId = existing.id as string;
       } else {
@@ -242,30 +261,50 @@ async function processOneRow(
           .select("id")
           .single();
         if (error || !created) {
-          return { status: "failed", error: error?.message ?? "falha ao criar empresa", normalizedCnpj };
+          return {
+            status: "failed",
+            error: error?.message ?? "falha ao criar empresa",
+            normalizedCnpj,
+          };
         }
         companyId = created.id as string;
         ctx.companiesToEnrich.add(companyId);
       }
       ctx.companyByKey.set(cacheKey, companyId);
     } else {
-      // Sem CNPJ: agrupa só dentro do lote pelo nome (não dedupa no banco por nome).
-      const { data: created, error } = await supabase
+      // Sem documento, só reutiliza uma correspondência EXATA e única.
+      const { data: matches, error: lookupError } = await supabase
         .from("companies")
-        .insert({
-          organization_id: organizationId,
-          legal_name: legal || null,
-          trade_name: trade || null,
-          enrichment_status: "pending",
-          created_by: userId,
-        })
         .select("id")
-        .single();
-      if (error || !created) {
-        return { status: "failed", error: error?.message ?? "falha ao criar empresa" };
+        .eq("organization_id", organizationId)
+        .is("normalized_cnpj", null)
+        .eq("trade_name", trade)
+        .eq("legal_name", legal)
+        .limit(2);
+      if (lookupError) throw new Error(lookupError.message);
+      if ((matches ?? []).length > 1)
+        return { status: "conflict", error: "Mais de uma empresa com este nome. Informe o CNPJ." };
+      if (matches?.[0]) {
+        companyId = matches[0].id as string;
+        ctx.companyByKey.set(cacheKey, companyId);
+      } else {
+        const { data: created, error } = await supabase
+          .from("companies")
+          .insert({
+            organization_id: organizationId,
+            legal_name: legal || null,
+            trade_name: trade || null,
+            enrichment_status: "pending",
+            created_by: userId,
+          })
+          .select("id")
+          .single();
+        if (error || !created) {
+          return { status: "failed", error: error?.message ?? "falha ao criar empresa" };
+        }
+        companyId = created.id as string;
+        ctx.companyByKey.set(cacheKey, companyId);
       }
-      companyId = created.id as string;
-      ctx.companyByKey.set(cacheKey, companyId);
     }
   }
 
@@ -278,39 +317,80 @@ async function processOneRow(
     if (cachedP) {
       personId = cachedP;
     } else {
-      const { data: created, error } = await supabase
-        .from("people")
-        .insert({
-          organization_id: organizationId,
-          full_name: personName,
-          normalized_name: nName,
-          email: mapped.email.trim() || null,
-          created_by: userId,
-        })
-        .select("id")
-        .single();
-      if (error || !created) {
+      let matches: { id: string; email: string | null }[] = [];
+      if (companyId) {
+        const { data, error: lookupError } = await supabase
+          .from("company_people")
+          .select("people!inner(id, normalized_name, email)")
+          .eq("organization_id", organizationId)
+          .eq("company_id", companyId)
+          .eq("people.normalized_name", nName)
+          .limit(2);
+        if (lookupError) throw new Error(lookupError.message);
+        matches = (data ?? []).map(
+          (link) => link.people as unknown as { id: string; email: string | null },
+        );
+      } else {
+        const { data, error: lookupError } = await supabase
+          .from("people")
+          .select("id, email")
+          .eq("organization_id", organizationId)
+          .eq("normalized_name", nName)
+          .limit(2);
+        if (lookupError) throw new Error(lookupError.message);
+        matches = (data ?? []) as { id: string; email: string | null }[];
+      }
+      if (
+        matches.length > 1 ||
+        (matches[0] &&
+          mapped.email.trim() &&
+          (matches[0].email ?? "").toLowerCase() !== mapped.email.trim().toLowerCase())
+      ) {
         return {
-          status: "failed",
-          error: error?.message ?? "falha ao criar pessoa",
+          status: "conflict",
+          error: "Pessoa já cadastrada com identidade ambígua ou e-mail diferente.",
           companyId,
-          normalizedCnpj,
         };
       }
-      personId = created.id as string;
-      ctx.personByKey.set(pKey, personId);
-
-      if (companyId) {
-        await supabase.from("company_people").upsert(
-          {
+      if (matches[0]) {
+        personId = matches[0].id;
+        ctx.personByKey.set(pKey, personId);
+      } else {
+        const { data: created, error } = await supabase
+          .from("people")
+          .insert({
             organization_id: organizationId,
-            company_id: companyId,
-            person_id: personId,
-            job_title: mapped.job_title.trim() || null,
-            is_decision_maker: true,
-          },
-          { onConflict: "company_id,person_id", ignoreDuplicates: true },
-        );
+            full_name: personName,
+            normalized_name: nName,
+            email: mapped.email.trim() || null,
+            created_by: userId,
+          })
+          .select("id")
+          .single();
+        if (error || !created) {
+          return {
+            status: "failed",
+            error: error?.message ?? "falha ao criar pessoa",
+            companyId,
+            normalizedCnpj,
+          };
+        }
+        personId = created.id as string;
+        ctx.personByKey.set(pKey, personId);
+
+        if (companyId) {
+          const { error: linkError } = await supabase.from("company_people").upsert(
+            {
+              organization_id: organizationId,
+              company_id: companyId,
+              person_id: personId,
+              job_title: mapped.job_title.trim() || null,
+              is_decision_maker: true,
+            },
+            { onConflict: "company_id,person_id", ignoreDuplicates: true },
+          );
+          if (linkError) throw new Error(linkError.message);
+        }
       }
     }
   }

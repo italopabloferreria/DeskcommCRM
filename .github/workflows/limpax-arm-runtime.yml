@@ -1,0 +1,40 @@
+name: Verificar entrada ARM LimpaxCRM
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ["vertical/limpax"]
+    paths:
+      - ".github/workflows/limpax-arm-runtime.yml"
+      - "scripts/limpax-arm-runtime.mjs"
+      - "tests/infrastructure/limpax-arm-runtime-config.mjs"
+      - "tests/unit/limpax-arm-runtime.test.mjs"
+      - "docker-compose.prod.yml"
+      - "Caddyfile"
+permissions: {}
+jobs:
+  runtime:
+    if: github.repository == 'italopabloferreria/DeskcommCRM'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar-node
+        timeout-minutes: 5
+      - name: Testes de recusas, mapa e permissões
+        run: pnpm exec vitest run tests/unit/limpax-arm-runtime.test.mjs tests/unit/mapas-de-arquitetura.test.ts tests/unit/workflows-tem-permissions.test.ts --maxWorkers=1
+        env:
+          NODE_OPTIONS: --max-old-space-size=1024
+      - name: Conferir lint e fragmento
+        run: |
+          set -euo pipefail
+          pnpm exec eslint scripts/limpax-arm-runtime.mjs tests/unit/limpax-arm-runtime.test.mjs tests/infrastructure/limpax-arm-runtime-config.mjs
+          pnpm release:conferir
+      - name: Provar plano com Compose real e configurações fictícias
+        run: node tests/infrastructure/limpax-arm-runtime-config.mjs
+      - name: Verificar o kit de instalação existente
+        run: |
+          set -euo pipefail
+          node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).scripts['test:shell']" | bash
+

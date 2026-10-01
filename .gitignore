@@ -181,3 +181,7 @@ __pycache__/
 
 # Runtime do instalador single-server: Supabase self-hosted, credenciais e dados.
 .runtime/
+
+# Configuração gerada pela implantação da vertical Limpax.
+.limpax-runtime.compose.json
+.limpax-runtime.compose.json.tmp

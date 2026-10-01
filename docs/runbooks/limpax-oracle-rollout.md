@@ -50,3 +50,20 @@ Fonte do runner: https://docs.github.com/en/actions/reference/runners/github-hos
 Consulta somente de metadados no Docker Hub oficial confirmou noweb-arm-2026.9.1 ativo para linux/arm64. Digest da tag: sha256:839c142d2620d4d68e3b060b560253fe820544de912ec64415d0ebad5853959c; digest da imagem ARM: sha256:f5b61310a8093bba82e7a287daef326a4caeaa1827ae2aba5196209b4de2ddba. Nenhuma imagem baixada ou serviço iniciado. A existência da imagem não comprova conexão, QR nem envio na VPS; verificar esses fluxos após instalação. O compose aceita WAHA_IMAGE, mas seu default não foi alterado nesta etapa.
 
 Fontes: https://hub.docker.com/v2/repositories/devlikeapro/waha/tags/noweb-arm-2026.9.1 e https://waha.devlike.pro/docs/how-to/engines/
+
+## Entrada específica de runtime ARM — 01/10/2026
+
+Destino: infraestrutura da vertical Limpax. A entrada scripts/limpax-arm-runtime.mjs usa o Compose existente com um overlay gerado e preserva o instalador upstream. Não instala Docker/Node, não reaplica baseline/migrations, não cria usuário nem configura DNS ou Auth. Pré-requisitos: VPS Linux ARM, Node22+ e Docker Compose com --wait; clone no commit da imagem; .env privado completo, domínio/autorização de acesso e banco existente validados. Backup/restore e0495 continuam gates separados antes da importação real.
+
+O manifesto JSON tem somente schema_version=1, revision=SHA completo e images com app/worker/scheduler. Cada referência deve ser ghcr.io/italopabloferreria/limpaxcrm (ou limpaxcrm-worker/limpaxcrm-scheduler) seguida de @sha256: e o digest real publicado. NÃO existe ainda manifesto publicado nesta etapa. Não usar hashes fictícios dos testes nem trocar para upstream. O projeto Compose é sempre limpaxcrm; usar outro nome cria outros volumes. Preservar esse nome nas atualizações e backups.
+
+Na raiz do clone, o agente prepara a configuração e executa:
+- node scripts/limpax-arm-runtime.mjs --check-manifest /caminho/manifesto.json: valida estrutura somente, sem rede.
+- node scripts/limpax-arm-runtime.mjs --plan /caminho/manifesto.json: resolve o Compose real sem baixar imagem, iniciar serviço ou persistir overlay. Recusa PC Windows, outro projeto Supabase, URL divergente, segredos obrigatórios ausentes, chave/hash WAHA diferentes, cadastro aberto e portas públicas auxiliares.
+- Após configuração/autorização concreta, --apply no lugar de --plan: puxa apenas os sete serviços, confere Linux ARM em todos e labels de commit/origem nas três imagens próprias; grava overlay privado .limpax-runtime.compose.json e sobe com --no-build/--wait. Falha de pull não tenta build; não há fallback nem remoção de volumes. A subida não é transação: uma falha pode deixar parte dos serviços atualizada. Não promete rollback automático; preservar manifesto anterior, backup e plano de recuperação antes de atualizar.
+
+WAHA fica no digest oficial ARM já registrado, engine NOWEB. Voz/telefonia não são ativadas. Os healthchecks do Compose não equivalem ao login/importação/WhatsApp aprovados: o aceite pelo navegador continua obrigatório. O fluxo não instala o agente de atualização upstream; atualizar a vertical com novo manifesto e o mesmo comando, depois das provas/backup, sem usar update.sh upstream.
+
+Living System Checklist (infraestrutura): entrada=manifesto da release + .env privado; consumidor=Compose de produção, somente app/worker/scheduler/waha/redis/srh/caddy; log=mensagens sanitizadas da CLI + GitHub Actions; porta=este runbook; anti-morte=erro interrompe antes de up quando faltar prova, recuperação pelo manifesto/backup anterior; retorno=falha exige correção e nova medição na branch. Mapa=docs/architecture/limpax-arm.architecture.json.
+
+Evidência inicial:22 testes unitários de recusa/sequência aprovados; sintaxe e ESLint dirigidos passaram. Suíte shell antiga interrompida no Windows após detectar incompatibilidade da prova600 com NTFS; conferência no Linux preparada em .github/workflows/limpax-arm-runtime.yml, incluindo resolução do Compose real sem serviços. Nenhuma implantação executada. Publicação das imagens, prova Linux desse novo plano, backup/restore e acesso VPS seguem pendentes.

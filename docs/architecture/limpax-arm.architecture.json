@@ -3,19 +3,22 @@
   "diagram_type": "architecture",
   "meta": { "title": "LimpaxCRM — validação ARM antes da hospedagem", "subtitle": "Infraestrutura da vertical; nenhuma publicação automática", "output": "limpax-arm.html", "quality_profile": "standard" },
   "lanes": [{ "id": "source", "label": "Código" }, { "id": "ci", "label": "GitHub Actions" }, { "id": "operator", "label": "Operação" }],
-  "mainPath": ["fork", "build", "probes", "summary", "rollout"],
+  "mainPath": ["fork", "build", "probes", "summary", "rollout", "runtime"],
   "nodes": [
     { "id": "fork", "lane": "source", "col": 0, "type": "service", "label": "vertical/limpax", "sublabel": "Dockerfiles e código do fork" },
     { "id": "build", "lane": "ci", "col": 1, "type": "service", "label": "limpax-arm-images.yml", "sublabel": "ubuntu-24.04-arm; build nativo de app/worker/scheduler, sem push" },
     { "id": "probes", "lane": "ci", "col": 2, "type": "service", "label": "verify-limpax-arm-images.mjs", "sublabel": "Reutiliza as cinco sondas de publish-image.yml; recusa mudança de contrato" },
     { "id": "summary", "lane": "operator", "col": 3, "type": "frontend", "label": "GitHub Actions: logs e resumo", "sublabel": "Sucesso não equivale a banco, WhatsApp ou uso real validados" },
-    { "id": "rollout", "lane": "operator", "col": 4, "type": "service", "label": "limpax-oracle-rollout.md", "sublabel": "Gate para publicação própria, backup e testes hospedados" }
+    { "id": "rollout", "lane": "operator", "col": 4, "type": "service", "label": "limpax-oracle-rollout.md", "sublabel": "Gate para publicação própria, backup e testes hospedados" },
+    { "id": "runtime", "lane": "operator", "col": 5, "type": "service", "label": "limpax-arm-runtime.mjs", "sublabel": "Manifesto por digest; plano real do Compose; sem build ou migration" }
   ],
   "edges": [
     { "id": "e1", "from": "fork", "to": "build", "label": "push relevante ou execução manual" },
     { "id": "e2", "from": "build", "to": "probes", "label": "imagens arm64 carregadas no runner" },
     { "id": "e3", "from": "probes", "to": "summary", "label": "falha bloqueia; sucesso declara alcance limitado" },
     { "id": "e4", "from": "summary", "to": "rollout", "label": "evidência anterior à implantação" },
-    { "id": "e5", "from": "rollout", "to": "fork", "label": "falha exige correção e nova medição antes de publicar" }
+    { "id": "e5", "from": "rollout", "to": "fork", "label": "falha exige correção e nova medição antes de publicar" },
+    { "id": "e6", "from": "rollout", "to": "runtime", "label": "configuração/backup/manifesto próprios antes da implantação" },
+    { "id": "e7", "from": "runtime", "to": "fork", "label": "recusa exige correção e nova prova; sem fallback" }
   ]
 }

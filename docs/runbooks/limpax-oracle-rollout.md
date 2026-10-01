@@ -41,3 +41,8 @@ O instalador `_common.sh` também recusa instalação nova em ARM; ainda não fo
 
 Living System Checklist (infraestrutura): entrada=branch/Dockerfiles; saída=gate do runbook Oracle; registro=logs/STEP_SUMMARY; tela/porta=GitHub Actions; configuração=workflow versionado/Run workflow; falha=job vermelho e correção na branch antes de liberação; não há atendimento/IA automática neste fluxo. Mapa=docs/architecture/limpax-arm.architecture.json com retorno da operação ao código. Publicação/backup/aceite remoto continuam gates.
 Fonte do runner: https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+## WAHA ARM confirmado no registro — 01/10/2026
+
+Consulta somente de metadados no Docker Hub oficial confirmou noweb-arm-2026.9.1 ativo para linux/arm64. Digest da tag: sha256:839c142d2620d4d68e3b060b560253fe820544de912ec64415d0ebad5853959c; digest da imagem ARM: sha256:f5b61310a8093bba82e7a287daef326a4caeaa1827ae2aba5196209b4de2ddba. Nenhuma imagem baixada ou serviço iniciado. A existência da imagem não comprova conexão, QR nem envio na VPS; verificar esses fluxos após instalação. O compose aceita WAHA_IMAGE, mas seu default não foi alterado nesta etapa.
+
+Fontes: https://hub.docker.com/v2/repositories/devlikeapro/waha/tags/noweb-arm-2026.9.1 e https://waha.devlike.pro/docs/how-to/engines/

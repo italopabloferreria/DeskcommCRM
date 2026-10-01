@@ -1,3 +1,4 @@
+> **Retomada vigente em 01/10/2026:** ler primeiro `docs/HANDOFF-LIMPAX.md`. Proprietário autorizou backup/preflight, prova0495 em ROLLBACK e aplicação apenas após checks aprovados. Migração ainda NÃO aplicada nesta atualização. Conta Oracle criada segundo proprietário; VPS não verificada. Next/Docker permanecem desligados por RAM. Seções abaixo são registros datados e não revogam esta autorização/estado. Último código enviado: ab1ea517c; alterações desta etapa são somente documentação.
 # LimpaxCRM — vertical sobre DeskcommCRM
 
 ## Importação transacional preparada — 01/10/2026

@@ -1,0 +1,97 @@
+name: Verificar imagens LimpaxCRM ARM
+
+# Validation-only: no registry, production secrets or deployment.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ["vertical/limpax"]
+    paths:
+      - ".github/workflows/limpax-arm-images.yml"
+      - ".github/workflows/publish-image.yml"
+      - "scripts/verify-limpax-arm-images.mjs"
+      - "Dockerfile*"
+      - "pnpm-lock.yaml"
+      - "package.json"
+      - "app/**"
+      - "lib/**"
+      - "components/**"
+      - "workers/**"
+      - "docker/**"
+
+permissions: {}
+
+jobs:
+  verificar-arm:
+    if: github.repository == 'italopabloferreria/DeskcommCRM'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validar arquitetura e sondas
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = aarch64
+          node scripts/verify-limpax-arm-images.mjs --check
+      - uses: docker/setup-buildx-action@v4
+      - name: Construir app ARM
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/arm64
+          push: false
+          load: true
+          tags: deskcomm-smoke:pr
+          build-args: APP_VERSION=${{ github.sha }}
+          cache-from: type=gha,scope=limpax-app-arm64
+          cache-to: type=gha,mode=max,scope=limpax-app-arm64
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Construir worker ARM
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.worker
+          platforms: linux/arm64
+          push: false
+          load: true
+          tags: deskcomm-worker:pr
+          build-args: APP_VERSION=${{ github.sha }}
+          cache-from: type=gha,scope=limpax-worker-arm64
+          cache-to: type=gha,mode=max,scope=limpax-worker-arm64
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Construir scheduler ARM
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.scheduler
+          platforms: linux/arm64
+          push: false
+          load: true
+          tags: deskcomm-scheduler:pr
+          build-args: APP_VERSION=${{ github.sha }}
+          cache-from: type=gha,scope=limpax-scheduler-arm64
+          cache-to: type=gha,mode=max,scope=limpax-scheduler-arm64
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Conferir arquitetura das imagens
+        run: |
+          set -euo pipefail
+          for image in deskcomm-smoke:pr deskcomm-worker:pr deskcomm-scheduler:pr; do
+            test "$(docker inspect --format '{{.Architecture}}' "$image")" = arm64
+          done
+      - name: Executar sondas reais nas imagens ARM
+        run: node scripts/verify-limpax-arm-images.mjs
+      - name: Registrar resultado
+        run: |
+          printf '%s\n' 'Imagens ARM construídas e sondas de embalagem aprovadas.' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' 'Sem publicação/deploy. Banco real, WhatsApp e fluxos de usuário não foram validados por este job.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Encerrar containers de teste
+        if: always()
+        run: docker rm -f smoke worker-laco worker-boot sched 2>/dev/null || true

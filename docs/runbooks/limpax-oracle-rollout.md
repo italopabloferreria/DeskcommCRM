@@ -79,3 +79,19 @@ Destino=infraestrutura da vertical; workflow=.github/workflows/limpax-arm-releas
 Próximo passo executável: completar acesso SSH/IPv4 da configuração Oracle e revisar configuração concreta antes da criação. Backup privado/restauração aguarda caminho autorizado do arquivo da senha atual (nunca enviar senha no chat). Migração0495 NÃO aplicada; nenhum dado real importado. VPS, HTTPS/endereço autorizado, pull/apply real e aceite hospedado de login/importação/exports/WhatsApp continuam pendentes. Sondas não comprovam banco real ou fluxos de cliente. Serviços locais pesados OFF; volumes preservados; G13 aberto.
 
 Fonte do registro: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+
+## Fixar checkout e manifesto antes do plano — 01/10/2026
+
+O manifesto foi registrado no commit documental a57f1f87b9254b7a6ed3310b5eb288fd622a3bf1, posterior ao commit das imagens. O runtime exige git HEAD igual a revision do manifesto. Portanto, não executar --plan/--apply no HEAD documental da branch: isso será recusado corretamente. Extrair o manifesto antes de trocar de revisão e guardá-lo fora do checkout. Em clone novo na VPS, após conferir origem e sem alterações locais:
+
+```bash
+# A pasta de releases fica fora do checkout; arquivo contém só referências públicas.
+install -d -m 700 /opt/limpaxcrm-releases
+git show a57f1f87b9254b7a6ed3310b5eb288fd622a3bf1:docs/releases/limpax/0fd1ebba1-arm.json > /opt/limpaxcrm-releases/0fd1ebba1-arm.json
+git checkout --detach 0fd1ebba1e9b0880b5d8cfcab501e1a6e3cd5a0d
+node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/0fd1ebba1-arm.json
+```
+
+Usar diretório pertencente ao operador; não elevar o runtime inteiro para contornar permissão. O .env privado só é preparado depois de revisar o endereço HTTPS e as credenciais, sem versioná-lo. Executar --plan e somente depois --apply conforme os gates acima. Não apagar arquivos nem forçar checkout se a árvore estiver suja. Na atualização futura, preservar volumes, nome Compose limpaxcrm, manifesto anterior e backup.
+
+Retomada desta sessão: Oracle no navegador do Codex abriu Cloud Sign In; sessão autenticada indisponível e login solicitado ao proprietário. Chrome indisponível para automação. OpenSSH/ssh-keygen presentes no Windows; pg_dump/psql ausentes do PATH. Nenhuma chave SSH, VM, regra de rede ou migração criada nesta sessão. Aguardar login e caminho explicitamente autorizado do arquivo da senha antes de prosseguir com tarefas dependentes.

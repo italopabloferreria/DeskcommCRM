@@ -1,3 +1,8 @@
+## Preparação de instalação e acesso pendente — 01/10/2026
+
+Oracle abriu Cloud Sign In no navegador do Codex; proprietário solicitado a entrar novamente. Chrome indisponível. Ainda sem VM/SSH/IPv4 público confirmado. Não foram geradas chaves nem criados recursos. Senha atual do Supabase continua desconhecida; solicitado apenas o caminho do arquivo autorizado, nunca conteúdo no chat. OpenSSH instalado; pg_dump/psql ausentes do PATH. Local pesado continua OFF.
+
+Runbook Oracle agora explica extrair o manifesto do commit documental a57f1f87b para pasta fora do checkout antes de fixar HEAD no commit das imagens0fd1ebba1. Isso preserva a guarda exata de revisão do runtime e evita perder o manifesto ao fazer checkout. São instruções preparadas, não instalação executada. Próximo: login Oracle, revisar acesso/rede concretos, backup privado antes de0495 e domínio HTTPS autorizado. G13 aberto.
 ## Publicação ARM concluída — 01/10/2026
 
 Estado vigente; as seções seguintes são histórico. Commit das imagens: 0fd1ebba1e9b0880b5d8cfcab501e1a6e3cd5a0d. Execução https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36824890913 concluída SUCCESS: 243 testes Linux, ESLint, fragmento de release, plano com Compose real e suite shell aprovados; app/worker/scheduler construídos em ARM nativo, arquitetura conferida, cinco sondas canônicas aprovadas e exatamente essas imagens publicadas no GHCR.

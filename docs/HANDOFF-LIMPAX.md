@@ -1,5 +1,10 @@
 # Retomada da vertical LimpaxCRM
 
+## Release documental pronta para instalar
+
+Workflow36947068509 SUCCESS: gates, testes Documentos, distribuição dos assets OCR, Compose, suite shell, builds e sondas ARM concluídos. Três imagens publicadas e metadados GHCR lidos anonimamente: arquitetura arm64 e revisão2a35ef53cb4297c553b22b2e941eae536ae64e4f conferidas. Manifesto docs/releases/limpax/2a35ef53c-arm.json, prova docs/evidence/limpax-documentos-release-20261001.json. Nenhuma VPS/HTTPS/deploy foi realizada; G13 aberto. Próximo: instalação do manifesto quando houver capacidade gratuita e aceite autenticado da tela.
+
+
 ## Storage real verificado — 01/10/2026
 
 Teste sintético no Supabase isolado aprovado: salvamento/leitura de modelo com assinatura e carimbo PNG, nomes do catálogo, replay idempotente, duas versões imutáveis e recusa de outra organização. Nove policies existentes verificadas. Download anônimo/upload anônimo/download público bloqueados; leitura SQL sob papel authenticated com claims transitórios do proprietário bloqueada. Nenhum usuário ou sessão criado; isso NÃO é aceite HTTP autenticado da tela. Bucket documentos-privados preparado, privado; arquivos fictícios removidos e ausência comprovada. Sem migration, importação real ou alteração do banco antigo.

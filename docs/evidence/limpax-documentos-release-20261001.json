@@ -1,0 +1,25 @@
+{
+  "revision": "2a35ef53cb4297c553b22b2e941eae536ae64e4f",
+  "run": "https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36947068509",
+  "conclusion": "success",
+  "images": {
+    "app": {
+      "anonymousPull": true,
+      "architecture": "arm64",
+      "revision": "2a35ef53cb4297c553b22b2e941eae536ae64e4f",
+      "digest": "sha256:c3c65d64f5859d5274fb4f726a0c401f4065cafb2302f37316f83b3c2db0444b"
+    },
+    "worker": {
+      "anonymousPull": true,
+      "architecture": "arm64",
+      "revision": "2a35ef53cb4297c553b22b2e941eae536ae64e4f",
+      "digest": "sha256:c14164dacc4ce6af6a8daa8ee51bd4729b5795daab27f8fc989da8cc324471bc"
+    },
+    "scheduler": {
+      "anonymousPull": true,
+      "architecture": "arm64",
+      "revision": "2a35ef53cb4297c553b22b2e941eae536ae64e4f",
+      "digest": "sha256:8115c71b160833e6bfc0bfad23ca69fc48832f3491e2c379b60739d0626236d9"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+name: Validar preparação de recuperação LimpaxCRM
+on:
+  workflow_dispatch: {}
+  push:
+    branches: ["vertical/limpax"]
+    paths:
+      - "scripts/limpax-recovery-preflight.ts"
+      - "tests/unit/limpax-recovery-preflight.test.ts"
+      - "tests/fixtures/limpax-recovery-query-check.ts"
+      - ".github/workflows/limpax-recovery-preflight.yml"
+permissions:
+  contents: read
+jobs:
+  conferir:
+    if: github.repository == 'italopabloferreria/DeskcommCRM' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: limpax_recovery_fixture
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: fixture-only-not-a-real-secret
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d limpax_recovery_fixture"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/preparar-node
+        timeout-minutes: 5
+      - name: Typecheck completo
+        run: pnpm typecheck
+      - name: Lint e contratos da ferramenta e documentação
+        run: |
+          pnpm exec eslint scripts/limpax-recovery-preflight.ts tests/unit/limpax-recovery-preflight.test.ts tests/fixtures/limpax-recovery-query-check.ts
+          pnpm vitest run tests/unit/limpax-recovery-preflight.test.ts tests/unit/fragmentos-de-release.test.ts tests/unit/documentacao-aponta-para-o-que-existe.test.ts --maxWorkers=2
+      - name: Provar consulta e hashes no PostgreSQL descartável
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGDATABASE: limpax_recovery_fixture
+          PGUSER: postgres
+          PGPASSWORD: fixture-only-not-a-real-secret
+        run: pnpm exec tsx tests/fixtures/limpax-recovery-query-check.ts
+# Standard public runner; no private dump, project credentials, restore, migration or deploy.

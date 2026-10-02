@@ -64,6 +64,11 @@ const DIR = join(process.cwd(), ".github/workflows");
  * que desliga um job de entrega fica visível em code review.
  */
 const GATILHO_ESPERADO: Record<string, { condicao: string | null; efeito: string }> = {
+  "limpax-recovery-preflight.yml::conferir": {
+    condicao: "github.repository == 'italopabloferreria/DeskcommCRM' && github.event.repository.private == false",
+    efeito:
+      "Valida tipagem e a sonda de recuperação em banco sintético no fork público, sem dump privado, conexão operacional, restauração ou deploy; fora deste fork gratuito a bancada não se aplica.",
+  },
   "limpax-arm-images.yml::verificar-arm": {
     condicao: "github.repository == 'italopabloferreria/DeskcommCRM'",
     efeito:

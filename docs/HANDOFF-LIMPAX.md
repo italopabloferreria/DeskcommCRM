@@ -1,5 +1,20 @@
 # Retomada da vertical LimpaxCRM
 
+## Preparação da recuperação — em execução (02/10/2026)
+
+Autorização atual: continuar o máximo possível sem consultas repetidas. Próximo
+gate permanece restauração privada separada. Conferência real somente leitura
+passou em PostgreSQL17.6: 186 tabelas public, 27 auth, 8 storage, 1 vault e632
+políticas; Storage/Vault vazios. Backup rechecado; manifesto privado de contagens,
+conteúdo e estrutura capturado fora do Git. Ferramenta não escreve no banco e
+não aprova recuperação integral. Dashboard Supabase desabilitou novo projeto
+porque a conta alcançou dois projetos gratuitos ativos. Nenhum projeto pausado,
+apagado ou atualizado para plano pago. Sem Docker/Next local, deploy ou carga.
+Próximo: concluir testes e enviar ferramenta/roteiro; depois usar destino privado
+separado, coordenar snapshot/backup, provar restore/login e preflight0495/0507.
+Código/runbook: scripts/limpax-recovery-preflight.ts e
+ docs/runbooks/limpax-recovery-preflight.md no fork DeskcommCRM.
+
 ## Confirmação e reversão histórica concluídas — 02/10/2026
 
 Código aprovado e enviado ao fork `vertical/limpax`: `ce20a41a0`.

@@ -3,6 +3,11 @@
 Código preparado não significa banco operacional migrado. Este runbook registra
 os gates da tarefa atual; não executa aplicação ou carga.
 
+Preparação executada em 02/10/2026: backup e inventário somente leitura conferidos;
+comparador privado pronto em `docs/runbooks/limpax-recovery-preflight.md`. O dashboard
+recusou novo projeto gratuito pelo limite de dois ativos. Destino de restauração
+continua pendente; nenhum projeto foi pausado ou removido para liberar quota.
+
 | Ordem | Gate | Evidência necessária | Estado em02/10/2026 |
 |---|---|---|---|
 | 1 | Recuperação | Restore do backup privado em Supabase descartável compatível, sem apontar o CRM ativo para ele | Pendente de destino separado |

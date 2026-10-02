@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "status": "source_capture_passed_ci_pending_target_unavailable",
+  "project": "bzretxzwnudtpxmoqjyv",
+  "source_version": "17.6",
+  "source_tables": { "public": 186, "auth": 27, "storage": 8, "vault": 1 },
+  "source_policies": 632,
+  "source_storage_objects": 0,
+  "source_vault_secrets": 0,
+  "backup_sha256_verified": true,
+  "archive_acl": 820,
+  "archive_default_acl": 24,
+  "source_manifest_private": true,
+  "data_hashes_captured": true,
+  "connection_tls": "verify-full",
+  "transaction": "repeatable_read_read_only_rollback",
+  "database_writes": 0,
+  "free_target": "dashboard_blocked_by_owner_two_active_free_projects_limit",
+  "projects_paused_deleted_or_upgraded": 0,
+  "restore_proven": false,
+  "migration_applied": false,
+  "real_import": false,
+  "deploy": false,
+  "heavy_local_services_started": false,
+  "limits": [
+    "Source capture and archive coverage are not a restore proof.",
+    "Source snapshot must be coordinated with backup for final data equality.",
+    "No separate target available; account project creation disabled by free quota.",
+    "Auth configuration/login, external keys and files/WAHA need separate recovery evidence.",
+    "Windows private output directory requires previously restricted owner ACL."
+  ]
+}

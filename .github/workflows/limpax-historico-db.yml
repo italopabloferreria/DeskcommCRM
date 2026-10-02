@@ -19,8 +19,11 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/preparar-node
         timeout-minutes: 5
+      - name: Buscar tags do kit publicado no upstream
+        run: git fetch --no-tags --depth=1 https://github.com/melgarafael/DeskcommCRM.git refs/tags/v1.69.0:refs/tags/v1.69.0 refs/tags/v1.63.0:refs/tags/v1.63.0
       - name: Provar isolamento, rollback, replay e concorrência em DB efêmero
         env:
+          CONFERENCIA_KIT_RELEASE: v1.69.0
           GH_TOKEN: ${{ github.token }}
         run: pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts tests/invariants/limpax-history-atomic-draft.test.ts
 # Public fork only; no operational credentials, migrations, real imports, image publication or deploy.

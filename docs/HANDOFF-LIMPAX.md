@@ -1,5 +1,13 @@
 # Retomada da vertical LimpaxCRM
 
+## Limpeza LGPD do histórico provada em rascunho — 02/10/2026
+
+Commit4cabcf574 enviado ao fork. Novo limpax_history_lifecycle.sql estende o evento existente de anonimização de contacts (0449) às cópias pessoais de serviços/locais: limpa bruto/referência/nota/data/valor/moeda/endereço e marca redacted_at, preserva recibo/origem para impedir restauração por replay. Triggers internos revogados dos papéis da API recusam inserção de local/serviço para pessoa com contato já anonimizado. Nenhuma migração aplicada foi editada; nada instalado no Supabase operacional.
+
+GitHub36972680702: PG15/job110729792432 ePG17/job110729792647 SUCCESS; logs conferidos24/24 em cada versão,48 execuções de24 casos distintos. Seis novos casos de limpeza/replay/bloqueio/escopo/rollback/grants, mais18 regressões de storage/atomicidade. Baseline install/update e158 políticas dos três kits aprovados. Lint focado aprovado. Prova no fork docs/evidence/limpax-history-lifecycle-20261002.json; contrato docs/specs/limpax-history-lifecycle.md.
+
+Limites: não há export completo do histórico do titular, portão para pessoa sem contato, tratamento de PII indireta em empresas/auxiliares, prazo de retenção ou comando de correção/expurgo. IDs/hash retidos não são anonimização matemática. Rascunho não é módulo LGPD completo nem migrado. Próximo executável: integrar export autorizado dos locais/serviços e provar erro fail-closed/tabela opcional/isolamento; completar demais limites antes de alocar migração/API de confirmação/recibo. Sem carga/deploy/serviços pesados. Restore antes0495, VPS gratuita/HTTPS, aceite/G13 continuam gates.
+
 ## Bancada histórica PostgreSQL aprovada — 02/10/2026
 
 Proprietário autorizou explicitamente a correção da fixture protegida e repetição. Commit34bff39ed enviado: somente leitura de auditoria como dono do DB descartável, importação como manager,18 casos/asserts e permissões do produto preservados. DESKCOMM_GOV_INVARIANTS_EDIT limitado ao commit autorizado.

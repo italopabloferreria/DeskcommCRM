@@ -1,0 +1,34 @@
+{
+  "status": "draft_contact_linked_redaction_proved_not_operational",
+  "commit": "4cabcf574d8588f5a2e7ca26d6dcf9eda8c89d80",
+  "run": 36972680702,
+  "postgres_versions": [
+    15,
+    17
+  ],
+  "cases_per_version": 24,
+  "executions_passed": 48,
+  "failed": 0,
+  "new_lifecycle_cases": 6,
+  "lint": "focused_passed",
+  "scope": "Extends existing0449 event; clears personal history/local copies; preserves receipt; rejects new insert for anonymized linked person",
+  "limits": [
+    "history subject export missing",
+    "person without contact not covered",
+    "indirect PII in company/auxiliary rows unresolved",
+    "correction/retention/erasure not implemented",
+    "IDs/hashes retained require retention assessment"
+  ],
+  "operational_supabase_changes": 0,
+  "deploy": false,
+  "next": "Authorized history subject export and tests; canonical migration/API only after lifecycle requirements and operational gates",
+  "date": "2026-10-02",
+  "run_url": "https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36972680702",
+  "jobs": [
+    110729792432,
+    110729792647
+  ],
+  "baseline_install_reapply": "passed_both_versions",
+  "kit_declared_policies": 158,
+  "real_import": false
+}

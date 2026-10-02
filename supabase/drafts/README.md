@@ -1,6 +1,6 @@
 # Rascunhos do histórico LimpaxCRM
 
-Este diretório não entra no baseline nem na cadeia de migrações. Não aplicar no Supabase operacional. SQL e eficácia de RLS/atomicidade ainda NÃO foram comprovados em PostgreSQL.
+Este diretório não entra no baseline nem na cadeia de migrações. Não aplicar no Supabase operacional. A prova dos18 casos de armazenamento/atomicidade passou em PostgreSQL15/17 na execução36971628633. Isso não instala o módulo nem aprova produção.
 
 limpax_history_provisioner.sql define provisionador fixo opcional de locais, serviços e recibos; somente sua chamada cria tabelas. O CHECK compartilhado de import_batches passa a admitir limpax_history, sem remover os dois valores conhecidos do baseline atual. Conferir upstream/PRs antes de alocar migração canônica.
 
@@ -12,4 +12,4 @@ Em bancada test:db descartável com Docker autorizado e recursos disponíveis, e
 
 A bancada aplica baseline/reset e destrói seu banco efêmero. O arquivo storage usa transação revertida; o arquivo atomic prepara schema/fixtures somente nesse DB efêmero e reverte os efeitos de cada caso. Duas conexões verificam busy durante transação aberta. Não rodar no banco real; não iniciar Docker local sob restrição de RAM.
 
-Ainda faltam:18 casos PostgreSQL reais, correções resultantes, política de correção/expurgo LGPD, migração/MANIFEST/baseline após alocação, API/editor/recibo e aceite hospedado. Restauração comprovada antes0495 continua gate.
+limpax_history_lifecycle.sql é uma extensão rascunhada do evento LGPD existente, carregada após provisionar: limpa as cópias pessoais e impede novas inserções para pessoa já anonimizada. Ler docs/specs/limpax-history-lifecycle.md para limites. Seis casos próprios adicionados à bancada15/17; resultado na evidência mais recente.\n\nAinda faltam: export do titular, pessoas sem contato/cópias indiretas, correção e expurgo, migração/MANIFEST/baseline após alocação, API de confirmação/recibo e aceite hospedado. Restauração comprovada antes0495 continua gate.

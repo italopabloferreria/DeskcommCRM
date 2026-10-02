@@ -10,7 +10,7 @@ vi.mock("@/lib/impersonate/support", () => ({ requireSupportWrite: h.support }))
 vi.mock("@/lib/auth/server", () => ({ loadAuthUser: h.user, resolveActiveOrg: h.org }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: h.client }));
 
-import { GET } from "./route";
+import { GET } from "@/app/api/v1/channel-sessions/[id]/qr/route";
 
 const id = "11111111-1111-4111-8111-111111111111";
 const orgId = "22222222-2222-4222-8222-222222222222";

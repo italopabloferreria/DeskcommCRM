@@ -7,6 +7,7 @@
  */
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { collectHistorySubject, type HistorySubjectExport } from "@/lib/lgpd/history-export";
 import { citacaoDaLei, perfilDoPais } from "@/lib/legal/perfil-do-pais";
 import { logger } from "@/lib/logger";
 import { camposLegiveis, perguntasDosGrafos, type CampoLegivel } from "@/lib/lgpd/campos-personalizados";
@@ -735,6 +736,7 @@ export interface ExportPayload {
    * `tests/unit/lgpd-exporta-o-que-redige.test.ts`, que lê o catálogo.
    */
   b2b?: {
+    historico_limpax?: HistorySubjectExport;
     pessoa: {
       id: string;
       full_name: string;
@@ -1357,8 +1359,11 @@ export async function collectExportData(args: CollectArgs): Promise<ExportPayloa
       .order("created_at", { ascending: false })
       .limit(500);
     if (eL) throw eL;
-    if (pessoa || vinculos.length > 0 || (linhas ?? []).length > 0) {
-      b2b = { pessoa, vinculos, linhas_importadas: linhas ?? [] };
+    const historico_limpax = personId
+      ? await collectHistorySubject(admin, organizationId, personId)
+      : undefined;
+    if (pessoa || vinculos.length > 0 || (linhas ?? []).length > 0 || historico_limpax) {
+      b2b = { pessoa, vinculos, linhas_importadas: linhas ?? [], historico_limpax };
     }
   }
 

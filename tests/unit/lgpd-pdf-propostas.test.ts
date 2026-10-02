@@ -34,7 +34,7 @@ function payload(proposals: ProposalRow[] | undefined): ExportPayload {
 
 async function texto(data: ExportPayload): Promise<string> {
   const bytes = await renderLgpdPdf(data);
-  const fonts = join(dirname(createRequire(import.meta.url).resolve("pdfjs-dist/package.json")), "standard_fonts") + sep;
+  const fonts = join(dirname(createRequire(import.meta.url).resolve("pdfjs-dist/package.json")), "standard_fonts").split(sep).join("/") + "/";
   const task = getDocument({ data: new Uint8Array(bytes), standardFontDataUrl: fonts });
   const doc = await task.promise;
   try {

@@ -34,7 +34,6 @@
 import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
 
-import { env } from "@/lib/env";
 
 import type { ExportPayload } from "./export-collector";
 
@@ -487,6 +486,30 @@ export function LgpdExportPdf({ data, unsignedWarning }: Props): React.ReactElem
                   {a.action}
                   {a.resource_type ? ` · ${a.resource_type}` : ""}
                 </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {data.b2b?.historico_limpax ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Histórico de locais e serviços</Text>
+            <Text>Locais: {data.b2b.historico_limpax.locais.length}. Serviços: {data.b2b.historico_limpax.servicos.length}.</Text>
+            {data.b2b.historico_limpax.locais.map((local) => (
+              <View key={local.id} style={styles.itemBlock}>
+                <Text>Local: {local.address_original}</Text>
+                <Text>Registro: {local.id} · Criado: {local.created_at} · Redigido: {local.redacted_at ?? "Não"}</Text>
+              </View>
+            ))}
+            {data.b2b.historico_limpax.servicos.map((servico) => (
+              <View key={servico.id} style={styles.itemBlock}>
+                <Text>Serviço: {servico.id} · Data: {servico.service_date ?? "Não informada"}</Text>
+                <Text>Valor em centavos: {servico.value_cents ?? "Não informado"} · Moeda: {servico.currency ?? "Não informada"}</Text>
+                <Text>Local: {servico.location_id ?? "Não informado"} · Linha importada: {servico.import_row_id}</Text>
+                <Text>Observações: {servico.notes_original || "Nenhuma"}</Text>
+                <Text>Referência original: {JSON.stringify(servico.original_reference)}</Text>
+                <Text>Dados originais: {JSON.stringify(servico.raw_data)}</Text>
+                <Text>Criado: {servico.created_at} · Redigido: {servico.redacted_at ?? "Não"}</Text>
               </View>
             ))}
           </View>

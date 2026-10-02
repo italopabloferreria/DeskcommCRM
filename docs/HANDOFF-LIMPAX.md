@@ -1,5 +1,42 @@
 # Retomada da vertical LimpaxCRM
 
+## Bloco contínuo de histórico — estado conferido em02/10/2026
+
+Autorização: “faça todo o bloco non stop”. Código no fork DeskcommCRM, branch vertical/limpax,
+revisãoe531c7133 enviada ao GitHub. Bloco implementado: pessoa sem contato tem exportação
+administrativa de cadastro/vínculos/linhas/locais/serviços e anonimização explícita; fichas de
+pessoas/empresas incluem histórico paginado; correção manager/admin confere versão e conserva
+origem; admin pode excluir logicamente e anonimizar pessoa sem telefone ativo.
+Recibos, replay, locks e audit são atômicos. Guardas impedem restaurar conteúdo pessoal
+por cadastro, vínculo empresarial, linha importada ou telefone. JSON/PDF inclui estado corrente.
+API valida origem, suporte, papel, consulta e64KiB. Prévia Documentos respeita suporte readonly.
+
+[Prova GitHub](https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36987396496):43/43 casos emPG15/job110775434079 ePG17/job110775434076,
+86 execuções de43 casos distintos;263 contratos de API/UI/export/mapa/navegação por job.
+Governança completa aprovada: typecheck, ESLint, canais, papéis e 17.168 testes unitários aprovados de 17.171, além de1 falha esperada e2 pulados preexistentes.
+A primeira suíte geral em36983371952 encontrou23 falhas, corrigidas sem pular asserções:
+idioma/datas, tokens de UI, menu sem rolagem, UUID fora de HTTPS, registros de workflows/
+Storage/portais ITI/RPC opcional e fixture de suporte.132 traduções adicionadas.
+Documentos permanece no hub CRM e na busca; acesso pelo menu “Ver tudo em CRM”.
+Os registros deliberados de RPC ausente devem sair da lista quando a migração canônica existir.
+Testes focados de telas:18 aprovados; os demais gates afetados aprovados localmente.
+A varredura de namespace necessita Linux; o Bash/grep não está funcional neste Windows.
+
+Estado operacional: SQL continua somente em supabase/drafts; nenhuma instalação, migração,
+carga real, alteração DNS ou deploy desta revisão. Sem funções instaladas, o módulo informa
+indisponível. Teste de componente não substitui aceite visual autenticado hospedado.
+Export direto declara person_profile_and_history, não todos os módulos do CRM.
+Arquivos/staging/exports/backups e PII empresarial/auxiliar exigem tratamento próprio;
+nenhum prazo automático de retenção foi inventado. Cobertura técnica conferida no fork:
+docs/specs/limpax-history-privacy-coverage.md; inventário privado de cópias ainda pendente.
+
+Próximo executável: Inventariar cópias externas e registros sem person_id, registrando as decisões pendentes de titularidade; obter destino Supabase compatível descartável e provar restauração antes0495/alocação canônica do histórico.
+Bloqueios externos: Oracle gratuita sem capacidade, VPS/IP/HTTPS ainda inexistentes;
+aceite hospedado eG13 abertos. Futuro: arquivo definitivo de emissões/retorno assinado,
+DocuSign/OpenRouter/fiscal e domínio crm.limpaxdf.com.br.
+Serviços locais pesados permanecem OFF. Notas abaixo são histórico quando divergirem desta
+seção; não refazer os comandos/API/UI e testes do bloco já implementado.
+
 ## Exportação do histórico pessoal implementada — 02/10/2026
 
 Fork commit6c135415c enviado a origin/vertical/limpax. Coletor LGPD existente resolve contacts.person_id e chama history-export.ts com organização confiável; busca locais/serviços filtrados por organização e pessoa. Lote limpax_history sinaliza dados do módulo: sem lote não lê tabelas opcionais; com lote, ausência/permissão/erro aborta coleta, nunca export parcial. Valida escopo/registro, preserva bruto/zero/nulo/redacted_at, pagina até resposta vazia com passo baseado em quantidade retornada; limite10.000 por tabela e16MiB total recusa sem truncar. Não é snapshot transacional; futura escrita concorrente exige prova adicional.

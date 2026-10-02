@@ -1,0 +1,59 @@
+{
+  "status": "implemented_draft_pg15_pg17_and_full_governance_verified",
+  "scope": "Authorized whole uninterrupted block: no-contact person export/redaction; service current-field corrections and logical void; API and person/company panel; indirect restore guards; receipts/atomic audit; tests and push",
+  "fork_commit": "e531c713358120ded1689907e26f62f109f3488c",
+  "run": 36987396496,
+  "postgres": {
+    "versions": [
+      15,
+      17
+    ],
+    "cases_each": 43,
+    "executions_passed": 86,
+    "jobs": [
+      110775434079,
+      110775434076
+    ],
+    "contract_tests_each": 263
+  },
+  "quality_job": 110775433700,
+  "types": "Full remote typecheck approved",
+  "lint": "Full ESLint: 0 errors and465 warnings; scoped correction lint passed without warnings",
+  "operational_supabase_changes": 0,
+  "deploy": false,
+  "real_import": false,
+  "heavy_local_services_started": false,
+  "limits": [
+    "SQL remains drafts, outside baseline/migrations/MANIFEST",
+    "No hosted visual acceptance",
+    "No-contact export scope is person_profile_and_history, not all CRM",
+    "Company-only and auxiliary PII, source/staging/documents/export/backups and retention are separate",
+    "Restore before0495; no free Oracle capacity; G13 open"
+  ],
+  "feature_commit": "5479cd0f8a85c4a2d9c358c29b59c1f42f4b3a4d",
+  "run_url": "https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36987396496",
+  "quality_status": "success",
+  "unit_tests_passed": 17168,
+  "unit_tests_total": 17171,
+  "prior_failures": {
+    "run": 36983371952,
+    "failed": 23,
+    "passed": 17138,
+    "corrected_without_skips": true
+  },
+  "next": "Inventariar cópias externas e registros sem person_id, registrando as decisões pendentes de titularidade; obter destino Supabase compatível descartável e provar restauração antes0495/alocação canônica do histórico.",
+  "unit_test_files": 1684,
+  "global_lint_errors": 0,
+  "global_lint_warnings": 465,
+  "date": "2026-10-02",
+  "services_started": false,
+  "not_proven": [
+    "Hosted authenticated visual acceptance",
+    "Operational schema install",
+    "Backup restore",
+    "PII ownership in company-only/auxiliary records and external copies/retention"
+  ],
+  "local_ui_tests": 18,
+  "global_expected_failure": 1,
+  "global_preexisting_skipped": 2
+}

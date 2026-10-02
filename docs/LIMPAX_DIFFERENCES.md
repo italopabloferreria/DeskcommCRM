@@ -27,8 +27,25 @@ Incremento de 01/10: prévia B2B passa a contar colunas em todas as linhas, recu
 
 ## Histórico — preparação adicional em02/10/2026
 
-Lote revisado conserva cabeçalhos/células/campos, distingue auxiliar/local/serviço e valida limites sem truncar;37 testes focados aprovados. A API de confirmação continua bloqueada. Recibos/RLS/operação atômica estão somente em supabase/drafts, com18 casos PostgreSQL preparados e zero executados; não anunciar armazenamento histórico funcionando. Detalhes em docs/HANDOFF-LIMPAX.md e docs/evidence/limpax-history-atomic-draft-20261002.json.
+Lote revisado conserva cabeçalhos/células/campos, distingue auxiliar/local/serviço e valida limites sem truncar;37 testes focados aprovados. A API de confirmação continua bloqueada. Recibos/RLS/operação atômica estão somente em supabase/drafts, com prova PostgreSQL15/17 concluída em banco descartável; não anunciar armazenamento histórico operacional. A prova não substitui instalação. Detalhes em docs/HANDOFF-LIMPAX.md e docs/evidence/limpax-history-atomic-draft-20261002.json.
 
 ## Editor histórico — 02/10/2026
 
 Revisão temporária paginada por25 linhas, busca explícita de empresas/pessoas, escolha de cliente/endereço e aceite de data/valor; revalidação de prévia sem escrita.25 testes focados aprovados; aceite visual hospedado pendente. Workflow de prova PostgreSQL em runner padrão preparado, exclusivo ao fork público e sem dados/credenciais operacionais. Não confundir sua preparação com execução aprovada.
+
+## Gestão histórica — bloco de02/10/2026
+
+Incrementos próprios Limpax: correção versionada/current notes, exclusão lógica administrativa,
+exportação direta da pessoa sem contato e portão administrativo de limpeza de conteúdo pessoal.
+Painel nas fichas de pessoa/empresa; API com validação/origem/papel/suporte e funções SQL com
+locks, recibos, rollback, MFA e audit sem conteúdo. Guardas evitam restauração por cadastro,
+vínculo empresarial, nova linha importada ou telefone ativo. Exportação existente PDF/JSON
+inclui estado corrente. Tudo foi implementado no fork, e o SQL segue em rascunho, não instalado.
+Não foi alterado o banco operacional nem liberada importação real. Prova43/43 porPG15/17 e263 contratos por job em36987396496. Governança completa aprovada: typecheck, ESLint, canais, papéis e 17.168 testes unitários aprovados de 17.171, além de1 falha esperada e2 pulados preexistentes.
+
+
+Correções transversais desta bancada:132 traduções nas telas de documentos/importação/histórico,
+datas seguindo o idioma, UUID válido fora de secure context e menu sem rolagem.
+Documentos segue acessível pelo hub CRM e pela busca. Registrados os workflows do fork,
+as chaves privadas do acervo, os portais manuais do ITI e a ausência deliberada de RPCs
+históricas ainda não instaladas. Nenhum teste foi pulado para tornar o resultado verde.

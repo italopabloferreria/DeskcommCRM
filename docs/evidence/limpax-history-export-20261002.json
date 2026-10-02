@@ -1,0 +1,33 @@
+{
+  "status": "implemented_synthetic_collector_and_real_pdf_verified_not_deployed",
+  "commit": "6c135415c",
+  "tests": 27,
+  "test_files": 6,
+  "focused_types_files": 6,
+  "lint": "passed_no_warnings",
+  "scope": "Contact-linked person history in existing collector JSON and delivered PDF; explicit org/person filters, scope validation, pagination and fail-closed errors",
+  "limits": {
+    "rows_per_table": 10000,
+    "aggregate_bytes": 16777216,
+    "presence": "historical batch, consistent with current draft atomic command",
+    "snapshot": "not_transactional"
+  },
+  "operational_supabase_changes": 0,
+  "real_email": false,
+  "deploy": false,
+  "next": "People without contacts; correction/erasure; indirect PII/file copies/retention before canonical migration/API",
+  "date": "2026-10-02",
+  "checks": [
+    "27 tests across6 files passed",
+    "Real generated PDF text checked",
+    "Existing collector called with synthetic admin adapter",
+    "Focused types6 files passed",
+    "Focused lint no warnings"
+  ],
+  "not_proven": [
+    "Live PostgREST export",
+    "Real email delivery",
+    "Concurrent write snapshot",
+    "Person without contact and indirect PII lifecycle"
+  ]
+}

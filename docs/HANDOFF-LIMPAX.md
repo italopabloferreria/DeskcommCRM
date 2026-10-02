@@ -1,5 +1,13 @@
 # Retomada da vertical LimpaxCRM
 
+## Exportação do histórico pessoal implementada — 02/10/2026
+
+Fork commit6c135415c enviado a origin/vertical/limpax. Coletor LGPD existente resolve contacts.person_id e chama history-export.ts com organização confiável; busca locais/serviços filtrados por organização e pessoa. Lote limpax_history sinaliza dados do módulo: sem lote não lê tabelas opcionais; com lote, ausência/permissão/erro aborta coleta, nunca export parcial. Valida escopo/registro, preserva bruto/zero/nulo/redacted_at, pagina até resposta vazia com passo baseado em quantidade retornada; limite10.000 por tabela e16MiB total recusa sem truncar. Não é snapshot transacional; futura escrita concorrente exige prova adicional.
+
+JSON recebe b2b.historico_limpax. PDF entregue inclui todos os locais/serviços e bruto/observações, não só contagem. Conferência do worker mostrou que e-mail atual entrega PDF eJSON fica no Storage, corrigindo a suposição de entrega dos dois. Teste gera e extrai texto do PDF.27 testes em6 arquivos aprovados, incluindo coletor real e regressão de propostas; tipos focados6 arquivos aprovados e lint sem avisos. Fixture de fontes de PDF normalizada paraWindows/Unix após falha; asserções preservadas. Nenhum envio real, DB operacional, migração, carga ou deploy.
+
+Próximo executável: tratamento de pessoas sem contato vinculado e correção/expurgo explícitos; completar PII indireta em empresa/auxiliares/cópias de arquivos e política de retenção antes de migração/API de confirmação. Restore antes0495, VPS gratuita/HTTPS, aceite hospedado/G13 continuam gates. Não declarar ciclo LGPD completo; prova PostgreSQL24/24 em15/17 da etapa anterior permanece específica aos rascunhos, não ao export por PostgREST.
+
 ## Limpeza LGPD do histórico provada em rascunho — 02/10/2026
 
 Commit4cabcf574 enviado ao fork. Novo limpax_history_lifecycle.sql estende o evento existente de anonimização de contacts (0449) às cópias pessoais de serviços/locais: limpa bruto/referência/nota/data/valor/moeda/endereço e marca redacted_at, preserva recibo/origem para impedir restauração por replay. Triggers internos revogados dos papéis da API recusam inserção de local/serviço para pessoa com contato já anonimizado. Nenhuma migração aplicada foi editada; nada instalado no Supabase operacional.

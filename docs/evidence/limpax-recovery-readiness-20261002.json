@@ -1,10 +1,15 @@
 {
   "schema_version": 1,
   "date": "2026-10-02",
-  "status": "source_capture_passed_ci_pending_target_unavailable",
+  "status": "source_and_synthetic_preflight_passed_target_unavailable",
   "project": "bzretxzwnudtpxmoqjyv",
   "source_version": "17.6",
-  "source_tables": { "public": 186, "auth": 27, "storage": 8, "vault": 1 },
+  "source_tables": {
+    "public": 186,
+    "auth": 27,
+    "storage": 8,
+    "vault": 1
+  },
   "source_policies": 632,
   "source_storage_objects": 0,
   "source_vault_secrets": 0,
@@ -28,6 +33,33 @@
     "Source snapshot must be coordinated with backup for final data equality.",
     "No separate target available; account project creation disabled by free quota.",
     "Auth configuration/login, external keys and files/WAHA need separate recovery evidence.",
-    "Windows private output directory requires previously restricted owner ACL."
-  ]
+    "Windows private output directory requires previously restricted owner ACL.",
+    "Sequence state and role attributes/memberships require separate administrative comparison."
+  ],
+  "code_commit": "436ec8f326420bd22496e201b827e07e9d0c4b73",
+  "local_contracts": {
+    "files": 5,
+    "passed": 81
+  },
+  "focused_final_recheck": 18,
+  "local_lint_errors": 0,
+  "local_lint_warnings": 0,
+  "rls_partial_capture_rejected": true,
+  "private_acl_verified_owner_only": true,
+  "prior_ci_failure": {
+    "run": 37048453572,
+    "reason": "Next ProcessEnv NODE_ENV augmentation: fixed inherited environment cloning and synthetic fixture environment, keeping assertions."
+  },
+  "ci": {
+    "run": 37049387074,
+    "url": "https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37049387074",
+    "job": 110978667102,
+    "conclusion": "success",
+    "typecheck": "full_passed",
+    "targeted_lint": "passed",
+    "contract_cases": 49,
+    "synthetic_postgres_query": "passed",
+    "completed_at": "2026-10-02T18:46:21Z"
+  },
+  "next": "Separate private compatible free restoration target; coordinated snapshot/backup; full restore/login before0495/0507 and hosted acceptance."
 }

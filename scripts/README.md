@@ -5,6 +5,7 @@ CLI utilities pra operação local e de produção.
 ## Lista
 
 - `seed-tenant.ts` — Cria um tenant manualmente (modo BPO). Placeholder; implementação na Spec 01.
+- `limpax-recovery-preflight.ts` — Confere backup e inventário privado somente leitura; compara um destino separado após restauração. Procedimento: `docs/runbooks/limpax-recovery-preflight.md`. Não aplica migração, restaura dados ou aprova recuperação integral.
 
 ## Convenções
 

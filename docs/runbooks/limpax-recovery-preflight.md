@@ -75,5 +75,9 @@ ainda retorna `restore_proven=false`: configuração Auth, login legítimo, chav
 externas, arquivos Storage e volumes WhatsApp são verificações separadas. Vault
 ou Storage com conteúdo impedem aprovação automática dessa comparação.
 
+O comparador cobre os campos enumerados no manifesto; não compara estado das
+sequências nem atributos/memberships dos papéis. Esses itens continuam na
+verificação administrativa da restauração, junto ao login e às chaves externas.
+
 Referências: [backup e restore Supabase](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore),
 [hashes PostgreSQL 17](https://www.postgresql.org/docs/17/functions-binarystring.html).

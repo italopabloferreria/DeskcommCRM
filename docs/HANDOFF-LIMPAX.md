@@ -1,19 +1,38 @@
 # Retomada da vertical LimpaxCRM
 
-## Preparação da recuperação — em execução (02/10/2026)
+## Preparação da recuperação concluída — 02/10/2026
 
-Autorização atual: continuar o máximo possível sem consultas repetidas. Próximo
-gate permanece restauração privada separada. Conferência real somente leitura
-passou em PostgreSQL17.6: 186 tabelas public, 27 auth, 8 storage, 1 vault e632
-políticas; Storage/Vault vazios. Backup rechecado; manifesto privado de contagens,
-conteúdo e estrutura capturado fora do Git. Ferramenta não escreve no banco e
-não aprova recuperação integral. Dashboard Supabase desabilitou novo projeto
-porque a conta alcançou dois projetos gratuitos ativos. Nenhum projeto pausado,
-apagado ou atualizado para plano pago. Sem Docker/Next local, deploy ou carga.
-Próximo: concluir testes e enviar ferramenta/roteiro; depois usar destino privado
-separado, coordenar snapshot/backup, provar restore/login e preflight0495/0507.
-Código/runbook: scripts/limpax-recovery-preflight.ts e
- docs/runbooks/limpax-recovery-preflight.md no fork DeskcommCRM.
+Autorização: continuar o máximo possível sem consultas repetidas. Código
+`436ec8f32` enviado ao fork. Backup rechecado; captura real por TLS
+verificado / REPEATABLE READ / READ ONLY / ROLLBACK: 186 tabelas public,
+27 auth, 8 storage, 1 vault; 632 políticas; zero objetos Storage e segredos Vault.
+820 ACL + 24 DEFAULT ACL no arquivo, preservando as 844 do recibo. Hashes de
+conteúdo, estrutura e permissões de 222 tabelas ficam em manifesto privado;
+ACL Windows do arquivo/credencial verificada como somente proprietário.
+Nenhum dado pessoal, dump ou credencial publicado. Nenhuma escrita no banco.
+
+CLI `scripts/limpax-recovery-preflight.ts` recusa arquivo alterado, projeto
+incorreto, banco ativo/legado como alvo, saída no checkout, sobrescrita e captura
+filtrada por RLS; descarta opções PG herdadas, mantém ambiente e exige TLS.
+Comparação detecta mudança mesmo com igual contagem e mantém restore_proven=false.
+[CI aprovado](https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37049387074): tipos completos, lint dirigido, 49 contratos e
+PostgreSQL 17 sintético (conteúdo alterado, readonly e filtragem RLS recusados).
+81 testes locais de contratos/documentação/workflows passaram; 18 rechecados
+na ferramenta após correção. Falha inicial 37048453572 era NODE_ENV exigido pela
+augmentação Next de ProcessEnv; corrigida preservando ambiente, sem relaxar testes.
+
+Bloqueio confirmado no dashboard: conta atingiu dois projetos gratuitos ativos;
+criação de novo projeto desabilitada. Nenhum projeto pausado/removido, upgrade,
+Docker/Next local, migração, carga real, convite, deploy ou alteração DNS.
+Próximo executável: obter destino separado privado compatível sem cobrança,
+coordenar snapshot/backup e comprovar restauração/login; depois preflight 0495/0507.
+Ferramenta não prova sequências, atributos/memberships de papéis, configuração
+Auth/login, chaves externas ou recuperação de arquivos/WhatsApp. Essas provas
+continuam exigidas antes de G13. Oracle/VPS/HTTPS e aceite hospedado pendentes.
+Runbook: `docs/runbooks/limpax-recovery-preflight.md`;
+evidência: `docs/evidence/limpax-recovery-readiness-20261002.json`.
+Roadmap posterior: arquivo definitivo de emissões, DocuSign, OpenRouter, fiscal
+e domínio crm.limpaxdf.com.br. Seções seguintes são histórico quando divergirem.
 
 ## Confirmação e reversão histórica concluídas — 02/10/2026
 

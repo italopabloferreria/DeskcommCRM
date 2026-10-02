@@ -32,7 +32,9 @@ export interface HistorySubjectExport {
   locais: Array<z.infer<typeof locationSchema>>;
   servicos: Array<z.infer<typeof serviceSchema>>;
 }
-type HistoryQuery = ReturnType<ReturnType<SupabaseClient["from"]>["select"]>;
+type HistoryPageReader = (
+  columns: string, first: number, last: number,
+) => Promise<{ data: unknown[] | null; error: unknown }>;
 const PAGE = 250;
 const MAX_ROWS = 10000;
 const MAX_BYTES = 16 * 1024 * 1024;
@@ -46,19 +48,29 @@ export async function collectHistorySubject(
   organizationId: string,
   personId: string,
   tables: {
-    locations: (columns: string) => HistoryQuery;
-    services: (columns: string) => HistoryQuery;
+    locations: HistoryPageReader;
+    services: HistoryPageReader;
   } = {
-    locations: (columns) => admin
-      .from("limpax_customer_locations")
-      .select(columns)
-      .eq("organization_id", organizationId)
-      .eq("person_id", personId),
-    services: (columns) => admin
-      .from("limpax_service_history")
-      .select(columns)
-      .eq("organization_id", organizationId)
-      .eq("person_id", personId),
+    locations: async (columns, first, last) => {
+      const result = await admin
+        .from("limpax_customer_locations")
+        .select(columns)
+        .eq("organization_id", organizationId)
+        .eq("person_id", personId)
+        .order("id", { ascending: true })
+        .range(first, last);
+      return { data: result.data, error: result.error };
+    },
+    services: async (columns, first, last) => {
+      const result = await admin
+        .from("limpax_service_history")
+        .select(columns)
+        .eq("organization_id", organizationId)
+        .eq("person_id", personId)
+        .order("id", { ascending: true })
+        .range(first, last);
+      return { data: result.data, error: result.error };
+    },
   },
 ): Promise<HistorySubjectExport | undefined> {
   z.string().uuid().parse(organizationId);
@@ -74,17 +86,13 @@ export async function collectHistorySubject(
 
   let bytes = 0;
   async function read<T>(
-    query: (columns: string) => HistoryQuery,
+    query: HistoryPageReader,
     columns: string,
     schema: z.ZodType<T>,
   ) {
     const rows: T[] = [];
     for (let start = 0; start <= MAX_ROWS;) {
-      const result = await query(columns)
-        .eq("organization_id", organizationId)
-        .eq("person_id", personId)
-        .order("id", { ascending: true })
-        .range(start, start + PAGE - 1);
+      const result = await query(columns, start, start + PAGE - 1);
       if (result.error || !Array.isArray(result.data))
         throw new Error("history_export_read_failed");
       if (result.data.length > PAGE || rows.length + result.data.length > MAX_ROWS)

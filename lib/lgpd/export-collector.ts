@@ -1362,17 +1362,27 @@ export async function collectExportData(args: CollectArgs): Promise<ExportPayloa
     const historico_limpax = personId
       ? await collectHistorySubject(admin, organizationId, personId, {
           // Enumerate actual sources here so the LGPD inventory covers optional
-          // history too. The helper applies tenant/person filters and all limits.
-          locations: (columns) => admin
-            .from("limpax_customer_locations")
-            .select(columns)
-            .eq("organization_id", organizationId)
-            .eq("person_id", personId),
-          services: (columns) => admin
-            .from("limpax_service_history")
-            .select(columns)
-            .eq("organization_id", organizationId)
-            .eq("person_id", personId),
+          // history too. Readers scope queries; the helper validates records and limits.
+          locations: async (columns, first, last) => {
+            const result = await admin
+              .from("limpax_customer_locations")
+              .select(columns)
+              .eq("organization_id", organizationId)
+              .eq("person_id", personId)
+              .order("id", { ascending: true })
+              .range(first, last);
+            return { data: result.data, error: result.error };
+          },
+          services: async (columns, first, last) => {
+            const result = await admin
+              .from("limpax_service_history")
+              .select(columns)
+              .eq("organization_id", organizationId)
+              .eq("person_id", personId)
+              .order("id", { ascending: true })
+              .range(first, last);
+            return { data: result.data, error: result.error };
+          },
         })
       : undefined;
     if (pessoa || vinculos.length > 0 || (linhas ?? []).length > 0 || historico_limpax) {

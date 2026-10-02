@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { historicalReceiptSchema, type HistoricalReceipt } from "@/lib/crm-b2b/historical-process";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,70 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
   const [kind, setKind] = useState<Kind>("company"),
     [search, setSearch] = useState("");
   const [matches, setMatches] = useState<{ id: string; label: string }[]>([]);
+  const [reviewReady, setReviewReady] = useState(false),
+    [accepted, setAccepted] = useState(false);
+  const [receipt, setReceipt] = useState<HistoricalReceipt | null>(null);
+  function invalidateReview() {
+    setReviewReady(false);
+    setAccepted(false);
+  }
+  function reviewPayload() {
+    return {
+      source_sha256: sourceHash,
+      decisions: Object.entries(choices).map(([index, choice]) => ({
+        data_row_index: Number(index),
+        customer: { kind: choice.customer.kind, id: choice.customer.id },
+        location: { kind: choice.location },
+        accept_original_date: choice.accept_original_date,
+        accept_original_value: choice.accept_original_value,
+      })),
+    };
+  }
+  async function confirm() {
+    if (busy || !reviewReady || !accepted || receipt) return;
+    setBusy(true);
+    setMessage("");
+    const controller = new AbortController();
+    abort.current = controller;
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      form.set("historical_confirm", "true");
+      form.set("historical_review", JSON.stringify(reviewPayload()));
+      const response = await fetch("/api/v1/imports", {
+        method: "POST",
+        body: form,
+        signal: controller.signal,
+      });
+      const json = await response.json();
+      if (controller.signal.aborted) return;
+      if (!response.ok) throw new Error(json.error?.message ?? "Falha ao confirmar histórico.");
+      const parsed = historicalReceiptSchema.safeParse(json.data);
+      if (!parsed.success)
+        throw new Error(
+          "O banco não confirmou o recibo. Confira o lote antes de tentar novamente.",
+        );
+      setReceipt(parsed.data);
+      setMessage(
+        parsed.data.reversed_at
+          ? "Este lote já foi revertido. O reenvio não recria serviços."
+          : parsed.data.reused
+            ? "Lote já confirmado. Nenhuma linha foi repetida."
+            : "Histórico confirmado.",
+      );
+    } catch (error) {
+      if (!controller.signal.aborted)
+        setMessage(
+          error instanceof Error &&
+            error.message !== "Failed to fetch" &&
+            error.message !== "rede indisponível"
+            ? error.message
+            : "Não foi possível conferir o recibo. Reenvie o mesmo arquivo e as mesmas decisões.",
+        );
+    } finally {
+      if (!controller.signal.aborted) setBusy(false);
+    }
+  }
   const abort = useRef<AbortController | null>(null);
   async function analyze(number: number, validate = false) {
     abort.current?.abort();
@@ -38,20 +104,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
       form.set("file", file);
       form.set("preview", "true");
       form.set("historical_page", String(number));
-      if (validate)
-        form.set(
-          "historical_review",
-          JSON.stringify({
-            source_sha256: sourceHash,
-            decisions: Object.entries(choices).map(([index, choice]) => ({
-              data_row_index: Number(index),
-              customer: { kind: choice.customer.kind, id: choice.customer.id },
-              location: { kind: choice.location },
-              accept_original_date: choice.accept_original_date,
-              accept_original_value: choice.accept_original_value,
-            })),
-          }),
-        );
+      if (validate) form.set("historical_review", JSON.stringify(reviewPayload()));
       const response = await fetch("/api/v1/imports", {
         method: "POST",
         body: form,
@@ -69,10 +122,12 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
         const result = json.data.reviewed_draft;
         if (!result || result.ownership_verified !== false)
           throw new Error("Resultado de revisão inválido.");
+        setReviewReady(result.review_required_rows === 0);
+        setAccepted(false);
         setMessage(
           result.review_required_rows > 0
             ? result.review_required_rows + " linhas ainda precisam de revisão."
-            : "Decisões analisadas. A gravação ainda está bloqueada; os vínculos serão verificados antes da importação.",
+            : "Decisões analisadas. Confira e confirme o lote; os vínculos serão verificados no banco.",
         );
       }
     } catch (error) {
@@ -82,7 +137,6 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
       if (!controller.signal.aborted) setBusy(false);
     }
   }
-  useEffect(() => () => abort.current?.abort(), []);
   async function find() {
     abort.current?.abort();
     const controller = new AbortController();
@@ -127,9 +181,11 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
     }
   }
   function change(index: number, patch: Partial<Choice>) {
+    invalidateReview();
     setChoices((current) => ({ ...current, [index]: { ...current[index]!, ...patch } }));
     setMessage("");
   }
+  useEffect(() => () => abort.current?.abort(), []);
   return (
     <section
       aria-label={t("Revisar vínculos do histórico")}
@@ -138,15 +194,15 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
       <h3 className="font-medium">{t("Escolha os clientes do histórico")}</h3>
       <p className="text-sm text-muted-foreground">
         {t(
-          "As decisões ficam nesta tela enquanto o arquivo estiver aberto. Trocar o arquivo ou sair descarta a revisão. Nenhum cliente, local ou serviço será gravado nesta etapa.",
+          "As decisões ficam nesta tela enquanto o arquivo estiver aberto. Trocar o arquivo ou sair descarta a revisão. A análise não grava. Somente a confirmação explícita salva locais e serviços para os clientes escolhidos.",
         )}{" "}
       </p>
-      {!page && (
+      {!page && !receipt && (
         <Button disabled={busy} onClick={() => void analyze(1)}>
           {t("Abrir revisão por linhas")}
         </Button>
       )}
-      <fieldset disabled={busy} className="flex flex-wrap items-end gap-2">
+      <fieldset disabled={busy || receipt !== null} className="flex flex-wrap items-end gap-2">
         <legend className="sr-only">{t("Buscar cliente cadastrado")}</legend>
         <label>
           {t("Tipo de cliente")}{" "}
@@ -188,7 +244,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
         return (
           <fieldset
             key={row.data_row_index}
-            disabled={busy}
+            disabled={busy || receipt !== null}
             className="grid gap-3 rounded-md border p-3 sm:grid-cols-2"
           >
             <legend>
@@ -210,6 +266,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
                     className="block w-full rounded-md border p-2"
                     value={choice ? choice.customer.kind + ":" + choice.customer.id : ""}
                     onChange={(event) => {
+                      invalidateReview();
                       const selected = matches.find(
                         (item) => kind + ":" + item.id === event.target.value,
                       );
@@ -306,7 +363,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
           </fieldset>
         );
       })}
-      {page && (
+      {page && !receipt && (
         <div className="flex flex-wrap items-center gap-2">
           <Button disabled={busy || page.page <= 1} onClick={() => void analyze(page.page - 1)}>
             {t("Página anterior")}{" "}
@@ -323,6 +380,37 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
           <Button disabled={busy} onClick={() => void analyze(page.page, true)}>
             {t("Validar decisões sem gravar")}{" "}
           </Button>
+        </div>
+      )}
+      {reviewReady && !receipt && (
+        <div className="space-y-2 rounded-md border p-3">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              disabled={busy}
+              checked={accepted}
+              onChange={(event) => setAccepted(event.target.checked)}
+            />
+            {t("Conferi os clientes e autorizo gravar este lote.")}
+          </label>
+          <Button disabled={busy || !accepted} onClick={() => void confirm()}>
+            {t("Confirmar histórico")}
+          </Button>
+        </div>
+      )}
+      {receipt && (
+        <div className="space-y-2 rounded-md border p-3 text-sm">
+          <p>
+            {t("Recibo")}: <span className="font-mono break-all">{receipt.receipt_id}</span>
+          </p>
+          <p>
+            {t("Linhas")}: {receipt.total_rows} · {t("Serviços")}: {receipt.service_rows} ·{" "}
+            {t("Locais criados")}: {receipt.locations_created} · {t("Auxiliares preservados")}:{" "}
+            {receipt.auxiliary_rows}
+          </p>
+          <Link className="underline" href={"/app/imports/" + receipt.batch_id}>
+            {t("Abrir lote confirmado")}
+          </Link>
         </div>
       )}
     </section>

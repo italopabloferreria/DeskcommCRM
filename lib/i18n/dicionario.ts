@@ -37,6 +37,19 @@ import type { Idioma } from "./idiomas";
 type Traducoes = Record<string, Partial<Record<Exclude<Idioma, "pt-BR">, string>>>;
 
 export const DICIONARIO: Traducoes = {
+  "Conferi os clientes e autorizo gravar este lote.": { es: "Revisé los clientes y autorizo guardar este lote." },
+  "Confirmar histórico": { es: "Confirmar historial" },
+  "Recibo": { es: "Comprobante" },
+  "Serviços": { es: "Servicios" },
+  "Locais criados": { es: "Ubicaciones creadas" },
+  "Auxiliares preservados": { es: "Auxiliares conservados" },
+  "Abrir lote confirmado": { es: "Abrir lote confirmado" },
+  "Lote revertido": { es: "Lote revertido" },
+  "Reverter histórico do lote": { es: "Revertir historial del lote" },
+  "A reversão anula serviços, preserva cadastros e origem e recusa serviços já corrigidos. Não pode ser desfeita por reenvio.": { es: "La reversión anula servicios, conserva registros y origen y rechaza servicios ya corregidos. No se puede deshacer reenviando el archivo." },
+  "Confirmo a reversão deste lote.": { es: "Confirmo la reversión de este lote." },
+  "Reverter lote": { es: "Revertir lote" },
+  "As decisões ficam nesta tela enquanto o arquivo estiver aberto. Trocar o arquivo ou sair descarta a revisão. A análise não grava. Somente a confirmação explícita salva locais e serviços para os clientes escolhidos.": { es: "Las decisiones permanecen en esta pantalla mientras el archivo esté abierto. Cambiar el archivo o salir descarta la revisión. El análisis no guarda datos. Solo la confirmación explícita guarda ubicaciones y servicios para los clientes elegidos." },
   // Limpax: documentos, revisão de planilhas e gestão do histórico.
   "Documentos": { es: "Documentos" },
   "Prepare prévias em PDF com assinatura e carimbo posicionados por página.": { es: "Prepara vistas previas en PDF con firma y sello posicionados por página." },

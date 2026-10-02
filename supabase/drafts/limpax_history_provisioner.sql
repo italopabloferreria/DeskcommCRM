@@ -102,10 +102,12 @@ begin
     service_rows integer not null check (service_rows between 0 and total_rows),
     locations_created integer not null check (locations_created between 0 and total_rows),
     auxiliary_rows integer not null check (auxiliary_rows between 0 and total_rows),
+    reversed_at timestamptz,
     created_by uuid not null references auth.users(id) on delete restrict,
     created_at timestamptz not null default now(),
     unique (organization_id, source_sha256)
   );
+  alter table public.limpax_history_receipts add column if not exists reversed_at timestamptz;
   alter table public.limpax_history_receipts enable row level security;
   drop policy if exists limpax_history_receipts_select on public.limpax_history_receipts;
   create policy limpax_history_receipts_select on public.limpax_history_receipts for select to authenticated

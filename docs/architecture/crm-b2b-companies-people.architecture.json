@@ -25,7 +25,13 @@
       "label": "Fora (BrasilAPI / WAHA)"
     }
   ],
-  "mainPath": ["ui_empresas", "api_companies", "companies", "people", "contacts"],
+  "mainPath": [
+    "ui_empresas",
+    "api_companies",
+    "companies",
+    "people",
+    "contacts"
+  ],
   "nodes": [
     {
       "id": "ui_empresas",
@@ -208,8 +214,32 @@
       "lane": "dados",
       "col": 5,
       "type": "database",
-      "label": "limpax_history_management.sql (rascunho)",
-      "sublabel": "versão/recibo/tombstone; NÃO instalado"
+      "label": "0507: histórico opcional",
+      "sublabel": "fonte preparada; instalar após recovery"
+    },
+    {
+      "id": "history_confirm",
+      "lane": "api",
+      "col": 3,
+      "type": "process",
+      "label": "historical-process.ts",
+      "sublabel": "recibo, replay, erro fail-closed"
+    },
+    {
+      "id": "ui_batch_receipt",
+      "lane": "humano",
+      "col": 5,
+      "type": "ui",
+      "label": "Ficha do lote",
+      "sublabel": "página50/recibo/reversão admin"
+    },
+    {
+      "id": "history_reverse",
+      "lane": "api",
+      "col": 6,
+      "type": "api",
+      "label": "history-reversal",
+      "sublabel": "admin/tenant/chave/SQL atômico"
     }
   ],
   "edges": [
@@ -217,7 +247,7 @@
       "id": "e_historical_analysis",
       "from": "api_imports",
       "to": "historical_preview",
-      "label": "análise e bloqueio antes da escrita"
+      "label": "prévia sem efeito; confirmação por RPC"
     },
     {
       "id": "e_historical_review",
@@ -410,7 +440,7 @@
       "id": "e_editor_decisions",
       "from": "ui_historical_review",
       "to": "historical_review",
-      "label": "decisões somente em preview"
+      "label": "decisões explícitas; hash do arquivo"
     },
     {
       "id": "e_editor_company_search",
@@ -459,6 +489,36 @@
       "from": "history_manage_draft",
       "to": "people",
       "label": "pessoa sem contato, limpeza e não restauração"
+    },
+    {
+      "id": "e_confirm_prepare",
+      "from": "api_imports",
+      "to": "history_confirm",
+      "label": "comando revisto e org confiável"
+    },
+    {
+      "id": "e_confirm_return",
+      "from": "history_confirm",
+      "to": "ui_batch_receipt",
+      "label": "recibo durável; sem repetir arquivo"
+    },
+    {
+      "id": "e_receipt_reverse",
+      "from": "ui_batch_receipt",
+      "to": "history_reverse",
+      "label": "confirmação explícita e retry"
+    },
+    {
+      "id": "e_reverse_sql",
+      "from": "history_reverse",
+      "to": "history_manage_draft",
+      "label": "anulação lógica/audit na transação"
+    },
+    {
+      "id": "e_reverse_result",
+      "from": "history_reverse",
+      "to": "ui_batch_receipt",
+      "label": "reversed_at/recusa edição posterior"
     }
   ]
 }

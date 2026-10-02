@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/limpax-historico-db.yml"
       - "supabase/drafts/**"
+      - "supabase/migrations/*_0507_*.sql"
+      - "tests/invariants/limpax-history-confirmation-canonical.test.ts"
       - "tests/invariants/limpax-history-*-draft.test.ts"
 permissions:
   contents: read
@@ -30,11 +32,11 @@ jobs:
           CONFERENCIA_KIT_RELEASE: v1.69.0
           TEST_DB_IMAGE: pgvector/pgvector:pg${{ matrix.pg }}
           GH_TOKEN: ${{ github.token }}
-        run: pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts tests/invariants/limpax-history-atomic-draft.test.ts tests/invariants/limpax-history-lifecycle-draft.test.ts tests/invariants/limpax-history-management-draft.test.ts tests/invariants/limpax-history-guards-draft.test.ts
+        run: pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts tests/invariants/limpax-history-atomic-draft.test.ts tests/invariants/limpax-history-lifecycle-draft.test.ts tests/invariants/limpax-history-management-draft.test.ts tests/invariants/limpax-history-guards-draft.test.ts tests/invariants/limpax-history-confirmation-canonical.test.ts
 # Public fork only; no operational credentials, migrations, real imports, image publication or deploy.
 
       - name: Contratos de API, interface, exportação e mapa vivo
-        run: pnpm vitest run tests/unit/limpax-history-management.test.ts tests/unit/limpax-customer-history-api.test.ts tests/unit/limpax-customer-history-ui.test.tsx tests/unit/limpax-history-export.test.ts tests/unit/limpax-history-export-collector.test.ts tests/unit/limpax-history-export-pdf.test.ts tests/unit/mapas-de-arquitetura.test.ts tests/unit/navegacao-completude.test.ts --maxWorkers=2
+        run: pnpm vitest run tests/unit/limpax-history-management.test.ts tests/unit/limpax-customer-history-api.test.ts tests/unit/limpax-customer-history-ui.test.tsx tests/unit/limpax-history-export.test.ts tests/unit/limpax-history-export-collector.test.ts tests/unit/limpax-history-export-pdf.test.ts tests/unit/mapas-de-arquitetura.test.ts tests/unit/navegacao-completude.test.ts tests/unit/limpax-history-confirmation.test.ts app/app/imports/_historical-confirmation.test.tsx app/app/imports/_historical-review.test.tsx app/api/v1/imports/route.test.ts tests/unit/limpax-history-reversal-api.test.ts tests/unit/limpax-import-detail-api.test.ts lib/crm-b2b/import-body.test.ts app/app/imports/[id]/_client.test.tsx --maxWorkers=2
 
   qualidade:
     if: github.repository == 'italopabloferreria/DeskcommCRM' && github.event.repository.private == false

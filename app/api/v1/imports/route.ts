@@ -1,5 +1,8 @@
 import { type NextRequest } from "next/server";
+import { readImportForm } from "@/lib/crm-b2b/import-body";
 import { createHash } from "node:crypto";
+import { prepareHistoricalCommand } from "@/lib/crm-b2b/historical-command";
+import { confirmHistoricalImport } from "@/lib/crm-b2b/historical-process";
 import { validateHistoricalReview } from "@/lib/crm-b2b/historical-review";
 import { historicalRowsForReview, historicalPreview } from "@/lib/crm-b2b/historical-preview";
 
@@ -73,7 +76,18 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (!authz.ok) return authz.response;
 
   try {
-    const form = await req.formData();
+    let form: FormData;
+    try {
+      form = await readImportForm(req);
+    } catch (error) {
+      const large = error instanceof Error && error.message === "import_body_limit";
+      return fail(
+        "validation_failed",
+        large ? "Solicitação de importação grande demais." : "Upload inválido.",
+        large ? 413 : 422,
+        { requestId },
+      );
+    }
     const file = form.get("file");
     if (!(file instanceof File)) {
       return fail("validation_failed", "Envie o arquivo no campo 'file'.", 422, { requestId });
@@ -122,13 +136,49 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
     const sourceHash = createHash("sha256").update(new Uint8Array(bytes)).digest("hex");
     const reviewRaw = form.get("historical_review");
-    if (reviewRaw !== null && form.get("preview") !== "true")
-      return fail(
-        "validation_failed",
-        "A revisão histórica permite apenas análise; a gravação não está habilitada.",
-        422,
-        { requestId },
-      );
+    const historicalConfirm = form.get("historical_confirm");
+    if (reviewRaw !== null && form.get("preview") !== "true") {
+      if (historicalConfirm !== "true")
+        return fail("validation_failed", "Confirme explicitamente a importação histórica.", 422, {
+          requestId,
+        });
+      if (req.headers.get("origin") !== new URL(req.url).origin)
+        return fail("forbidden", "Origem inválida.", 403, { requestId });
+      if (typeof reviewRaw !== "string" || reviewRaw.length > IMPORT_MAX_BYTES)
+        return fail("validation_failed", "Revisão inválida ou grande demais.", 422, { requestId });
+      let review: unknown;
+      try {
+        review = JSON.parse(reviewRaw);
+      } catch {
+        return fail("validation_failed", "Revisão inválida.", 422, { requestId });
+      }
+      const command = prepareHistoricalCommand(parsed.sheet, sourceHash, nome, review);
+      if (!command.ok) return fail("validation_failed", command.error, 422, { requestId });
+      try {
+        const result = await confirmHistoricalImport(
+          await createClient(),
+          authz.org.orgId,
+          command.data,
+        );
+        if (!result.ok)
+          return fail(result.error.code, result.error.message, result.error.status, { requestId });
+        // SQL commits receipt, all rows and audit together. No separate audit write.
+        return ok(result.data, {
+          requestId,
+          status: result.data.reused ? 200 : 201,
+          headers: { "cache-control": "private, no-store" },
+        });
+      } catch {
+        return fail(
+          "internal_error",
+          "Não foi possível conferir o recibo. Reenvie o mesmo arquivo e as mesmas decisões.",
+          500,
+          { requestId },
+        );
+      }
+    }
+    if (historicalConfirm === "true" && reviewRaw === null)
+      return fail("validation_failed", "A revisão histórica é obrigatória.", 422, { requestId });
     if (form.get("preview") === "true") {
       const pageRaw = form.get("historical_page");
       let historicalPage = null;

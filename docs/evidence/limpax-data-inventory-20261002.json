@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "inventories": {
+    "originals": {
+      "available": true,
+      "files": 346,
+      "bytes": 96064848,
+      "reparse_skipped": 0,
+      "extensions": {
+        ".xlsm": 1,
+        ".pdf": 326,
+        ".jpg": 9,
+        ".zip": 4,
+        ".ini": 1,
+        ".lnk": 2,
+        ".png": 1,
+        ".doc": 1,
+        ".jpeg": 1
+      }
+    },
+    "staging": {
+      "available": true,
+      "files": 20,
+      "bytes": 22262931,
+      "reparse_skipped": 0,
+      "extensions": {
+        ".jsonl": 9,
+        ".csv": 1,
+        ".log": 2,
+        ".json": 5,
+        ".py": 3
+      }
+    },
+    "analysis_copies": {
+      "available": true,
+      "files": 17,
+      "bytes": 4036143,
+      "reparse_skipped": 0,
+      "extensions": {
+        ".json": 11,
+        ".zip": 1,
+        ".png": 1,
+        ".ps1": 1,
+        ".pdf": 1,
+        ".py": 2
+      }
+    },
+    "backup_tools": {
+      "available": true,
+      "files": 43,
+      "bytes": 65104955,
+      "reparse_skipped": 0,
+      "extensions": {
+        ".log": 3,
+        ".txt": 1,
+        ".json": 3,
+        ".dump": 1,
+        ".sql": 1,
+        ".crt": 1,
+        ".dll": 29,
+        ".exe": 4
+      }
+    }
+  },
+  "source_preserved": true,
+  "duplicate_file_groups": 3,
+  "redundant_file_copies": 4,
+  "queues": {
+    "identity-review.jsonl": 4148,
+    "location-review.jsonl": 4156,
+    "service-review.jsonl": 4156,
+    "auxiliary-review.jsonl": 24
+  },
+  "staging_rows": 5050,
+  "sheets": 9,
+  "formula_cells_preserved": 51,
+  "merges": 0,
+  "deletions": 0,
+  "remote_uploads": 0,
+  "imported_rows": 0,
+  "private_report": "Outside repositories; restricted owner area",
+  "ownership_and_retention": "[VALIDAR] explicit customer selection and separate retention per surface; no automatic merging by name."
+}

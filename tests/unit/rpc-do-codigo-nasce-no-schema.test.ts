@@ -84,21 +84,6 @@ const BASELINE = "supabase/baseline.sql";
 // vermelho pedindo a remoção daqui (é o `it` abaixo que faz isso).
 
 const CONGELADAS: Record<string, { degradacao: string; porque: string }> = {
-  fn_limpax_history_view: {
-    degradacao: "app/api/v1/customer-history/[kind]/[id]/route.ts:60",
-    porque:
-      "Módulo opcional do fork ainda em supabase/drafts/limpax_history_management.sql: ausência da RPC retorna available:false sem alterar dados, coberto pelos testes da rota. Será retirado deste registro quando houver migração canônica validada.",
-  },
-  fn_limpax_history_manage: {
-    degradacao: "app/api/v1/customer-history/[kind]/[id]/route.ts:60",
-    porque:
-      "Módulo opcional do fork ainda em rascunho SQL: ausência da RPC recusa o comando com 409 sem gravar ou emitir exportação parcial, coberto pelos testes da rota. Só entra no schema após backup, restore e validação operacional.",
-  },
-  fn_limpax_history_export_person: {
-    degradacao: "app/api/v1/customer-history/[kind]/[id]/route.ts:60",
-    porque:
-      "Módulo opcional do fork ainda em rascunho SQL: ausência da RPC recusa o comando com 409 sem gravar ou emitir exportação parcial, coberto pelos testes da rota. Só entra no schema após backup, restore e validação operacional.",
-  },
   decrypt_cpf: {
     degradacao: "app/api/v1/contacts/_handler.ts:324",
     porque:

@@ -22,7 +22,7 @@ declare
   v_locations integer := 0;
   v_auxiliary integer := 0;
 begin
-  if v_actor is null or not coalesce(public.fn_support_write_allowed(p_organization_id), false) then
+  if v_actor is null or not public.fn_session_mfa_proven() or not coalesce(public.fn_support_write_allowed(p_organization_id), false) then
     raise exception using errcode='42501', message='history_import_forbidden';
   end if;
   select role into v_role from public.user_organizations
@@ -52,7 +52,8 @@ begin
     end if;
     return jsonb_build_object('receipt_id',v_receipt.id,'batch_id',v_receipt.batch_id,
       'total_rows',v_receipt.total_rows,'service_rows',v_receipt.service_rows,
-      'locations_created',v_receipt.locations_created,'auxiliary_rows',v_receipt.auxiliary_rows,'reused',true);
+      'locations_created',v_receipt.locations_created,'auxiliary_rows',v_receipt.auxiliary_rows,'reused',true)||
+      case when v_receipt.reversed_at is not null then jsonb_build_object('reversed_at',v_receipt.reversed_at) else '{}'::jsonb end;
   end if;
   insert into public.import_batches(organization_id,kind,filename,status,total_rows,created_by)
     values(p_organization_id,'limpax_history',p_filename,'processing',jsonb_array_length(p_rows),v_actor)

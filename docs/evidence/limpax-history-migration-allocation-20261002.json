@@ -1,0 +1,14 @@
+{
+  "candidate": 507,
+  "upstream": "efed1d5745f87dfeaf3adbe8bc6165bc684a7a75",
+  "open_prs": 69,
+  "pagination": "all_pages",
+  "max_number": 506.0,
+  "status": "complete",
+  "last_timestamp": "20261001214323",
+  "schema_files_in_prs": 19,
+  "measured_at": "2026-10-02T06:52:18.8361620-03:00",
+  "filename": "20261002095906_0507_limpax_historico_confirmacao.sql",
+  "cli": "supabase 2.119.0; official release checksum verified",
+  "operational_application": false
+}

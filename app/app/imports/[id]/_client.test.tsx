@@ -98,7 +98,7 @@ it("incerteza de rede conserva a chave da confirmação para retry", async () =>
   await screen.findByText("Lote revertido");
   const calls = f.mock.calls.filter(([url]) => String(url).endsWith("/history-reversal"));
   expect(calls).toHaveLength(2);
-  expect(calls[0][1]?.body).toBe(calls[1][1]?.body);
+  expect(calls[0]![1]?.body).toBe(calls[1]![1]?.body);
 });
 it("falha na leitura oferece retry e não fica presa em carregando", async () => {
   setup(false, false, true);

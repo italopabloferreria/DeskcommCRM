@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/limpax-historico-db.yml"
       - "supabase/drafts/**"
+      - "lib/lgpd/history-export.ts"
+      - "lib/lgpd/export-collector.ts"
       - "supabase/migrations/*_0507_*.sql"
       - "tests/invariants/limpax-history-confirmation-canonical.test.ts"
       - "tests/invariants/limpax-history-*-draft.test.ts"
@@ -36,7 +38,7 @@ jobs:
 # Public fork only; no operational credentials, migrations, real imports, image publication or deploy.
 
       - name: Contratos de API, interface, exportação e mapa vivo
-        run: pnpm vitest run tests/unit/limpax-history-management.test.ts tests/unit/limpax-customer-history-api.test.ts tests/unit/limpax-customer-history-ui.test.tsx tests/unit/limpax-history-export.test.ts tests/unit/limpax-history-export-collector.test.ts tests/unit/limpax-history-export-pdf.test.ts tests/unit/mapas-de-arquitetura.test.ts tests/unit/navegacao-completude.test.ts tests/unit/limpax-history-confirmation.test.ts app/app/imports/_historical-confirmation.test.tsx app/app/imports/_historical-review.test.tsx app/api/v1/imports/route.test.ts tests/unit/limpax-history-reversal-api.test.ts tests/unit/limpax-import-detail-api.test.ts lib/crm-b2b/import-body.test.ts app/app/imports/[id]/_client.test.tsx --maxWorkers=2
+        run: pnpm vitest run tests/unit/limpax-history-management.test.ts tests/unit/limpax-customer-history-api.test.ts tests/unit/limpax-customer-history-ui.test.tsx tests/unit/limpax-history-export.test.ts tests/unit/limpax-history-export-collector.test.ts tests/unit/limpax-history-export-pdf.test.ts tests/unit/mapas-de-arquitetura.test.ts tests/unit/navegacao-completude.test.ts tests/unit/limpax-history-confirmation.test.ts app/app/imports/_historical-confirmation.test.tsx app/app/imports/_historical-review.test.tsx app/api/v1/imports/route.test.ts tests/unit/limpax-history-reversal-api.test.ts tests/unit/limpax-import-detail-api.test.ts lib/crm-b2b/import-body.test.ts app/app/imports/[id]/_client.test.tsx tests/unit/adr-0002-funcao-provisionadora.test.ts tests/unit/admin-client-exige-filtro-de-tenant.test.ts tests/unit/lgpd-exporta-o-que-redige.test.ts tests/unit/apendice-do-baseline-nao-diverge-da-cadeia.test.ts tests/unit/varredura-anon-e-o-ultimo-bloco.test.ts tests/unit/rpc-do-codigo-nasce-no-schema.test.ts --maxWorkers=2
 
   qualidade:
     if: github.repository == 'italopabloferreria/DeskcommCRM' && github.event.repository.private == false

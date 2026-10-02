@@ -1363,8 +1363,16 @@ export async function collectExportData(args: CollectArgs): Promise<ExportPayloa
       ? await collectHistorySubject(admin, organizationId, personId, {
           // Enumerate actual sources here so the LGPD inventory covers optional
           // history too. The helper applies tenant/person filters and all limits.
-          locations: () => admin.from("limpax_customer_locations"),
-          services: () => admin.from("limpax_service_history"),
+          locations: (columns) => admin
+            .from("limpax_customer_locations")
+            .select(columns)
+            .eq("organization_id", organizationId)
+            .eq("person_id", personId),
+          services: (columns) => admin
+            .from("limpax_service_history")
+            .select(columns)
+            .eq("organization_id", organizationId)
+            .eq("person_id", personId),
         })
       : undefined;
     if (pessoa || vinculos.length > 0 || (linhas ?? []).length > 0 || historico_limpax) {

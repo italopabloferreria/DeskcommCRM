@@ -74,6 +74,21 @@ async function count(table: string) {
     ].includes(table)
   )
     throw new Error("Invalid test table");
+  // Audit RLS permits admin only. Observe effects as the disposable DB owner;
+  // the import itself still executes as the real manager.
+  if (table === "api_audit_log") {
+    await db.query("reset role");
+    try {
+      return (
+        await db.query(
+          "select count(*)::int n from public.api_audit_log where organization_id=$1",
+          [org],
+        )
+      ).rows[0].n;
+    } finally {
+      await db.query("set local role authenticated");
+    }
+  }
   return (
     await db.query("select count(*)::int n from public." + table + " where organization_id=$1", [
       org,
@@ -144,9 +159,11 @@ describe("rascunho de lote histórico atômico", () => {
       "api_audit_log",
     ])
       expect(await count(table)).toBe(1);
+    await db.query("reset role");
     const metadata = (
       await db.query("select metadata from public.api_audit_log where organization_id=$1", [org])
     ).rows[0].metadata;
+    await db.query("set local role authenticated");
     expect(metadata).toEqual({
       receipt_id: first.receipt_id,
       total_rows: 1,

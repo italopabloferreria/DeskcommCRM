@@ -1,0 +1,28 @@
+{
+  "status": "implemented_focused_verification_passed_not_deployed",
+  "tests": { "files": 5, "passed": 41, "failed": 0 },
+  "types": "focused_changed_files_and_dependencies_passed",
+  "lint": "seven_changed_typescript_files_passed",
+  "checks": [
+    "raw_historical_sample",
+    "repeated_rows_preserved",
+    "whole_file_counts",
+    "zero_vs_missing",
+    "bounded_integer_money",
+    "invalid_dates_and_excel_serial_review",
+    "ambiguous_headers_no_silent_choice",
+    "server_rejects_history_remapping_before_database",
+    "ui_history_visible_and_confirmation_disabled",
+    "ordinary_import_regression"
+  ],
+  "remote_writes": 0,
+  "limits": [
+    "no historical persistence",
+    "no migration",
+    "no real import",
+    "no hosted visual acceptance",
+    "no full build or full repository typecheck",
+    "parsed_row_position_not_original_excel_row"
+  ],
+  "next": "historical locations/services persistence contract, isolated recovery proof and hosted acceptance"
+}

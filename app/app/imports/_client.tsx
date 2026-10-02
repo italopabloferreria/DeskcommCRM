@@ -12,17 +12,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { HistoricalReviewEditor } from "./_historical-review";
 import { Input } from "@/components/ui/input";
 import { useT } from "@/hooks/i18n/useT";
 
-import { IMPORT_FIELDS } from "@/lib/crm-b2b/import-preview";
+import {
+  IMPORT_FIELDS,
+  uncoveredImportColumns,
+  type ImportColumnCoverage,
+} from "@/lib/crm-b2b/import-preview";
 import type { MappingField } from "@/lib/crm-b2b/spreadsheet";
+import type { historicalPreview } from "@/lib/crm-b2b/historical-preview";
 interface Preview {
+  source_sha256?: string;
   headers: string[];
   total_rows: number;
   mapping: Partial<Record<MappingField, string>>;
   raw_sample: string[][];
   sample: Record<MappingField, string>[];
+  column_coverage: ImportColumnCoverage[];
+  historical_review: ReturnType<typeof historicalPreview>;
 }
 interface BatchRow {
   id: string;
@@ -44,6 +53,7 @@ export function ImportsListClient() {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [mapping, setMapping] = useState<Partial<Record<MappingField, string>>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const uncovered = preview ? uncoveredImportColumns(preview.column_coverage ?? [], mapping) : [];
 
   const load = useCallback(async () => {
     const res = await fetch("/api/v1/imports");
@@ -187,6 +197,91 @@ export function ImportsListClient() {
               </label>
             ))}
           </div>
+          {preview.historical_review && (
+            <section
+              aria-label={t("Locais e histórico de serviços")}
+              className="space-y-3 rounded-md border p-3"
+            >
+              <h3 className="font-medium">
+                {t("Locais e histórico de serviços — somente revisão")}
+              </h3>
+              <p className="text-sm">
+                {preview.historical_review.address_rows} {t("linhas com endereço")} ·{" "}
+                {preview.historical_review.service_rows} {t("linhas com dados de serviço")} ·{" "}
+                {preview.historical_review.unnamed_rows} {t("linhas sem nome identificado")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "Estes dados ainda não serão importados. Não unimos clientes, criamos compromissos nem registramos pagamentos. A posição indica a linha de dados lida, não a linha original do Excel.",
+                )}
+              </p>
+              <p className="text-sm">
+                {preview.historical_review.value_review_rows} {t("valores para revisão")} ·{" "}
+                {preview.historical_review.date_review_rows} {t("datas para revisão")}
+              </p>
+              {preview.historical_review.ambiguous_fields.length > 0 && (
+                <p role="status" className="text-sm">
+                  {t(
+                    "Há colunas com significados repetidos; a identificação automática ficou pendente nesses campos.",
+                  )}
+                </p>
+              )}
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {[
+                        "Posição",
+                        "Nome original",
+                        "Endereço original",
+                        "Data original",
+                        "Valor original",
+                        "Observação original",
+                      ].map((label) => (
+                        <TableHead key={label}>{t(label)}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {preview.historical_review.sample.map((row) => (
+                      <TableRow key={row.data_row_index}>
+                        <TableCell>{row.data_row_index}</TableCell>
+                        <TableCell>{row.raw.name || "—"}</TableCell>
+                        <TableCell>{row.raw.address || "—"}</TableCell>
+                        <TableCell>{row.raw.service_date || "—"}</TableCell>
+                        <TableCell>{row.raw.value || "—"}</TableCell>
+                        <TableCell>{row.raw.notes || "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </section>
+          )}
+          {file && preview.historical_review && preview.source_sha256 && (
+            <HistoricalReviewEditor
+              key={preview.source_sha256}
+              file={file}
+              sourceHash={preview.source_sha256}
+            />
+          )}
+          {uncovered.length > 0 && (
+            <div role="status" className="rounded-md border p-3 text-sm">
+              <p className="font-medium">{t("Importação bloqueada: há colunas sem destino.")}</p>
+              <p>
+                {t(
+                  "Revise o mapeamento. Endereços e histórico de serviços precisam de um fluxo próprio; não os relacione a campos de nome ou telefone.",
+                )}
+              </p>
+              <ul className="mt-2 list-inside list-disc">
+                {uncovered.map((column) => (
+                  <li key={column.header}>
+                    {column.header}: {column.populated_rows} {t("linhas preenchidas")}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -213,7 +308,13 @@ export function ImportsListClient() {
             </Table>
           </div>
           <Button
-            disabled={uploading || !Object.values(mapping).some(Boolean)}
+            disabled={
+              uploading ||
+              !Array.isArray(preview.column_coverage) ||
+              !Object.values(mapping).some(Boolean) ||
+              (preview.historical_review?.blocked_columns.length ?? 0) > 0 ||
+              uncovered.length > 0
+            }
             onClick={() => void upload(false)}
           >
             {uploading ? t("Importando…") : t("Confirmar importação")}

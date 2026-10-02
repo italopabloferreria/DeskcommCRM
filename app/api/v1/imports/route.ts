@@ -1,9 +1,17 @@
 import { type NextRequest } from "next/server";
+import { createHash } from "node:crypto";
+import { validateHistoricalReview } from "@/lib/crm-b2b/historical-review";
+import { historicalRowsForReview, historicalPreview } from "@/lib/crm-b2b/historical-preview";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { requireSupportWrite } from "@/lib/impersonate/support";
 import { audit } from "@/lib/audit";
-import { importPreview, mappingError } from "@/lib/crm-b2b/import-preview";
+import {
+  importColumnCoverage,
+  importPreview,
+  mappingError,
+  uncoveredImportColumns,
+} from "@/lib/crm-b2b/import-preview";
 import { processCompaniesPeopleImport } from "@/lib/crm-b2b/import-process";
 import { importColumnMappingSchema } from "@/lib/crm-b2b/schemas";
 import {
@@ -112,10 +120,77 @@ export async function POST(req: NextRequest): Promise<Response> {
     ) {
       return fail("validation_failed", headerError, 422, { requestId });
     }
-    if (form.get("preview") === "true")
-      return ok(importPreview(parsed.sheet, mapping), { requestId });
+    const sourceHash = createHash("sha256").update(new Uint8Array(bytes)).digest("hex");
+    const reviewRaw = form.get("historical_review");
+    if (reviewRaw !== null && form.get("preview") !== "true")
+      return fail(
+        "validation_failed",
+        "A revisão histórica permite apenas análise; a gravação não está habilitada.",
+        422,
+        { requestId },
+      );
+    if (form.get("preview") === "true") {
+      const pageRaw = form.get("historical_page");
+      let historicalPage = null;
+      if (pageRaw !== null) {
+        if (typeof pageRaw !== "string" || !/^[1-9][0-9]{0,2}$/.test(pageRaw))
+          return fail("validation_failed", "Página histórica inválida.", 422, { requestId });
+        const page = Number(pageRaw);
+        const totalPages = Math.max(1, Math.ceil(parsed.sheet.rows.length / 25));
+        if (page > totalPages)
+          return fail("validation_failed", "Página histórica inexistente.", 422, { requestId });
+        const extracted = historicalRowsForReview(parsed.sheet);
+        historicalPage = {
+          page,
+          page_size: 25,
+          total_pages: totalPages,
+          rows: extracted.rows.slice((page - 1) * 25, page * 25),
+        };
+      }
+      let reviewedDraft = null;
+      if (reviewRaw !== null) {
+        if (typeof reviewRaw !== "string" || reviewRaw.length > IMPORT_MAX_BYTES)
+          return fail("validation_failed", "Revisão inválida ou grande demais.", 422, {
+            requestId,
+          });
+        let input: unknown;
+        try {
+          input = JSON.parse(reviewRaw);
+        } catch {
+          return fail("validation_failed", "Revisão inválida.", 422, { requestId });
+        }
+        const result = validateHistoricalReview(parsed.sheet, sourceHash, input);
+        if (!result.ok) return fail("validation_failed", result.error, 422, { requestId });
+        // Full raw rows stay in memory; do not duplicate the file in the response/logs.
+        const { rows, ...summary } = result.data;
+        reviewedDraft = { ...summary, sample: rows.slice(0, 5) };
+      }
+      return ok(
+        {
+          ...importPreview(parsed.sheet, mapping),
+          source_sha256: sourceHash,
+          reviewed_draft: reviewedDraft,
+          historical_page: historicalPage,
+        },
+        { requestId },
+      );
+    }
     const invalidMapping = mappingError(parsed.sheet.headers, mapping);
     if (invalidMapping) return fail("validation_failed", invalidMapping, 422, { requestId });
+    if ((historicalPreview(parsed.sheet)?.blocked_columns.length ?? 0) > 0)
+      return fail(
+        "validation_failed",
+        "Esta planilha contém endereços ou histórico de serviços. A prévia está disponível, mas a importação desses dados ainda não está habilitada. Nenhum cadastro foi criado.",
+        422,
+        { requestId },
+      );
+    if (uncoveredImportColumns(importColumnCoverage(parsed.sheet), mapping).length > 0)
+      return fail(
+        "validation_failed",
+        "Há colunas preenchidas sem destino. Revise o mapeamento; endereço e histórico de serviços precisam de um fluxo próprio antes da importação. Nenhum cadastro foi criado.",
+        422,
+        { requestId },
+      );
 
     const supabase = await createClient();
     const summary = await processCompaniesPeopleImport(supabase, {

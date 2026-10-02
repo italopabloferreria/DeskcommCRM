@@ -1,8 +1,40 @@
 import { describe, expect, it } from "vitest";
-import { importPreview, mappingError } from "./import-preview";
+import {
+  importColumnCoverage,
+  importPreview,
+  mappingError,
+  uncoveredImportColumns,
+} from "./import-preview";
 import { exportCsv } from "./export-csv";
 import { parseImportFile } from "./spreadsheet";
 describe("revisão de planilhas", () => {
+  it("encontra dados além da amostra e mantém zero como valor preenchido", () => {
+    const sheet = {
+      headers: ["Nome", "Endereço", "Valor", "Vazio"],
+      rows: Array.from({ length: 6 }, (_, i) => [
+        "Cliente fictício",
+        i === 5 ? "Rua fictícia" : "",
+        "0",
+        "  ",
+      ]),
+    };
+    const preview = importPreview(sheet, { person_name: "Nome" });
+    expect(preview.raw_sample.every((r) => r[1] === "")).toBe(true);
+    expect(preview.unmapped_columns).toEqual([
+      { header: "Endereço", populated_rows: 1 },
+      { header: "Valor", populated_rows: 6 },
+    ]);
+  });
+  it("recalcula a cobertura ao mapear e desmapear campos", () => {
+    const coverage = importColumnCoverage({
+      headers: ["Nome", "Email"],
+      rows: [["Teste", "teste@example.invalid"]],
+    });
+    expect(uncoveredImportColumns(coverage, { person_name: "Nome", email: "Email" })).toEqual([]);
+    expect(uncoveredImportColumns(coverage, { person_name: "Nome", email: "" })).toEqual([
+      { header: "Email", populated_rows: 1 },
+    ]);
+  });
   it("permite mapear cabeçalhos desconhecidos e limita a amostra", () => {
     const sheet = {
       headers: ["Cliente", "Responsável"],

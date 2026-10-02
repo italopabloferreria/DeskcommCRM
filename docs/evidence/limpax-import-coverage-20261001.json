@@ -1,0 +1,23 @@
+{
+  "scope": "existing companies/people import preview and confirmation",
+  "status": "focused_tests_verified_not_deployed",
+  "tests": { "files": 5, "passed": 29, "failed": 0 },
+  "lint": "six_changed_typescript_files_passed",
+  "types": "focused_typescript_check_of_six_changed_files_and_dependencies_passed",
+  "coverage": [
+    "whole_file_not_sample",
+    "zero_is_populated",
+    "mapping_recalculation",
+    "server_rejects_unmapped_data_before_database",
+    "ui_confirmation_disabled_until_mapping_complete",
+    "transactional_import_regression"
+  ],
+  "limits": [
+    "not a semantic validator for intentionally wrong mappings",
+    "no customer-location or historical-service import yet",
+    "no real database write or migration",
+    "no fresh hosted visual acceptance",
+    "no full build or full repository typecheck"
+  ],
+  "next": "customer locations and historical services contract and preview; restore proof before migration0495"
+}

@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-02",
+  "status": "command_preparation_verified_sql_draft_not_executed",
+  "code": "lib/crm-b2b/historical-command.ts",
+  "sql": "supabase/drafts/limpax_history_atomic.sql",
+  "checks": {
+    "unit_tests": 37,
+    "test_files": 3,
+    "new_cases": 7,
+    "focused_types": "passed",
+    "focused_eslint": "passed",
+    "postgres_cases_prepared": 18,
+    "postgres_cases_executed": 0
+  },
+  "sql_expected_behavior": [
+    "accepted active manager/admin required",
+    "support write guard",
+    "transaction lock shared with B2B import",
+    "receipt replay without new effects or audit",
+    "changed decision conflict",
+    "whole-command rollback on last-row failure",
+    "raw auxiliary preservation",
+    "address only does not create service"
+  ],
+  "sql_claims": "Not proven until actual disposable Postgres tests pass",
+  "local_cleanup": {
+    "reason": "C drive zero free bytes blocked command helper",
+    "generated_cache_removed_bytes": 1061437166,
+    "path": ".next/cache",
+    "sources_and_data_preserved": true
+  },
+  "remote_writes": 0,
+  "deployed": false,
+  "next": "Disposable PostgreSQL proof and lifecycle policy before canonical migration, API/UI wiring and hosted acceptance"
+}

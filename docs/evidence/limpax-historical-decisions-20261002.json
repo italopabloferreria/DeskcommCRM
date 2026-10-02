@@ -1,0 +1,32 @@
+{
+  "status": "draft_validation_integrated_not_persisted",
+  "tests": {
+    "files": 5,
+    "passed": 51,
+    "failed": 0,
+    "validator_recheck": 14
+  },
+  "types": "focused_passed",
+  "lint": "five_changed_files_passed",
+  "checks": [
+    "source_file_binding",
+    "duplicate_and_invalid_row_rejection",
+    "no_organization_in_body",
+    "raw_rows_retained",
+    "missing_vs_zero",
+    "explicit_date_value_acceptance",
+    "no_address_discard",
+    "ambiguous_headers_rejection",
+    "preview_only_no_db",
+    "no_entity_merge"
+  ],
+  "limits": [
+    "entity_ownership_not_verified",
+    "no_persistence_or_replay_receipt",
+    "no_ui_decision_editor",
+    "no_migration_or_deployment",
+    "no_full_repository_checks"
+  ],
+  "remote_writes": 0,
+  "next": "provisioner/migration and isolated database tests"
+}

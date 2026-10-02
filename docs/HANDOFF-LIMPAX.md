@@ -1,5 +1,62 @@
 # Retomada da vertical LimpaxCRM
 
+## Editor histórico implementado — 02/10/2026
+
+/app/imports agora oferece revisão temporária por páginas de25 linhas, busca explícita de empresa/pessoa nos endpoints existentes filtrados por organização, cliente por linha, opção de endereço e aceite de data/valor. Decisões persistem apenas em memória entre páginas; trocar arquivo/sair descarta. Revalidação reenvia arquivo+hash+decisões somente preview=true. Resposta de outra fonte é recusada. Não escolhe homônimos automaticamente e não confirma escrita. Locais já existentes ainda não são oferecidos porque seu schema não está instalado; inválidos/ambíguos precisam de correção no arquivo.
+
+POST/imports aceita historical_page somente na prévia,25 linhas e limite de páginas calculado; permite revisar além das cinco amostras originais sem liberar DB.25 testes de tela/API aprovados; nova rodada editor+mapa+permissões209 aprovados; lint focado sem avisos e tipos focados aprovados. Aceite visual real/hospedado NÃO realizado e nenhum servidor pesado iniciado.
+
+Workflow .github/workflows/limpax-historico-db.yml preparado para banco efêmero no runner padrão ubuntu-24.04 do fork público, em push limitado aos rascunhos/testes ou dispatch manual. Publicidade do fork confirmada via API GitHub. Sem Supabase secrets/deploy/publicação de imagens; nenhuma prova PostgreSQL já obtida. O plano de enviar esta etapa e executar a bancada não equivale a aprovação dos18 casos. Registrar o resultado real depois.
+
+Próximo: verificar execução remota dos18 casos, corrigir falhas, definir ciclo de vida/LGPD e alocar migração canônica; depois autorizar vínculos e ligar confirmação/recibo/histórico do cliente. Recuperação antes0495, VPS gratuita/HTTPS eG13 continuam gates.
+
+## Preparação do lote e rascunho atômico — 02/10/2026
+
+Implementado lib/crm-b2b/historical-command.ts: converte revisão validada em lote completo, conserva cabeçalhos/células/campos originais, separa serviço/local sem serviço/auxiliar, mantém nulo/zero e recusa qualquer questão pendente, nomes de arquivo inválidos ou excesso sem truncar. Não aceita organização/ator no payload e não inventa moeda ou linhagem original. NÃO ligado à confirmação/API; status prepared_only_not_enabled e ownership_verified=false.37 testes em três arquivos aprovados (7 novos), lint e tipos focados aprovados.
+
+Rascunho supabase/drafts/limpax_history_atomic.sql: função exige sessão manager/admin aceita, não revogada, e trava de suporte; lock transacional compartilhado com0495; hash da decisão calculado no banco; replay devolve recibo sem novo efeito/auditoria; mesma fonte/decisão diferente gera conflito. Sem catch por linha: erro aborta todas as escritas do comando. Receipt e auditoria apenas com IDs/contagens. Provisionador rascunhado passa a criar recibos com RLS/grants restritos e acrescentar kind limpax_history ao CHECK atual de import_batches. Checar upstream/PRs antes de transformar em migração canônica, especialmente esse CHECK compartilhado.
+
+Dez casos adicionais em tests/invariants/limpax-history-atomic-draft.test.ts preparados, incluindo segunda conexão, falha na última linha, replay/conflito e negativos de payload/papel. SQL e18 casos PostgreSQL (8 anteriores+10 novos) NÃO executados; atomicidade/concorrência/RLS não comprovadas. Bancada exige container/template/reset e loopback; o arquivo atômico deixa somente fixtures fictícias no DB efêmero, com efeitos de cada teste revertidos, e a bancada descarta esse DB. NÃO executar em ambiente operacional. Comando futuro: pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts tests/invariants/limpax-history-atomic-draft.test.ts.
+
+Bloqueio incidental resolvido: disco C estava sem espaço; removido exclusivamente .next/cache (1.061.437.166 bytes) do fork após verificar caminho absoluto. Fontes/planilhas/backup preservados. Sem Docker/Next/build pesado, conexão remota, commit/push ou deploy. Evidência docs/evidence/limpax-history-atomic-draft-20261002.json.
+
+Próximo: executar/corrigir prova PostgreSQL descartável, completar negativos do ciclo de vida/expurgo LGPD, depois migração canônica e ligação servidor/editor/recibo com hash real do upload. Recuperação comprovada antes0495, VPS gratuita/HTTPS, aceite visual hospedado eG13 permanecem abertos.
+
+## Rascunho de armazenamento histórico — 02/10/2026
+
+Preparados supabase/drafts/limpax_history_provisioner.sql e tests/invariants/limpax-history-storage-draft.test.ts. SQL NÃO é migração, não está no baseline/MANIFEST e não foi aplicado. Provisionador fixo sem parâmetros cria locais de cliente e serviços históricos; guardas conferem cliente/local/origem na mesma organização, cliente único company OU person, centavos inteiros, dados brutos e unicidade por origem. RLS de leitura por organização; escrita direta do navegador revogada. Unicidade não equivale a recibo idempotente: comando atômico, auditoria, replay/conflito e concorrência continuam pendentes.
+
+Oito testes de PostgreSQL preparados, com duas organizações fictícias realmente populadas, negativos de vínculos, permissões, reaplicação e rollback final. Entram somente na bancada test:db; guardas exigem container, template, porta local e marcador de reset da bancada. Não editar invariantes existentes. Comando futuro em ambiente descartável: pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts. NÃO executar na instalação operacional, nem iniciar Docker local sob a restrição de RAM.
+
+Verificado: TypeScript focado, ESLint e diff --check aprovados. PostgreSQL NÃO executado; sintaxe/semântica SQL e eficácia de RLS ainda não comprovadas. Há cliente psql portátil, mas não servidor postgres/initdb local. Nenhum banco remoto, dado real, servidor pesado, commit, push ou deploy nesta etapa. Evidência sanitizada: docs/evidence/limpax-history-storage-draft-20261002.json.
+
+Próximo: executar e corrigir a bancada descartável; completar operação atômica/recibo e provas de replay/concorrência antes de alocar migração canônica (conferir upstream/PRs) e conectar API/editor. Definir correção/expurgo LGPD e validar limites sem truncamento. Restauração comprovada antes0495; capacidade gratuita/HTTPS, aceite hospedado eG13 permanecem abertos.
+
+## Revisão histórica estruturada implementada — 02/10/2026
+
+historical-review.ts valida schema estrito, origem SHA-256, posição, cliente/local escolhidos e aceite de data/valor. Integrado ao POST/imports somente preview=true; forma de UUID não prova existência/organização. ownership_verified=false; draft_only_not_importable.51 testes focados/5 arquivos aprovados e14 do validador repetidos após reforço; lint/tipos focados aprovados. Todos os dados mantidos em memória; resposta amostra5/totais. Não aceita revisão como confirmação de escrita. Editor de decisões UI e persistência NÃO implementados. Próximo: provisionador/migração, provas isoladas de RLS/replay/atomicidade, autorização de vínculos/editor/recibo. Gates recuperação/0495/VPS/HTTPS/G13 mantidos. Contrato em C:\Users\italo\Programação\Limpax\docs\LIMPAX_HISTORY_STORAGE_CONTRACT.md.
+
+
+## Continuação verificada — 02/10/2026
+
+Leitor CSV/XLSX recusa dados além do cabeçalho antes de truncar: zero preservado, extras vazias permitidas.42 testes focados em5 arquivos, lint e tipos focados aprovados. Persistência histórica ainda NÃO implementada. Contrato fechado em C:\Users\italo\Programação\Limpax\docs\LIMPAX_HISTORY_STORAGE_CONTRACT.md; próximo: validação das decisões revisadas, provisionador/migração e provas isoladas antes de confirmação. Não houve migração/carga/serviço pesado/deploy. Aceite visual eG13 abertos.
+
+
+## Prévia de locais e histórico implementada — 01/10/2026
+
+Fork: historical-preview.ts integrado à análise B2B e à tela /app/imports. Mostra endereço/data/valor/observação originais, contagens completas, campos ambíguos e posição lógica dos registros. SHA-256 do upload na resposta autenticada; não confundir posição lida com linha Excel original. Datas impossíveis/serial Excel e valores ambíguos ficam para revisão; zero distinto de falta. Histórico reconhecido bloqueia confirmação no servidor mesmo quando mapeado como nome.41 testes focados em5 arquivos, tipos e lint focados aprovados. Sem escrita DB, migração, carga real ou deploy. Aceite visual hospedado pendente; Next/Docker OFF. Contrato no fork: docs/specs/limpax-historical-import-preview.md; prova docs/evidence/limpax-historical-preview-20261001.json. Próximo: contrato de persistência com cliente revisado→local revisado→serviço histórico por origem, reutilizando import_batches/import_rows; prover RLS/idempotência/auditoria antes de liberar confirmação. Recuperação isolada antes0495; Oracle sem VPS/HTTPS; G13 aberto.
+
+## Staging privado executado — 01/10/2026
+
+Preparação privada concluída e verificada: nove abas/5.050 linhas não vazias/51 fórmulas preservadas; CADASTRO4.180 linhas (4.148 com nome,8 operacionais sem nome,24 auxiliares).600 grupos de nomes repetidos,73 de ID,575 de telefone candidato,291 nome/endereço,2 de conteúdo operacional idêntico; grupos não são duplicatas confirmadas. Nenhuma união, exclusão ou escrita remota. Original XLSM intacto; macros não executadas. Artefatos com PII fora do Git: C:\Users\italo\.codex\limpax-private\data-staging\2026-10-01. Recibo e mapa sanitizado: C:\Users\italo\Programação\Limpax\docs\LIMPAX_STAGING_REVIEW.md. CSV é instrumento de revisão, não arquivo pronto para carga.
+
+Próximo executável de dados: classificar pessoas/empresas e preservar múltiplos locais/serviços, confrontando entidades existentes no fork antes de implementar extensões. Revisar grupos por origem, nunca só nome/telefone. Planejar pelo menos três lotes de origem, mantendo entidades e serviços separados. Não importar pelo fluxo atual que omite endereço/data/valor/observação. Recuperação isolada e0495 continuam gates; Oracle sem VPS/IP/HTTPS,Google novo desativado,aceite hospedado eG13 abertos. Não iniciar Docker/Next pesados.
+
+
+## Plano vigente de entrada em uso — 01/10/2026
+
+Mapa consolidado e plano solicitados pelo proprietário: C:\Users\italo\Programação\01_PROJETOS\DeskcommCRM\docs\superpowers\plans\2026-10-01-limpax-entrada-em-uso.md. Sequência: staging privado sem escrita remota; ambiente/recuperação comprovada; preflight/ROLLBACK0495 e aplicação condicionada; instalação da release2a35ef53c/HTTPS; aceite autenticado; carga real somente com autorização específica; depois documentos definitivos, assinatura externa, IA/fiscal/domínio. Enquanto Oracle não tem capacidade, staging e plano de cobertura de campos podem avançar sem Docker pesado. Este planejamento NÃO aplica migração, importa clientes, convida ou publica. Notas subsequentes são histórico quando divergirem do resultado atual: última criação A1 recusada por capacidade; franquia200 GB/uso0 comprovada; nenhuma VPS/IP/HTTPS; Storage documental sintético real aprovado; publicação ARM concluída; restauração e aceite hospedado pendentes; G13 aberto. Google do novo Supabase ainda desativado. Push no GitHub não implanta automaticamente na futura VPS.
+
 ## Release documental pronta para instalar
 
 Workflow36947068509 SUCCESS: gates, testes Documentos, distribuição dos assets OCR, Compose, suite shell, builds e sondas ARM concluídos. Três imagens publicadas e metadados GHCR lidos anonimamente: arquitetura arm64 e revisão2a35ef53cb4297c553b22b2e941eae536ae64e4f conferidas. Manifesto docs/releases/limpax/2a35ef53c-arm.json, prova docs/evidence/limpax-documentos-release-20261001.json. Nenhuma VPS/HTTPS/deploy foi realizada; G13 aberto. Próximo: instalação do manifesto quando houver capacidade gratuita e aceite autenticado da tela.
@@ -11,7 +68,7 @@ Teste sintético no Supabase isolado aprovado: salvamento/leitura de modelo com 
 
 Prova reproduzível: scripts/validate-document-storage.ts, recibo docs/evidence/limpax-documentos-storage-20261001.json. Credenciais ficam apenas em variáveis de ambiente; a senha atual no arquivo privado autorizado é o valor avulso, não a URI antiga. Não registrar seu conteúdo. Lint/tipos focados e 17 testes de publicação/permissões aprovados.
 
-Workflow ARM passa a testar Documentos, preparar/verificar assets OCR e construir a revisão no GitHub, sem Docker/Next pesado local. Publicação de imagens não equivale a hospedagem; VPS grátis continua sem capacidade e G13 aberto. Próximo: conferir o build/publicação e o manifesto da nova revisão; aceite de tela autenticada em ambiente hospedado. Arquivo de emissões/retorno assinado e DocuSign continuam futuros.
+Workflow ARM passa a testar Documentos, preparar/verificar assets OCR e construir a revisão no GitHub, sem Docker/Next pesado local. Publicação de imagens não equivale a hospedagem; VPS grátis continua sem capacidade e G13 aberto. Build/publicação e manifesto da revisão2a35ef53c conferidos; próximo: instalar e realizar aceite de tela autenticada em ambiente hospedado. Arquivo de emissões/retorno assinado e DocuSign continuam futuros.
 
 
 ## Entrega atual: OCR, modelos e imagens reutilizáveis
@@ -20,7 +77,7 @@ Implementado no fork: OCR em português dentro de /app/documents para PDF escane
 
 Provas: 234 testes relevantes aprovados (232 na suíte de sete arquivos, mais provisionamento privado e imagens duplicadas); navegador real com PNG fictício, PDF escaneado e PDF textual aprovados, confiança 95% na imagem, zero requisições externas. Lint e tipos focados aprovados. Assets OCR/idioma/PDF são copiados das dependências fixadas antes de dev/build; não dependem de CDN. Nenhum Next/Docker/build completo, importação real ou alteração remota executados.
 
-Limites: extração não conserva automaticamente a diagramação original; revisão é obrigatória. Original fica com o usuário; só seu hash e texto do modelo revisado são salvos. Acervo paginado em 25 versões por consulta, sem truncamento silencioso. Persistência foi validada com Storage simulado; bucket/permissões e round-trip no Supabase real precisam de aceite antes de uso. PDF ainda é prévia, sem arquivo de emissões/numeração/valor fiscal. DocuSign não conectado; Gov.br usa portal externo.
+Limites: extração não conserva automaticamente a diagramação original; revisão é obrigatória. Original fica com o usuário; só seu hash e texto do modelo revisado são salvos. Acervo paginado em 25 versões por consulta, sem truncamento silencioso. Persistência, bucket privado e round-trip sintético no Supabase real foram verificados; falta aceite HTTP autenticado da tela antes de uso. PDF ainda é prévia, sem arquivo de emissões/numeração/valor fiscal. DocuSign não conectado; Gov.br usa portal externo.
 
 Próximo executável: aceite autenticado do fluxo de modelos/PNGs no Storage real e publicação da revisão quando houver ambiente disponível; depois arquivo de emissões e retorno de documentos assinados. Backup/restauração/0495/VPS/G13 mantêm os gates existentes.
 
@@ -57,3 +114,25 @@ Identidade LimpaxCRM/iCBAI, login/frontend padrão da base Deskcomm, módulos B2
 ## Histórico preservado
 
 As notas antigas não são instruções atuais: [HANDOFF-LIMPAX-before-consolidation-20261001.md](history/HANDOFF-LIMPAX-before-consolidation-20261001.md).
+
+## Consulta Oracle — 01/10/2026
+
+Chrome externo acessível. A sessão existente redirecionou ao formulário de login Oracle; capacidade atual NÃO verificada, nenhuma criação tentada nesta consulta, nenhum recurso/custo/porta alterado. Página mantida aberta para autenticação do proprietário. Última recusa por capacidade permanece histórica, não prova disponibilidade atual. Documentação oficial recomenda nova tentativa após espera ou outro AD disponível na região principal; não informa prazo garantido. Nenhum monitor periódico foi ativado. Próximo: autenticar e verificar criação A1 2 OCPUs/12 GB/80 GB somente com custo zero; depois instalação/HTTPS do manifesto 2a35ef53c. Servidores pesados locais permanecem desligados.
+### Retomada Oracle após login informado pelo proprietário
+
+A aba autenticada920935645 ficou no carregamento. Navegação direta para a lista Compute recuperou a conta, mas Oracle solicitou nova verificação FIDO/Windows Hello. Botão Verificar acionado; confirmação local do proprietário pendente. Capacidade ainda NÃO consultada, nenhuma VPS criada, nenhum custo/recurso/regra de rede alterado. Retomar essa aba após confirmação; não reutilizar URL com tokens de login. Contradições antigas sobre Storage sintético/publicação ARM foram corrigidas para refletir provas já concluídas.
+### Oracle: franquia confirmada, formulário preparado
+
+Após confirmação FIDO do proprietário, Compute em São Paulo mostrou zero instâncias no compartimento raiz. Limites Block Volume no AD-1: total-free-storage-gb-regional Active, limite200 GB, uso0 GB, disponível200 GB; conta Free Tier em avaliação. Ubuntu24.04 Minimal aarch64 e VM.Standard.A1.Flex elegível Always Free,2 OCPUs/12 GB, disco80 GB/VPU10/criptografia em trânsito preparados. Estimativa continuaR$17,80/mês para o disco, mas volume cabe na franquia oficial e na cota da conta comprovada. Ainda NÃO clicado Criar, capacidade não testada nesta retomada, nenhuma máquina/cobrança/rede alterada. Confirmação final de IP público/nova chave administrativa solicitada conforme política de controle do navegador. SSH permanece fechado; não aplicar abertura antes de necessidade/escopo confirmado.
+
+Chave privada local fora do Git: C:\Users\italo\.codex\limpax-private\oracle-ssh\limpaxcrm_ed25519; ACL restringe acesso ao usuário Windows. Apenas a pública inserida no formulário. Evidência visual privada: C:\Users\italo\.codex\limpax-private\oracle-free-quota.png. Aba de criação Chrome3/920935645; não copiar URLs de autenticação com tokens. Manifesto para futura instalação permanece2a35ef53c.
+### Resultado definitivo da tentativa autorizada Oracle
+
+Proprietário confirmou criação gratuita/IP público/chave. Clique Criar executado no formulário A1 2 OCPUs/12 GB,Ubuntu24.04ARM,80 GB,VPU10,sub-rede limpaxcrm-publica,chave pública local,domínio de falha automático. Oracle retornou Erro de API: capacidade insuficiente VM.Standard.A1.Flex AD-1 São Paulo. Nenhuma instância/IP/HTTPS obtido; instalação não executada. Sem upgrade, custo pago, abertura SSH, DNS ou mudança Supabase. Franquia grátis200 GB/uso0 comprovada antes da tentativa; bloqueio atual é capacidade do datacenter. Não repetir mesma tentativa em loop. Evidência privada C:\Users\italo\.codex\limpax-private\oracle-capacity-refused.png; rascunho Chrome3/920935645 preservado. Próximo: nova tentativa em outro momento ou destino alternativo autorizado; recuperação isolada e aceite hospedado continuam pendentes. Nenhum monitor automático ativo.
+## Filas privadas verificadas — 01/10/2026
+
+Preparação avançou:4.148 entradas de revisão de identidade,4.156 de endereço,4.156 de serviço,24 auxiliares; não são entidades únicas confirmadas. Três lotes de origem2.000/2.000/180; dependências de grupos entre lotes explicitadas no manifesto privado. Cobertura4.180 linhas aprovada, sem união/escrita remota. Conferido no schema: reutilizar import_batches/import_rows; calendar_locations é local da organização,calendar_appointments exige horários ausentes. Não converter histórico em agenda nem inferir pagamento. Evidência: docs/LIMPAX_STAGING_REVIEW.md no repo Limpax. Próximo: contrato de locais/serviços históricos e prévia que bloqueie campos sem destino; identidade final ainda em revisão. Restauração/0495/Oracle/HTTPS/aceite/G13 mantêm gates.
+
+## Proteção de cobertura implementada — 01/10/2026
+
+Fork: import-preview.ts calcula colunas preenchidas em TODAS as linhas; prévia expõe contagens; tela lista colunas sem destino e bloqueia confirmação; POST/imports recusa confirmação incompleta antes de createClient/RPC/auditoria. Colunas vazias não bloqueiam.29 testes relevantes em5 arquivos aprovados; lint dos6 arquivos TS aprovado. Não importa endereço/local/histórico ainda e não valida a semântica de mapeamento deliberadamente incorreto. Não houve escrita remota, migração ou deploy. Prova no fork: docs/evidence/limpax-import-coverage-20261001.json. Aceite visual hospedado pendente; serviços pesados locais OFF. Próximo: contrato e prévia específicos para locais/serviços históricos, mantendo origem e decisões de identidade; restauração antes0495 eG13 aberto.

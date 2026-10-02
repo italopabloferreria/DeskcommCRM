@@ -59,6 +59,13 @@ function matrizParaPlanilha(matrix: string[][]): Leitura {
     return { ok: false, error: `Máximo de ${IMPORT_MAX_DATA_ROWS} linhas de dados.` };
   }
   const width = headers.length;
+  if (rows.some((row) => row.slice(width).some((cell) => cell.trim() !== ""))) {
+    return {
+      ok: false,
+      error:
+        "Há dados em colunas sem cabeçalho. Corrija os cabeçalhos antes de importar; nenhuma célula preenchida será descartada.",
+    };
+  }
   const normalized = rows.map((r) => {
     const out = r.slice(0, width);
     while (out.length < width) out.push("");
@@ -78,7 +85,8 @@ const ENTIDADES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"
 function decodificarXml(texto: string): string {
   return texto.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (inteira, e: string) => {
     if (e[0] === "#") {
-      const codigo = e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      const codigo =
+        e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
       return Number.isInteger(codigo) && codigo >= 0 && codigo <= 0x10ffff
         ? String.fromCodePoint(codigo)
         : inteira;
@@ -90,7 +98,8 @@ function decodificarXml(texto: string): string {
 /** O texto de um `<si>` ou `<is>`: todos os `<t>`, inclusive os de texto rico (`<r><t>`). */
 function textoDosRuns(xml: string): string {
   let out = "";
-  for (const m of xml.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)) out += decodificarXml(m[1] ?? "");
+  for (const m of xml.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g))
+    out += decodificarXml(m[1] ?? "");
   return out;
 }
 
@@ -153,13 +162,15 @@ function parseXlsx(bytes: ArrayBuffer): Leitura {
   for (const m of rels.matchAll(/<Relationship\b[^>]*>/g)) {
     if (m[0].includes(`Id="${rid}"`)) alvo = /Target="([^"]+)"/.exec(m[0])?.[1];
   }
-  const caminho = alvo ? `xl/${alvo.replace(/^\/?xl\//, "").replace(/^\//, "")}` : "xl/worksheets/sheet1.xml";
+  const caminho = alvo
+    ? `xl/${alvo.replace(/^\/?xl\//, "").replace(/^\//, "")}`
+    : "xl/worksheets/sheet1.xml";
   const aba = texto(caminho);
   if (aba === null) return { ok: false, error: "Planilha vazia." };
 
-  const compartilhados = [...(texto("xl/sharedStrings.xml") ?? "").matchAll(/<si>([\s\S]*?)<\/si>/g)].map((m) =>
-    textoDosRuns(m[1] ?? ""),
-  );
+  const compartilhados = [
+    ...(texto("xl/sharedStrings.xml") ?? "").matchAll(/<si>([\s\S]*?)<\/si>/g),
+  ].map((m) => textoDosRuns(m[1] ?? ""));
 
   const matriz: string[][] = [];
   for (const linha of aba.matchAll(/<row\b[^>]*?(?:\/>|>([\s\S]*?)<\/row>)/g)) {

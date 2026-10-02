@@ -1,4 +1,5 @@
 import { applyMapping, type MappingField, type SheetMatrix } from "./spreadsheet";
+import { historicalPreview } from "./historical-preview";
 export const IMPORT_FIELDS: { key: MappingField; label: string }[] = [
   { key: "company_name", label: "Empresa" },
   { key: "legal_name", label: "Razão social" },
@@ -9,6 +10,26 @@ export const IMPORT_FIELDS: { key: MappingField; label: string }[] = [
   { key: "phone", label: "Telefone" },
   { key: "email", label: "E-mail" },
 ];
+export interface ImportColumnCoverage {
+  header: string;
+  populated_rows: number;
+}
+
+/** Counts the whole file; a five-row sample cannot prove that a column is empty. */
+export function importColumnCoverage(sheet: SheetMatrix): ImportColumnCoverage[] {
+  return sheet.headers.map((header, index) => ({
+    header,
+    populated_rows: sheet.rows.filter((row) => (row[index] ?? "").trim() !== "").length,
+  }));
+}
+
+export function uncoveredImportColumns(
+  coverage: ImportColumnCoverage[],
+  mapping: Partial<Record<MappingField, string>>,
+): ImportColumnCoverage[] {
+  const mapped = new Set(Object.values(mapping).filter(Boolean));
+  return coverage.filter((column) => column.populated_rows > 0 && !mapped.has(column.header));
+}
 export function mappingError(
   headers: string[],
   mapping: Partial<Record<MappingField, string>>,
@@ -26,10 +47,14 @@ export function mappingError(
   return null;
 }
 export function importPreview(sheet: SheetMatrix, mapping: Partial<Record<MappingField, string>>) {
+  const coverage = importColumnCoverage(sheet);
   return {
     headers: sheet.headers,
     total_rows: sheet.rows.length,
     mapping,
+    column_coverage: coverage,
+    unmapped_columns: uncoveredImportColumns(coverage, mapping),
+    historical_review: historicalPreview(sheet),
     raw_sample: sheet.rows.slice(0, 5),
     sample: sheet.rows.slice(0, 5).map((row) => applyMapping(sheet.headers, row, mapping)),
   };

@@ -64,8 +64,14 @@ describe("parseImportFile — XLSX", () => {
   });
 
   it("CSV continua pelo parser dos contatos (Excel em português, com `;`)", async () => {
-    const r = await parseImportFile(strToU8("Empresa;CNPJ\nACME;11.222.333/0001-81\n").buffer as ArrayBuffer, "a.csv");
-    expect(r).toEqual({ ok: true, sheet: { headers: ["Empresa", "CNPJ"], rows: [["ACME", "11.222.333/0001-81"]] } });
+    const r = await parseImportFile(
+      strToU8("Empresa;CNPJ\nACME;11.222.333/0001-81\n").buffer as ArrayBuffer,
+      "a.csv",
+    );
+    expect(r).toEqual({
+      ok: true,
+      sheet: { headers: ["Empresa", "CNPJ"], rows: [["ACME", "11.222.333/0001-81"]] },
+    });
   });
 
   it("recusa expansão total de múltiplas abas antes de descompactá-las", async () => {
@@ -77,13 +83,51 @@ describe("parseImportFile — XLSX", () => {
 
   it("recusa referência de coluna extrema sem preencher um vetor enorme", async () => {
     const aba = `<worksheet><sheetData><row><c r="A1" t="inlineStr"><is><t>Empresa</t></is></c></row><row><c r="XFD2" t="inlineStr"><is><t>Teste</t></is></c></row></sheetData></worksheet>`;
-    const r = await parseImportFile(xlsx({ "xl/workbook.xml": WORKBOOK, "xl/worksheets/sheet1.xml": aba }), "colunas.xlsx");
+    const r = await parseImportFile(
+      xlsx({ "xl/workbook.xml": WORKBOOK, "xl/worksheets/sheet1.xml": aba }),
+      "colunas.xlsx",
+    );
     expect(r).toEqual({ ok: false, error: "Planilha com mais de 256 colunas." });
   });
 
   it("entidade numérica inválida não derruba a análise", async () => {
     const aba = `<worksheet><sheetData><row><c r="A1" t="inlineStr"><is><t>Empresa</t></is></c></row><row><c r="A2" t="inlineStr"><is><t>Teste &#99999999;</t></is></c></row></sheetData></worksheet>`;
-    const r = await parseImportFile(xlsx({ "xl/workbook.xml": WORKBOOK, "xl/worksheets/sheet1.xml": aba }), "entidade.xlsx");
+    const r = await parseImportFile(
+      xlsx({ "xl/workbook.xml": WORKBOOK, "xl/worksheets/sheet1.xml": aba }),
+      "entidade.xlsx",
+    );
     expect(r).toEqual({ ok: true, sheet: { headers: ["Empresa"], rows: [["Teste &#99999999;"]] } });
+  });
+});
+
+describe("nenhuma célula preenchida sem cabeçalho é descartada", () => {
+  it("recusa CSV com dado depois da última coluna nomeada", async () => {
+    const bytes = new TextEncoder().encode(
+      "Nome;Telefone\nCliente fictício;61900000000;Endereço fictício",
+    );
+    const result = await parseImportFile(bytes.buffer as ArrayBuffer, "demo.csv");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain("sem cabeçalho");
+  });
+  it("permite apenas células extras realmente vazias no CSV", async () => {
+    const bytes = new TextEncoder().encode("Nome;Telefone\nCliente fictício;61900000000; ;");
+    const result = await parseImportFile(bytes.buffer as ArrayBuffer, "demo.csv");
+    expect(result).toEqual({
+      ok: true,
+      sheet: { headers: ["Nome", "Telefone"], rows: [["Cliente fictício", "61900000000"]] },
+    });
+  });
+  it("recusa zero além do cabeçalho em XLSX", async () => {
+    const result = await parseImportFile(
+      xlsx({
+        "xl/workbook.xml": WORKBOOK,
+        "xl/_rels/workbook.xml.rels": RELS,
+        "xl/worksheets/sheet2.xml":
+          '<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>Nome</t></is></c></row><row r="2"><c r="A2" t="inlineStr"><is><t>Cliente fictício</t></is></c><c r="B2"><v>0</v></c></row></sheetData></worksheet>',
+      }),
+      "demo.xlsx",
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain("sem cabeçalho");
   });
 });

@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-02",
+  "status": "draft_not_applied_database_tests_not_run",
+  "artifacts": [
+    "supabase/drafts/limpax_history_provisioner.sql",
+    "tests/invariants/limpax-history-storage-draft.test.ts"
+  ],
+  "checks": {
+    "focused_typescript": "passed",
+    "focused_eslint": "passed",
+    "tracked_diff_check": "passed",
+    "postgres_execution": "not_run",
+    "sql_syntax_semantics": "not_proven",
+    "rls_effectiveness": "not_proven"
+  },
+  "database_suite": {
+    "cases": 8,
+    "synthetic_tenants": 2,
+    "execution": "pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts",
+    "guard": "existing disposable harness only; loopback connection; reset marker required; transaction rolled back"
+  },
+  "limits": [
+    "no atomic import command or replay receipt",
+    "no concurrency proof",
+    "no canonical migration allocation",
+    "no baseline or MANIFEST mutation",
+    "no remote changes or real imports",
+    "no local Docker/Next/build started"
+  ],
+  "next": "Execute disposable DB suite, implement atomic receipt/audit/replay and prove isolation/concurrency before canonical migration and API/UI"
+}

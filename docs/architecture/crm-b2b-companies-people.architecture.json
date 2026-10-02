@@ -79,7 +79,15 @@
       "col": 2,
       "type": "api",
       "label": "/api/v1/imports",
-      "sublabel": "dedupe + enrich"
+      "sublabel": "prévia + bloqueios + RPC atômica"
+    },
+    {
+      "id": "historical_preview",
+      "lane": "api",
+      "col": 4,
+      "type": "service",
+      "label": "historical-preview.ts",
+      "sublabel": "somente revisão; sem escrita"
     },
     {
       "id": "brasilapi",
@@ -168,9 +176,37 @@
       "type": "service",
       "label": "lib/lgpd/export-collector",
       "sublabel": "b2b no pedido de acesso"
+    },
+    {
+      "id": "historical_review",
+      "lane": "api",
+      "col": 5,
+      "type": "service",
+      "label": "historical-review.ts",
+      "sublabel": "schema+origem; rascunho sem DB"
+    },
+    {
+      "id": "ui_historical_review",
+      "lane": "humano",
+      "col": 5,
+      "type": "frontend",
+      "label": "Revisão histórica paginada",
+      "sublabel": "Cliente explícito; validação sem escrita"
     }
   ],
   "edges": [
+    {
+      "id": "e_historical_analysis",
+      "from": "api_imports",
+      "to": "historical_preview",
+      "label": "análise e bloqueio antes da escrita"
+    },
+    {
+      "id": "e_historical_review",
+      "from": "historical_preview",
+      "to": "ui_imports",
+      "label": "amostra original e contagens autenticadas"
+    },
     {
       "id": "e1",
       "from": "ui_empresas",
@@ -321,6 +357,54 @@
       "from": "people",
       "to": "export",
       "label": "entregue ao titular"
+    },
+    {
+      "id": "e_historical_decisions",
+      "from": "api_imports",
+      "to": "historical_review",
+      "label": "JSON estrito e hash real do upload"
+    },
+    {
+      "id": "e_historical_raw_review",
+      "from": "historical_preview",
+      "to": "historical_review",
+      "label": "extração integral de linhas brutas"
+    },
+    {
+      "id": "e_review_draft_response",
+      "from": "historical_review",
+      "to": "api_imports",
+      "label": "rascunho limitado e pendências; sem escrita"
+    },
+    {
+      "id": "e_editor_entry",
+      "from": "ui_imports",
+      "to": "ui_historical_review",
+      "label": "Abrir revisão por linhas"
+    },
+    {
+      "id": "e_editor_pages",
+      "from": "api_imports",
+      "to": "ui_historical_review",
+      "label": "25 linhas por página e hash do upload"
+    },
+    {
+      "id": "e_editor_decisions",
+      "from": "ui_historical_review",
+      "to": "historical_review",
+      "label": "decisões somente em preview"
+    },
+    {
+      "id": "e_editor_company_search",
+      "from": "ui_historical_review",
+      "to": "api_companies",
+      "label": "busca de cliente da organização"
+    },
+    {
+      "id": "e_editor_person_search",
+      "from": "ui_historical_review",
+      "to": "api_people",
+      "label": "busca de pessoa sem união automática"
     }
   ]
 }

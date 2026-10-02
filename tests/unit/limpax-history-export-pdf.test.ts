@@ -107,6 +107,9 @@ it("PDF recebido inclui endereço, notas e bruto do histórico pessoal", async (
           value_cents: 0,
           currency: null,
           notes_original: "Nota historica ficticia",
+          notes_current: "Correcao corrente ficticia",
+          revision: 2,
+          voided_at: "2026-10-02T10:00:00Z",
           created_at: "2020-01-01",
           redacted_at: null,
         },
@@ -118,4 +121,7 @@ it("PDF recebido inclui endereço, notas e bruto do histórico pessoal", async (
   expect(result).toContain("Origem historica ficticia");
   expect(result).toContain("Nota historica ficticia");
   expect(result).toContain("Valor em centavos: 0");
+  expect(result).toContain("Correcao corrente ficticia");
+  expect(result).toContain("Versão: 2");
+  expect(result).toContain("Excluído da operação: 2026-10-02");
 });

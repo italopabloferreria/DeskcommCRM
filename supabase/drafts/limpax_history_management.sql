@@ -70,6 +70,41 @@ drop trigger if exists limpax_location_no_restore on public.limpax_customer_loca
 create trigger limpax_location_no_restore before insert on public.limpax_customer_locations
  for each row execute function public.fn_limpax_history_no_restore();
 
+
+-- Close indirect re-identification paths in the existing B2B tables.
+create or replace function public.fn_limpax_history_guard_copies()
+returns trigger language plpgsql security definer set search_path='' as $copies$
+declare v_redacted boolean;
+begin
+ if new.person_id is null then return new;end if;
+ -- A linked phone and no-contact erasure serialize on the person row too.
+ perform 1 from public.people where organization_id=new.organization_id and id=new.person_id for update;
+ select exists(select 1 from public.limpax_history_subjects where organization_id=new.organization_id and person_id=new.person_id)
+  or exists(select 1 from public.contacts where organization_id=new.organization_id and person_id=new.person_id and is_anonymized)
+  into v_redacted;
+ if not v_redacted then return new;end if;
+ if tg_table_name='company_people' then
+  if new.job_title is not null or new.department is not null or new.notes is not null then
+   raise exception using errcode='42501',message='history_person_anonymized';end if;
+ elsif tg_table_name='import_rows' then
+  if new.raw_data is distinct from '{}'::jsonb or new.normalized_data is distinct from '{}'::jsonb or new.error is not null then
+   raise exception using errcode='42501',message='history_person_anonymized';end if;
+ elsif tg_table_name='contacts' then
+  if not coalesce(new.is_anonymized,false) then raise exception using errcode='42501',message='history_person_anonymized';end if;
+ end if;
+ return new;
+end;$copies$;
+revoke all on function public.fn_limpax_history_guard_copies() from public,anon,authenticated,service_role;
+drop trigger if exists limpax_link_no_restore on public.company_people;
+create trigger limpax_link_no_restore before insert or update of person_id,job_title,department,notes on public.company_people
+ for each row execute function public.fn_limpax_history_guard_copies();
+drop trigger if exists limpax_import_no_restore on public.import_rows;
+create trigger limpax_import_no_restore before insert or update of person_id,raw_data,normalized_data,error on public.import_rows
+ for each row execute function public.fn_limpax_history_guard_copies();
+drop trigger if exists limpax_phone_no_restore on public.contacts;
+create trigger limpax_phone_no_restore before insert or update of person_id,is_anonymized on public.contacts
+ for each row execute function public.fn_limpax_history_guard_copies();
+
 -- Extend the pre-existing contact event to any corrected text too.
 create or replace function public.fn_limpax_history_clear_current_contact()
 returns trigger language plpgsql security definer set search_path='' as $current$
@@ -173,7 +208,7 @@ grant execute on function public.fn_limpax_history_manage(uuid,text,uuid,jsonb) 
 
 create or replace function public.fn_limpax_history_view(p_org uuid,p_kind text,p_id uuid,p_after uuid default null)
 returns jsonb language plpgsql stable security definer set search_path='' as $view$
-declare v_role text;v_items jsonb;
+declare v_role text;v_items jsonb;v_locations jsonb;
 begin
  v_role:=public.fn_limpax_history_access(p_org,'viewer',false);
  if p_kind='person' then
@@ -188,7 +223,12 @@ begin
    and ((p_kind='person' and person_id=p_id) or(p_kind='company' and company_id=p_id))
    and(p_after is null or id>p_after) order by id limit 26
  )r;
- return jsonb_build_object('available',true,'items',v_items,
+ select coalesce(jsonb_agg(to_jsonb(r) order by r.id),'[]') into v_locations from(
+  select id,address_original from public.limpax_customer_locations where organization_id=p_org and redacted_at is null
+   and ((p_kind='person' and person_id=p_id) or(p_kind='company' and company_id=p_id)) order by id limit 201
+ )r;
+ return jsonb_build_object('available',true,'items',v_items,'locations',v_locations,
+  'locations_truncated',jsonb_array_length(v_locations)>200,'can_export',v_role='admin',
   'can_correct',v_role in('manager','admin'),'can_void',v_role='admin',
   'can_redact',p_kind='person' and v_role='admin' and not exists(select 1 from public.contacts where organization_id=p_org and person_id=p_id and not is_anonymized),
   'redacted',p_kind='person' and exists(select 1 from public.limpax_history_subjects where organization_id=p_org and person_id=p_id));

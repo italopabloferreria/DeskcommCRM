@@ -22,6 +22,9 @@ const serviceSchema = z.object({
   value_cents: z.union([z.number().int().safe(), z.string().regex(/^\d+$/)]).nullable(),
   currency: z.string().nullable(),
   notes_original: z.string(),
+  notes_current: z.string().nullable().optional(),
+  revision: z.number().int().nonnegative().optional(),
+  voided_at: z.string().nullable().optional(),
   created_at: z.string(),
   redacted_at: z.string().nullable(),
 });
@@ -92,7 +95,7 @@ export async function collectHistorySubject(
     ),
     servicos: await read(
       "limpax_service_history",
-      "id,organization_id,person_id,location_id,import_row_id,original_reference,raw_data,service_date,value_cents,currency,notes_original,created_at,redacted_at",
+      "id,organization_id,person_id,location_id,import_row_id,original_reference,raw_data,service_date,value_cents,currency,notes_original,notes_current,revision,voided_at,created_at,redacted_at",
       serviceSchema,
     ),
   };

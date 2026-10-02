@@ -25,13 +25,7 @@
       "label": "Fora (BrasilAPI / WAHA)"
     }
   ],
-  "mainPath": [
-    "ui_empresas",
-    "api_companies",
-    "companies",
-    "people",
-    "contacts"
-  ],
+  "mainPath": ["ui_empresas", "api_companies", "companies", "people", "contacts"],
   "nodes": [
     {
       "id": "ui_empresas",
@@ -192,6 +186,30 @@
       "type": "frontend",
       "label": "Revisão histórica paginada",
       "sublabel": "Cliente explícito; validação sem escrita"
+    },
+    {
+      "id": "ui_history_manage",
+      "lane": "humano",
+      "col": 5,
+      "type": "frontend",
+      "label": "Histórico nas fichas de pessoas/empresas",
+      "sublabel": "corrigir, anular, exportar; indisponível sem SQL"
+    },
+    {
+      "id": "api_history_manage",
+      "lane": "api",
+      "col": 5,
+      "type": "api",
+      "label": "/api/v1/customer-history",
+      "sublabel": "RBAC/MFA/origem, RPC autenticada, erros fechados"
+    },
+    {
+      "id": "history_manage_draft",
+      "lane": "dados",
+      "col": 5,
+      "type": "database",
+      "label": "limpax_history_management.sql (rascunho)",
+      "sublabel": "versão/recibo/tombstone; NÃO instalado"
     }
   ],
   "edges": [
@@ -405,6 +423,42 @@
       "from": "ui_historical_review",
       "to": "api_people",
       "label": "busca de pessoa sem união automática"
+    },
+    {
+      "id": "eh_people_manage",
+      "from": "ui_pessoas",
+      "to": "ui_history_manage",
+      "label": "ficha da pessoa"
+    },
+    {
+      "id": "eh_company_manage",
+      "from": "ui_empresas",
+      "to": "ui_history_manage",
+      "label": "ficha da empresa"
+    },
+    {
+      "id": "eh_manage_command",
+      "from": "ui_history_manage",
+      "to": "api_history_manage",
+      "label": "comando explícito e chave de tentativa"
+    },
+    {
+      "id": "eh_manage_rpc",
+      "from": "api_history_manage",
+      "to": "history_manage_draft",
+      "label": "org confiável, locks, rollback e auditoria"
+    },
+    {
+      "id": "eh_manage_return",
+      "from": "api_history_manage",
+      "to": "ui_history_manage",
+      "label": "recarrega; conflito exige revisão"
+    },
+    {
+      "id": "eh_manage_people",
+      "from": "history_manage_draft",
+      "to": "people",
+      "label": "pessoa sem contato, limpeza e não restauração"
     }
   ]
 }

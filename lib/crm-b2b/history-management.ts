@@ -58,6 +58,20 @@ export function historySqlError(error: { code?: string; message?: string }) {
       code: "history_not_installed",
       message: "O módulo de histórico ainda não está instalado. Nenhuma alteração foi realizada.",
     };
+  if (error.code === "PT409" && error.message === "history_person_has_contacts")
+    return {
+      status: 409,
+      code: "history_person_has_contacts",
+      message:
+        "Esta pessoa tem telefone ativo. Use a anonimização na ficha do contato para revisar o vínculo antes de apagar dados.",
+    };
+  if (error.code === "54000")
+    return {
+      status: 413,
+      code: "history_export_limit",
+      message:
+        "A exportação excedeu o limite seguro. Solicite uma exportação em partes; nenhum dado foi truncado.",
+    };
   if (["PT409", "55006"].includes(error.code ?? ""))
     return {
       status: 409,
@@ -107,4 +121,39 @@ export async function readHistoryJson(request: Request): Promise<unknown> {
     offset += chunk.byteLength;
   }
   return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+}
+
+export const historyViewSchema = z.object({
+  available: z.boolean(),
+  items: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        revision: z.number().int().nonnegative(),
+        service_date: z.string().nullable(),
+        value_cents: z.number().int().safe().nullable(),
+        currency: z.string().nullable(),
+        notes_current: z.string(),
+        location_id: z.string().uuid().nullable(),
+        voided_at: z.string().nullable(),
+        redacted_at: z.string().nullable(),
+      }),
+    )
+    .max(26),
+  can_correct: z.boolean(),
+  can_void: z.boolean(),
+  can_redact: z.boolean(),
+  can_export: z.boolean().default(false),
+  redacted: z.boolean(),
+  locations: z
+    .array(z.object({ id: z.string().uuid(), address_original: z.string() }))
+    .max(201)
+    .default([]),
+  locations_truncated: z.boolean().default(false),
+});
+export type HistoryView = z.infer<typeof historyViewSchema>;
+export function formatHistoryMoney(value: number | null): string {
+  if (value === null) return "";
+  const n = BigInt(value);
+  return String(n / 100n) + "," + String(n % 100n).padStart(2, "0");
 }

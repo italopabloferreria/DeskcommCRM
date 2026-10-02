@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CustomerHistory } from "@/components/crm-b2b/customer-history";
 import {
   Dialog,
   DialogContent,
@@ -228,6 +229,7 @@ export function CompanyDetailClient({ id }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <CustomerHistory key={id} kind="company" id={id} onChanged={() => void load()} />
     </div>
   );
 }

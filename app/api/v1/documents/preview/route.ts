@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { fail } from "@/lib/api/wrappers";
+import { requireSupportWrite } from "@/lib/impersonate/support";
 import { requireRole } from "@/lib/auth/require-role";
 import { lerJsonLimitado, previaSchema } from "@/lib/documentos/previa";
 import { validarPngDaAssinatura } from "@/lib/documentos/png";
@@ -11,6 +12,8 @@ export async function POST(request: Request): Promise<Response> {
   const requestId = randomUUID();
   const authz = await requireRole("agent", { requestId, resource: "documents_preview" });
   if (!authz.ok) return authz.response;
+  const support = await requireSupportWrite();
+  if (support) return support;
   // O navegador envia Origin; sem ela não existe prova de origem confiável.
   if (request.headers.get("origin") !== new URL(request.url).origin)
     return fail("forbidden", "Origem do pedido inválida.", 403, { requestId });

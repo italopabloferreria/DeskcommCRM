@@ -48,6 +48,7 @@ async function command(hash = "c".repeat(64)) {
   await db.query("reset role");
   return result.rows[0].receipt;
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Preserve the frozen synthetic fixture helper; no assertion changed.
 async function redact() {
   await db.query(
     "update public.contacts set is_anonymized=true,anonymized_at=now() where id=$1 and organization_id=$2",

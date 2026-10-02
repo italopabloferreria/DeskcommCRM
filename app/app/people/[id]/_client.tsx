@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { CustomerHistory } from "@/components/crm-b2b/customer-history";
 import { useT } from "@/hooks/i18n/useT";
 
 export function PersonDetailClient({ id }: { id: string }) {
@@ -82,6 +83,7 @@ export function PersonDetailClient({ id }: { id: string }) {
           )}
         </Card>
       </div>
+      <CustomerHistory key={id} kind="person" id={id} onChanged={() => void load()} />
     </div>
   );
 }

@@ -1,5 +1,47 @@
 # Retomada da vertical LimpaxCRM
 
+## Confirmação e reversão histórica concluídas — 02/10/2026
+
+Código aprovado e enviado ao fork `vertical/limpax`: `ce20a41a0`.
+A revisão exige aceite explícito; o servidor revalida origem, papel, suporte,
+hash e decisões antes da RPC atômica. Recibo durável identifica o lote e evita
+repetição. A ficha pagina 50 linhas; admin pode reverter serviços logicamente,
+preservando clientes/locais/origem. Alterações posteriores recusam reversão do
+lote inteiro; replay não recria serviços anulados. Erro no audit desfaz efeitos.
+
+Fonte 0507, baseline e MANIFEST preparados; provisionador opcional explícito.
+Nenhuma migração no banco operacional, importação real, deploy ou serviço local
+pesado iniciado. Testes descartáveis não comprovam restauração do backup ativo.
+[Validação GitHub](https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37042326064): 52 casos distintos em PG15/17 (104 execuções),
+372 contratos de API/interface por versão. Governança completa: typecheck,
+ESLint (0 erros/464 avisos), canais, papéis e
+17213 testes unitários aprovados de 17216 em 1690 arquivos,
+além de 1 falha esperada e 2 pulados preexistentes. Nenhuma asserção eliminada.
+As bancadas iniciais encontraram incompatibilidade do kit antigo com políticas
+opcionais, tipagem TS2532 de UI e três gates de governança. Consolidado o
+provisionador, enumeradas fontes reais no export LGPD e explicitado filtro de
+organização/pessoa em cada consulta; o helper recebe resultados paginados simples,
+sem vazar genéricos do SDK. Correções revalidadas sem exceções de guard.
+
+Inventário técnico privado concluído nos quatro diretórios declarados:
+346 originais preservados; 9 abas/5.050 linhas/51 fórmulas mantidas no staging.
+3 grupos de arquivos idênticos não são duplicidade de clientes; zero mesclagens
+ou exclusões. Filas de identidade/endereço/serviço/auxiliares continuam separadas.
+Relatório público só agrega contagens. Caminhos/checksums/dump permanecem privados;
+backup rechecado e íntegro. Titularidade indireta e retenção continuam [VALIDAR].
+
+Próximo passo executável: provar recuperação integral num Supabase separado
+compatível e privado; depois preflight/ROLLBACK 0495/0507, instalação autorizada,
+aceite hospedado e revisão/carga real autorizada. Sequência preparada em
+`docs/runbooks/limpax-history-activation.md`. Sem inferência de identidade por nome,
+truncamento de abas/linhas ou reativação do importador parcial. G13 permanece aberto.
+Bloqueios externos: destino separado de restauração; Oracle gratuita sem
+capacidade na última consulta registrada, VPS/IP/HTTPS ausentes; aceite visual hospedado não executado.
+Futuro: arquivo definitivo das emissões/retorno assinado, DocuSign, OpenRouter,
+fiscal e domínio `crm.limpaxdf.com.br`.
+Evidência: `docs/evidence/limpax-history-confirmation-20261002.json`.
+Seções seguintes são histórico quando divergirem desta.
+
 ## Bloco contínuo de histórico — estado conferido em02/10/2026
 
 Autorização: “faça todo o bloco non stop”. Código no fork DeskcommCRM, branch vertical/limpax,

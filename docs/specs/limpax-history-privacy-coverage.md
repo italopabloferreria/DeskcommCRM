@@ -1,7 +1,9 @@
 # Histórico Limpax — cobertura de dados pessoais
 
-Conferência de código em02/10/2026, revisão e531c7133. SQL somente em rascunho:
-esta cobertura descreve o desenho e a bancada descartável, não o banco operacional.
+Conferência do bloco anterior em02/10/2026, revisão e531c7133. O bloco de
+confirmação posterior prepara fonte0507/baseline/MANIFEST e reversão por lote.
+Esta cobertura descreve código e bancada descartável, não o banco operacional.
+Contrato atual: docs/specs/limpax-history-confirmation.md.
 
 ## Titularidade explícita e efeito
 
@@ -30,13 +32,16 @@ esta cobertura descreve o desenho e a bancada descartável, não o banco operaci
 
 ## Próxima ordem executável
 
-1. Inventário técnico privado de cópias e campos sem person_id; relatório de contagens
-   e referências internas, sem conteúdo pessoal no Git.
+1. Inventário técnico concluído nos quatro diretórios declarados em02/10/2026;
+   contagens em docs/evidence/limpax-data-inventory-20261002.json. Caminhos/checksums
+   privados fora do Git; não cobre downloads antigos ou cópias cloud desconhecidas.
 2. Registrar as decisões de titularidade/retenção que dependem do proprietário como
    [VALIDAR], sem transformar deduplicação por nome em vínculo.
 3. Comprovar restauração administrativa num destino Supabase compatível e descartável.
-4. Alocar migração canônica, ligar confirmação histórica e validar a instalação antes
-   de liberar importação real. Nunca marcar G13 apenas por testes de componente.
+4. Fonte0507 e confirmação/recibo/reversão preparados: preflight/aplicação autorizada
+   e aceite hospedado continuam após recuperação, antes de liberar importação real.
+   Sequência em docs/runbooks/limpax-history-activation.md. Nunca marcar G13 apenas
+   por testes de componente.
 
 ## Fontes verificadas
 
@@ -48,5 +53,9 @@ esta cobertura descreve o desenho e a bancada descartável, não o banco operaci
 - docs/runbooks/limpax-import-rollout.md — backup e restauração exigidos.
 - docs/evidence/limpax-history-full-block-20261002.json — resultado da bancada e suas limitações.
 
-43 casos distintos passaram emPG15/17 (86 execuções); isso não instala o rascunho
-nem comprova eliminação de cópias externas. Nenhum dado real foi carregado neste bloco.
+No bloco anterior,43 casos distintos passaram emPG15/17 (86 execuções). O bloco
+posterior mantém essa prova e adiciona confirmação/reversão canônica: 52 casos
+passaram em PG15/17 (104 execuções), com evidência em
+`docs/evidence/limpax-history-confirmation-20261002.json`. Testes não instalam SQL
+no banco ativo nem comprovam
+eliminação de cópias externas. Nenhum dado real foi carregado neste bloco.

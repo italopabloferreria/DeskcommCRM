@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "status": "database_and_full_governance_passed",
+  "code_commit": "ce20a41a087fe8b208c77db2bfb569fcdd611e38",
+  "feature_commit": "5de36e620244d16e393066eac3550de198b970df",
+  "run": 37042326064,
+  "run_url": "https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37042326064",
+  "postgres": {
+    "versions": [
+      15,
+      17
+    ],
+    "distinct_cases": 52,
+    "cases_each": 52,
+    "executions_passed": 104,
+    "jobs": {
+      "15": 110955207610,
+      "17": 110955207586
+    },
+    "current_run_status": "success",
+    "previous_sql_identical_run": 37041260160,
+    "contract_tests_each": 372,
+    "contract_files_each": 22
+  },
+  "quality": {
+    "job": 110955207448,
+    "status": "success",
+    "tests_passed": 17213,
+    "tests_total": 17216,
+    "expected_fail": 1,
+    "skipped": 2,
+    "test_files": 1690,
+    "lint_errors": 0,
+    "lint_warnings": 464,
+    "typecheck": "passed",
+    "channel_and_role_gates": "passed"
+  },
+  "prior_runs": {
+    "37034815243": "Failed: optional policies declaration scanned by pre-v1.63.1 update kit and new UI-test TS2532. Fixed without changing grants or assertions.",
+    "37035133001": "Database passed; quality typecheck failed on UI-test TS2532, fixed in a2533dff4.",
+    "37035513648": "Database52/52 and contracts330/330 passed per PG15/17; full quality found three governance failures (provisioner declaration/delimiter and LGPD source inventory). Source consolidated and actual export factories enumerated; no test assertions changed.",
+    "37038132667": "Cancelled redundant run after source-only EOF normalization; no checks claimed for this cancelled execution.",
+    "37038217915": "DB52/52 and contracts330/330 passed in PG15/17; full governance passed17212 tests but found one tenant-scope AST gate in export factories. Explicit organization/person filters added; all24 focused guard/export tests passed, no allowlist or assertions changed.",
+    "37041260160": "PG15/17 and expanded fast governance contracts passed. Full typecheck found SDK builder variance/deep-instantiation; replaced cross-file builder type with plain paginated results, preserving explicit tenant/person filters and runtime Zod validation. Focused24 tests and normalized17-file types passed."
+  },
+  "migration": {
+    "filename": "20261002095906_0507_limpax_historico_confirmacao.sql",
+    "status": "source_prepared_not_applied",
+    "baseline_manifest": true,
+    "provisioner": "explicit_optional_only",
+    "operational_changes": 0
+  },
+  "inventory": "docs/evidence/limpax-data-inventory-20261002.json",
+  "backup_checksum_rechecked": true,
+  "restore_proven": false,
+  "real_import": false,
+  "deploy": false,
+  "heavy_local_services_started": false,
+  "limits": [
+    "Synthetic disposable database tests only; not a restore of the operational backup.",
+    "Component tests are not hosted authenticated visual acceptance.",
+    "Customer identity and ownership/retention decisions remain explicit.",
+    "First-sheet / 2000-row import limits require controlled private staging, not truncation.",
+    "G13 open; no free Oracle capacity/IP/HTTPS."
+  ],
+  "scoped_types_limit": "Earlier scoped checker did not normalize Windows diagnostic paths; those earlier scoped approvals are not evidence. Corrected path matching and included test ambient setup; full remote typecheck remains required.",
+  "completed_at": "2026-10-02T18:02:50Z"
+}

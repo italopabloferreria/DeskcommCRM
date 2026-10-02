@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-02",
+  "status": "passed_disposable_postgres_matrix",
+  "run_url": "https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36971628633",
+  "commit": "34bff39ed68afd194b179969acaf0acbd3939723",
+  "results": [
+    {
+      "postgres": 15,
+      "job": 110726614106,
+      "storage_passed": 8,
+      "atomic_passed": 10,
+      "total_passed": 18,
+      "failed": 0
+    },
+    {
+      "postgres": 17,
+      "job": 110726614164,
+      "storage_passed": 8,
+      "atomic_passed": 10,
+      "total_passed": 18,
+      "failed": 0
+    }
+  ],
+  "baseline_install_reapply": "passed_both_versions_with_ON_ERROR_STOP",
+  "kit_policies_checked": 158,
+  "kit_versions": [
+    "checkout",
+    "v1.69.0",
+    "v1.63.0"
+  ],
+  "fixture_exception": "Explicit owner approval; audit reads only under disposable DB owner; manager commands and all assertions unchanged",
+  "lint": "focused_passed_no_warnings",
+  "operational_supabase_changes": 0,
+  "real_import": false,
+  "deploy": false,
+  "limits": [
+    "Draft SQL only, no canonical migration installed",
+    "No hosted visual acceptance",
+    "Operational restore proof and G13 still open"
+  ],
+  "next": "History lifecycle for corrections/anonymization/erasure before canonical migration/API/receipt"
+}

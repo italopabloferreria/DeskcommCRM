@@ -1,5 +1,29 @@
 # Retomada da vertical LimpaxCRM
 
+## Bancada histórica PostgreSQL aprovada — 02/10/2026
+
+Proprietário autorizou explicitamente a correção da fixture protegida e repetição. Commit34bff39ed enviado: somente leitura de auditoria como dono do DB descartável, importação como manager,18 casos/asserts e permissões do produto preservados. DESKCOMM_GOV_INVARIANTS_EDIT limitado ao commit autorizado.
+
+GitHub36971628633: sucesso nos jobs110726614106 (PG15) e110726614164 (PG17). Logs conferidos:18/18 por versão,36 execuções de18 casos distintos; armazenamento8/8 e atômico10/10, instalação/reaplicação baseline ON_ERROR_STOP aprovadas e158 políticas declaradas verificadas nos três kits. Lint focado aprovado. Evidência docs/evidence/limpax-history-postgres-20261002.json. A falha17/18 anterior é registro histórico, superado nesta execução.
+
+Próximo: ciclo de correção/anonimização/expurgo integrado ao LGPD existente, alocação canônica da migração, API de confirmação e recibo. Rascunhos não são migrações instaladas; confirmação histórica permanece bloqueada. Sem Supabase operacional, carga real, deploy ou serviços pesados locais. Restauração antes0495, VPS gratuita/HTTPS, aceite hospedado/G13 continuam gates.
+
+## Publicação e prova PostgreSQL parcial — 02/10/2026
+
+Proprietário respondeu continuar ao pedido específico de envio público; auto-review aprovou. Commit6664e1fc8 enviado; workflow corrigido e69c17c56a enviado. Primeira bancada36967197223 falhou antes de testes por descoberta de release no fork. A correção busca tags públicas upstreamv1.69.0 (latest conferida) e v1.63.0, mantendo as verificações do kit.
+
+Rodada36967438149: Postgres15 descartável, baseline install/reapply aprovados e158 regras dos três kits conferidas.18 casos executados:17 aprovados,1 falhou. Armazenamento8/8, atômico9/10. Replay/auditoria falha na observação feita sob manager, que não lê api_audit_log sob policyadmin. Não afirmar que auditoria faltou, nem ampliar permissões do produto para resolver fixture.
+
+Patch fora do teste protegido em docs/reviews/limpax-history-audit-fixture.patch + justificativa.md: observar log como dono do DB descartável, preservar importação como manager e todas as18 verificações. Ainda NÃO aplicado. Regra freeze-invariants.sh congela invariante já versionado; autorização específica de exceção solicitada e pendente. Não contornar guard ou trocar suite para esconder falha.
+
+Prova sanitizada: docs/evidence/limpax-history-postgres-partial-20261002.json. Sem Supabase operacional, dados reais, deploy ou serviço pesado local. Após autorização: aplicar só fixture, registrar exceção, repetir banco15/17, depois ciclo LGPD e alocação de migração antesAPI/confirmação. Recuperação antes0495/Oracle/HTTPS/aceite/G13 continuam gates.
+
+## Commit local e aprovação de publicação pendente — 02/10/2026
+
+Commit6664e1fc8 local criado com38 arquivos de análise/revisão, rascunhos SQL/testes e workflow de bancada. GitHub API confirmou fork público. Push NÃO realizado: auto-review recusou exposição pública do payload completo, exigindo autorização inequívoca. Pedido específico enviado; aguardar resposta do proprietário. Não contornar com outra ferramenta/rota.
+
+25 testes focados de tela/API aprovados; rodada editor/mapa/workflow209 aprovada; lint sem avisos e tipos focados aprovados. Sem aceite visual real, migração, carga, deploy ou serviços pesados.18 casos PostgreSQL continuam preparados e NÃO executados, porque workflow ainda só existe localmente. Próximo após aprovação: enviar exatamente6664e1fc8 e acompanhar a prova em DB efêmero; corrigir resultados antes de migração/confirmar. Este registro de bloqueio é alteração documental local posterior ao commit, ainda não enviado.
+
 ## Editor histórico implementado — 02/10/2026
 
 /app/imports agora oferece revisão temporária por páginas de25 linhas, busca explícita de empresa/pessoa nos endpoints existentes filtrados por organização, cliente por linha, opção de endereço e aceite de data/valor. Decisões persistem apenas em memória entre páginas; trocar arquivo/sair descarta. Revalidação reenvia arquivo+hash+decisões somente preview=true. Resposta de outra fonte é recusada. Não escolhe homônimos automaticamente e não confirma escrita. Locais já existentes ainda não são oferecidos porque seu schema não está instalado; inválidos/ambíguos precisam de correção no arquivo.

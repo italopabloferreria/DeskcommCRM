@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-02",
+  "status": "partial_disposable_postgres_proof",
+  "run_url": "https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36967438149",
+  "commit": "69c17c56ad9eb61ba724b7f79f1d9425a275116a",
+  "postgres": 15,
+  "baseline_install_reapply": "passed",
+  "kit_policies_checked": 158,
+  "storage_cases_passed": 8,
+  "atomic_cases_passed": 9,
+  "atomic_cases_failed": 1,
+  "total_cases": 18,
+  "failure": "Replay/audit assertion reads log under manager subject to admin-only RLS; observation flawed",
+  "fixture_correction": "explicitly_authorized_applied_commit34bff39ed",
+  "preserved": "All assertions and product RLS/grants must remain",
+  "operational_supabase_changes": 0,
+  "deploy": false,
+  "next": "See successful PostgreSQL15/17 evidence",
+  "superseded_by": "limpax-history-postgres-20261002.json"
+}

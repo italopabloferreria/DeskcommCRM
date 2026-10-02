@@ -43,5 +43,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/preparar-node
+        timeout-minutes: 5
       - name: Governança de tipos, lint e toda a suíte unitária
         run: pnpm gov:verify

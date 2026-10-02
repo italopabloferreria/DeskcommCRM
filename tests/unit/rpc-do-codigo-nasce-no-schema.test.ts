@@ -84,6 +84,21 @@ const BASELINE = "supabase/baseline.sql";
 // vermelho pedindo a remoção daqui (é o `it` abaixo que faz isso).
 
 const CONGELADAS: Record<string, { degradacao: string; porque: string }> = {
+  fn_limpax_history_view: {
+    degradacao: "app/api/v1/customer-history/[kind]/[id]/route.ts:60",
+    porque:
+      "Módulo opcional do fork ainda em supabase/drafts/limpax_history_management.sql: ausência da RPC retorna available:false sem alterar dados, coberto pelos testes da rota. Será retirado deste registro quando houver migração canônica validada.",
+  },
+  fn_limpax_history_manage: {
+    degradacao: "app/api/v1/customer-history/[kind]/[id]/route.ts:60",
+    porque:
+      "Módulo opcional do fork ainda em rascunho SQL: ausência da RPC recusa o comando com 409 sem gravar ou emitir exportação parcial, coberto pelos testes da rota. Só entra no schema após backup, restore e validação operacional.",
+  },
+  fn_limpax_history_export_person: {
+    degradacao: "app/api/v1/customer-history/[kind]/[id]/route.ts:60",
+    porque:
+      "Módulo opcional do fork ainda em rascunho SQL: ausência da RPC recusa o comando com 409 sem gravar ou emitir exportação parcial, coberto pelos testes da rota. Só entra no schema após backup, restore e validação operacional.",
+  },
   decrypt_cpf: {
     degradacao: "app/api/v1/contacts/_handler.ts:324",
     porque:
@@ -274,7 +289,11 @@ function projetar(fonte: string, linguagem: Linguagem = "ts"): Projecoes {
       i += 1;
       continue;
     }
-    if ((modo === "simples" && c === "'") || (modo === "dupla" && c === '"') || (modo === "crase" && c === "`")) {
+    if (
+      (modo === "simples" && c === "'") ||
+      (modo === "dupla" && c === '"') ||
+      (modo === "crase" && c === "`")
+    ) {
       modo = "codigo";
     }
   }
@@ -381,7 +400,8 @@ function varrerCodigo(): { chamadas: Chamada[]; dinamicas: Chamada[]; cruas: num
       // conteúdo no arquivo) seria atravessado.
       let j = inicio + m[0].length;
       for (;;) {
-        while (j < fonte.length && /\s/.test(fonte.charAt(j)) && /\s/.test(codigo.charAt(j))) j += 1;
+        while (j < fonte.length && /\s/.test(fonte.charAt(j)) && /\s/.test(codigo.charAt(j)))
+          j += 1;
         const depoisDoComentario = pularComentario(fonte, j);
         if (depoisDoComentario === j) break;
         j = depoisDoComentario;
@@ -450,7 +470,7 @@ function varrerSchema(): Declaracoes {
 const { chamadas, dinamicas } = varrerCodigo();
 const schema = varrerSchema();
 
-describe("todo `.rpc(\"nome\")` do código nasce no schema versionado", () => {
+describe('todo `.rpc("nome")` do código nasce no schema versionado', () => {
   it("controle positivo: a varredura do código acha as chamadas que existem", () => {
     expect(chamadas.length).toBeGreaterThan(100);
 
@@ -487,9 +507,10 @@ describe("todo `.rpc(\"nome\")` do código nasce no schema versionado", () => {
 
     // `//` — a menção existe no arquivo e NÃO pode virar chamada.
     const linha = ler("app/api/v1/admin/dashboard/kpis/route.ts").split("\n")[80] ?? "";
-    expect(linha, "a menção de controle mudou de lugar — atualize este teste e o cabeçalho").toContain(
-      "fn_admin_ai_budget_warning_count",
-    );
+    expect(
+      linha,
+      "a menção de controle mudou de lugar — atualize este teste e o cabeçalho",
+    ).toContain("fn_admin_ai_budget_warning_count");
     expect(linha).toContain("//");
     expect(nomes.has("fn_admin_ai_budget_warning_count")).toBe(false);
     expect(schema.nomes.has("fn_admin_ai_budget_warning_count")).toBe(false);
@@ -501,7 +522,7 @@ describe("todo `.rpc(\"nome\")` do código nasce no schema versionado", () => {
     expect(semBloco).not.toContain("fn_encrypt_oauth");
   });
 
-  it("armadilha (2): identificador citado (`\"public\".\"fn_x\"`) segue sendo exercitado", () => {
+  it('armadilha (2): identificador citado (`"public"."fn_x"`) segue sendo exercitado', () => {
     expect(
       schema.citada.size,
       "nenhuma declaração na forma citada do pg_dump: um extrator que só entenda `public.fn_x(` volta a nascer falso-ausente",
@@ -547,7 +568,10 @@ describe("todo `.rpc(\"nome\")` do código nasce no schema versionado", () => {
 
     for (const arquivo of amostra) {
       const fonte = ler(arquivo);
-      const { codigo, comentario, texto } = projetar(fonte, arquivo.endsWith(".sql") ? "sql" : "ts");
+      const { codigo, comentario, texto } = projetar(
+        fonte,
+        arquivo.endsWith(".sql") ? "sql" : "ts",
+      );
       expect(codigo.length).toBe(fonte.length);
       expect(comentario.length).toBe(fonte.length);
       expect(texto.length).toBe(fonte.length);
@@ -561,9 +585,10 @@ describe("todo `.rpc(\"nome\")` do código nasce no schema versionado", () => {
         if (donos === 0) perdidos += 1;
         if (donos > 1) duplicados += 1;
       }
-      expect(`${perdidos}/${duplicados}`, `${arquivo}: 0/0 — caractere perdido ou contado duas vezes no scanner`).toBe(
-        "0/0",
-      );
+      expect(
+        `${perdidos}/${duplicados}`,
+        `${arquivo}: 0/0 — caractere perdido ou contado duas vezes no scanner`,
+      ).toBe("0/0");
     }
   });
 

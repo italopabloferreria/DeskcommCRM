@@ -64,6 +64,39 @@ const DIR = join(process.cwd(), ".github/workflows");
  * que desliga um job de entrega fica visível em code review.
  */
 const GATILHO_ESPERADO: Record<string, { condicao: string | null; efeito: string }> = {
+  "limpax-arm-images.yml::verificar-arm": {
+    condicao: "github.repository == 'italopabloferreria/DeskcommCRM'",
+    efeito:
+      "Prova o boot e as imagens ARM do fork público sem depender do computador local; fora deste fork a bancada não se aplica.",
+  },
+  "limpax-arm-release.yml::publicar": {
+    condicao:
+      "github.repository == 'italopabloferreria/DeskcommCRM' && github.ref == 'refs/heads/vertical/limpax'",
+    efeito:
+      "Publica somente as imagens próprias do fork após runtime; desligá-lo deixa a versão nova sem artefato instalável. Não publica upstream nem instala produção.",
+  },
+  "limpax-arm-release.yml::runtime": {
+    condicao: "github.repository == 'italopabloferreria/DeskcommCRM'",
+    efeito:
+      "Prova os contratos antes de publicar as imagens do fork; não rodar remove a trava de procedência do artefato.",
+  },
+  "limpax-arm-runtime.yml::runtime": {
+    condicao: "github.repository == 'italopabloferreria/DeskcommCRM'",
+    efeito:
+      "Prova o runtime ARM independente da publicação; fora do fork esta bancada específica não se aplica.",
+  },
+  "limpax-historico-db.yml::banco-descartavel": {
+    condicao:
+      "github.repository == 'italopabloferreria/DeskcommCRM' && github.event.repository.private == false",
+    efeito:
+      "Instala baseline e testa isolamento, replay e rollback em PG15/17 descartáveis. Sem isto o rascunho histórico fica sem prova de banco; somente fork público, sem credenciais operacionais.",
+  },
+  "limpax-historico-db.yml::qualidade": {
+    condicao:
+      "github.repository == 'italopabloferreria/DeskcommCRM' && github.event.repository.private == false",
+    efeito:
+      "Executa governança completa, tipos, lint e suíte unitária do fork público; não rodar deixa regressões transversais sem medição.",
+  },
   // --- a cadeia que leva o conserto até a VPS ---------------------------------
   "release.yml::abrir-pr-de-release": {
     condicao: "github.event_name == 'workflow_dispatch'",
@@ -150,7 +183,8 @@ const GATILHO_ESPERADO: Record<string, { condicao: string | null; efeito: string
   // Desligar qualquer um destes faz o PR entrar sem ter sido testado.
   "ci.yml::verify-parte": {
     condicao: null,
-    efeito: "São as partes da suíte (typecheck + lint + test:unit); sem elas o `verify` não tem o que ler.",
+    efeito:
+      "São as partes da suíte (typecheck + lint + test:unit); sem elas o `verify` não tem o que ler.",
   },
   // A suíte foi dividida em partes (tempo medido, ver ci.yml); o nome que a
   // branch protection exige continua sendo `verify`, agora o agregado.
@@ -268,7 +302,9 @@ interface JobLido {
 function lerJobs(): JobLido[] {
   const achados: JobLido[] = [];
 
-  for (const arquivo of readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f)).sort()) {
+  for (const arquivo of readdirSync(DIR)
+    .filter((f) => /\.ya?ml$/.test(f))
+    .sort()) {
     const brutas = readFileSync(join(DIR, arquivo), "utf8").split("\n");
     // Comentário não conta em NENHUMA direção: um `#` falando de `if:` não pode
     // satisfazer o mapa, e um `#` na coluna 0 no meio de `jobs:` não pode
@@ -325,7 +361,10 @@ describe("nenhum job pode ser desligado por uma condição — `skipped` conta c
     // nada — o modo de falha mais comum desta classe de teste.
     expect(jobs.length, "jobs lidos em .github/workflows").toBeGreaterThanOrEqual(10);
     expect(
-      jobs.filter((j) => j.condicao !== null).map(chave).sort(),
+      jobs
+        .filter((j) => j.condicao !== null)
+        .map(chave)
+        .sort(),
       "o recorte de `if:` está cego — nenhuma condição foi lida, e o mapa passaria por vacuidade",
     ).not.toEqual([]);
     // E o inverso: se TUDO virasse condição, a comparação também seria inútil.

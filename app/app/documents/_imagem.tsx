@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/hooks/i18n/useT";
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
@@ -19,6 +20,7 @@ export function EditorImagem({
   erro: (texto: string) => void;
   paginas: number;
 }) {
+  const t = useT();
   const leitura = useRef(0);
   const input = useRef<HTMLInputElement>(null);
   useEffect(
@@ -27,7 +29,7 @@ export function EditorImagem({
     },
     [],
   );
-  const titulo = imagem.tipo === "carimbo" ? "Carimbo" : "Assinatura";
+  const titulo = imagem.tipo === "carimbo" ? t("Carimbo") : t("Assinatura");
   const prefixo = `doc-${imagem.tipo}`;
   function limpar() {
     leitura.current++;
@@ -54,12 +56,17 @@ export function EditorImagem({
   }
   return (
     <fieldset className="space-y-4 rounded-lg border p-4">
-      <legend className="px-2 font-medium">{titulo} opcional</legend>
+      <legend className="px-2 font-medium">
+        {titulo} {t("opcional")}
+      </legend>
       <p className="text-sm text-muted-foreground">
-        PNG transparente RGBA de até 128 KB e 1024 × 512 pixels. Confira no PDF se a imagem cobre
-        algum texto.
+        {t(
+          "PNG transparente RGBA de até 128 KB e 1024 × 512 pixels. Confira no PDF se a imagem cobre algum texto.",
+        )}{" "}
       </p>
-      <Label htmlFor={`${prefixo}-png`}>PNG de {titulo.toLowerCase()}</Label>
+      <Label htmlFor={`${prefixo}-png`}>
+        {t("PNG de")} {titulo.toLowerCase()}
+      </Label>
       <Input
         ref={input}
         id={`${prefixo}-png`}
@@ -68,7 +75,7 @@ export function EditorImagem({
         onChange={(e) => carregar(e.target.files?.[0])}
       />
       {imagem.png ? (
-        <div className="rounded border bg-white p-3">
+        <div className="rounded-md border bg-white p-3">
           <Image
             src={imagem.png}
             alt={`Prévia de ${titulo.toLowerCase()}`}
@@ -82,7 +89,7 @@ export function EditorImagem({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor={`${prefixo}-nome`}>
-            {imagem.tipo === "carimbo" ? "Identificação do emissor" : "Signatário"}
+            {imagem.tipo === "carimbo" ? t("Identificação do emissor") : t("Signatário")}
           </Label>
           <Input
             id={`${prefixo}-nome`}
@@ -92,7 +99,7 @@ export function EditorImagem({
           />
         </div>
         <div>
-          <Label htmlFor={`${prefixo}-qualificacao`}>Cargo ou qualificação</Label>
+          <Label htmlFor={`${prefixo}-qualificacao`}>{t("Cargo ou qualificação")}</Label>
           <Input
             id={`${prefixo}-qualificacao`}
             value={imagem.qualificacao}
@@ -104,11 +111,11 @@ export function EditorImagem({
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         {(
           [
-            ["pagina", "Página", 1, paginas],
-            ["x", "Esquerda (mm)", 10, 200],
-            ["y", "Topo (mm)", 35, 255],
-            ["largura", "Largura (mm)", 15, 90],
-            ["altura", "Altura (mm)", 5, 35],
+            ["pagina", t("Página"), 1, paginas],
+            ["x", t("Esquerda (mm)"), 10, 200],
+            ["y", t("Topo (mm)"), 35, 255],
+            ["largura", t("Largura (mm)"), 15, 90],
+            ["altura", t("Altura (mm)"), 5, 35],
           ] as const
         ).map(([key, label, min, max]) => (
           <div key={key}>
@@ -127,7 +134,7 @@ export function EditorImagem({
       </div>
       {imagem.png ? (
         <Button variant="outline" onClick={limpar}>
-          Retirar {titulo.toLowerCase()}
+          {t("Retirar")} {titulo.toLowerCase()}
         </Button>
       ) : null}
     </fieldset>

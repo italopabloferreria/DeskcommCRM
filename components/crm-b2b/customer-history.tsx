@@ -1,4 +1,5 @@
 "use client";
+import { randomId } from "@/lib/random-id";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ function CustomerHistoryPanel({ kind, id, onChanged }: Props) {
     };
   }, [load]);
   function open(action: Editing["action"], item: Item | null) {
-    setEdit({ action, item, key: crypto.randomUUID() });
+    setEdit({ action, item, key: randomId() });
     setConfirmed(false);
     setError("");
     setDate(item?.service_date ?? "");

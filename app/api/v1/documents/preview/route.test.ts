@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { requireRole } from "@/lib/auth/require-role";
 import { renderizarPrevia } from "@/lib/documentos/previa-pdf";
 import { POST } from "./route";
+vi.mock("@/lib/impersonate/support", () => ({ requireSupportWrite: async () => null }));
 vi.mock("@/lib/auth/require-role", () => ({ requireRole: vi.fn() }));
 vi.mock("@/lib/documentos/previa-pdf", () => ({ renderizarPrevia: vi.fn() }));
 const png =
@@ -20,7 +21,7 @@ const req = (value: unknown = body, origin = "https://crm.test") =>
     body: JSON.stringify(value),
   });
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
   vi.mocked(requireRole).mockResolvedValue({
     ok: true,
     user: { id: "ator" },

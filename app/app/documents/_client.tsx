@@ -1,4 +1,5 @@
 "use client";
+import { useT } from "@/hooks/i18n/useT";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -13,6 +14,7 @@ import { preencherModelo, type CampoDocumento } from "@/lib/documentos/modelos";
 import type { PreviaDocumento } from "@/lib/documentos/previa";
 
 export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
+  const t = useT();
   const [titulo, setTitulo] = useState("Ordem de serviço");
   const [destinatario, setDestinatario] = useState("");
   const [paginas, setPaginas] = useState([""]);
@@ -99,14 +101,15 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-8">
       <div>
-        <h1 className="text-2xl font-semibold">Documentos</h1>
+        <h1 className="text-2xl font-semibold">{t("Documentos")}</h1>
         <p className="text-muted-foreground">
-          Prepare uma prévia em PDF com assinatura e carimbo nas posições escolhidas.
+          {t("Prepare uma prévia em PDF com assinatura e carimbo nas posições escolhidas.")}{" "}
         </p>
       </div>
       <div className="rounded-lg border p-4 text-sm">
-        Salve o modelo para reutilizar texto, assinatura, carimbo e posições. O PDF identifica o
-        rascunho e não é uma nota fiscal. Salvar um modelo não arquiva os PDFs emitidos.
+        {t(
+          "Salve o modelo para reutilizar texto, assinatura, carimbo e posições. O PDF identifica o rascunho e não é uma nota fiscal. Salvar um modelo não arquiva os PDFs emitidos.",
+        )}{" "}
       </div>
       {podeUsarPng ? (
         <ModelosDocumentos
@@ -123,7 +126,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
       ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="doc-titulo">Título</Label>
+          <Label htmlFor="doc-titulo">{t("Título")}</Label>
           <Input
             id="doc-titulo"
             value={titulo}
@@ -132,7 +135,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="doc-destinatario">Cliente ou destinatário</Label>
+          <Label htmlFor="doc-destinatario">{t("Cliente ou destinatário")}</Label>
           <Input
             id="doc-destinatario"
             value={destinatario}
@@ -143,7 +146,9 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
       </div>
       {paginas.map((texto, i) => (
         <div key={i} className="space-y-2">
-          <Label htmlFor={`doc-pagina-${i}`}>Texto da página {i + 1}</Label>
+          <Label htmlFor={`doc-pagina-${i}`}>
+            {t("Texto da página")} {i + 1}
+          </Label>
           <Textarea
             id={`doc-pagina-${i}`}
             rows={9}
@@ -152,7 +157,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
             onChange={(e) => setPaginas((p) => p.map((t, n) => (n === i ? e.target.value : t)))}
           />
           <p className="text-xs text-muted-foreground">
-            Até 32 linhas de 50 caracteres; divida textos maiores entre páginas.
+            {t("Até 32 linhas de 50 caracteres; divida textos maiores entre páginas.")}{" "}
           </p>
         </div>
       ))}
@@ -162,7 +167,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
           disabled={paginas.length >= 40}
           onClick={() => setPaginas((p) => [...p, ""])}
         >
-          Adicionar página
+          {t("Adicionar página")}{" "}
         </Button>
         {paginas.length > 1 ? (
           <Button
@@ -177,7 +182,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
               );
             }}
           >
-            Remover última página
+            {t("Remover última página")}{" "}
           </Button>
         ) : null}
       </div>
@@ -200,11 +205,11 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
         </p>
       ) : null}
       <Button disabled={busy} onClick={() => void baixar()}>
-        {busy ? "Gerando PDF…" : "Baixar prévia em PDF"}
+        {busy ? t("Gerando PDF…") : t("Baixar prévia em PDF")}
       </Button>
       <div className="flex flex-wrap gap-4 border-t pt-4 text-sm">
         <Link className="underline" href="/app/proposals">
-          Propostas comerciais
+          {t("Propostas comerciais")}{" "}
         </Link>
         <a
           className="underline"
@@ -212,7 +217,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Portal de assinatura Gov.br
+          {t("Portal de assinatura Gov.br")}{" "}
         </a>
         <a
           className="underline"
@@ -220,12 +225,13 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Validar assinatura no ITI
+          {t("Validar assinatura no ITI")}{" "}
         </a>
       </div>
       <p className="text-sm text-muted-foreground">
-        DocuSign ainda não está conectado. O portal Gov.br abre separadamente; o CRM não envia este
-        arquivo automaticamente.
+        {t(
+          "DocuSign ainda não está conectado. O portal Gov.br abre separadamente; o CRM não envia este arquivo automaticamente.",
+        )}{" "}
       </p>
     </main>
   );

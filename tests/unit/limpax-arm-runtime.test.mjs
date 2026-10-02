@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { SERVICES, createOverlay, main, runRuntime, validateConfig, validateManifest } from "../../scripts/limpax-arm-runtime.mjs";
 
+const upstreamNamespace = readFileSync("hostgator-setup-kit/_common.sh", "utf8").match(/IMG_NS="([^"]+)"/)?.[1];
+if (!upstreamNamespace) throw new Error("Namespace publicado não encontrado no kit");
 const revision = "a".repeat(40);
 const manifest = () => ({ schema_version: 1, revision, images: {
   app: "ghcr.io/italopabloferreria/limpaxcrm@sha256:" + "1".repeat(64),
@@ -58,7 +60,7 @@ describe("Limpax ARM runtime refuses unsafe installation", () => {
     expect(validateManifest(manifest()).revision).toBe(revision);
     expect(createOverlay(manifest()).services.waha.image).toContain("@sha256:");
   });
-  it.each(["ghcr.io/melgarafael/deskcommcrm:stable", "ghcr.io/italopabloferreria/limpaxcrm:latest", "missing", "ghcr.io/italopabloferreria/limpaxcrm@sha256:abc"])("refuses mutable, upstream or incomplete app ref %s", (ref) => {
+  it.each([`${upstreamNamespace}/deskcommcrm:stable`, "ghcr.io/italopabloferreria/limpaxcrm:latest", "missing", "ghcr.io/italopabloferreria/limpaxcrm@sha256:abc"])("refuses mutable, upstream or incomplete app ref %s", (ref) => {
     const m = manifest(); m.images.app = ref; expect(() => validateManifest(m)).toThrow();
   });
   it("refuses unknown fields and missing images", () => {

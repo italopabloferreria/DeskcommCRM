@@ -366,7 +366,7 @@ export const NAV_CATALOG = [
     group: "crm",
     section: "Fechar a venda",
     minRole: "agent",
-    sidebar: true,
+    // Documentos permanece no hub CRM e na busca; o sidebar cabe sem rolagem.
   },
   {
     // A promessa que o comentário da Agenda fazia desde que ela nasceu. Aqui se

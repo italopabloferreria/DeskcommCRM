@@ -1,4 +1,7 @@
 "use client";
+import { randomId } from "@/lib/random-id";
+import { useTagDeIdioma } from "@/hooks/i18n/useLocaleDeData";
+import { useT } from "@/hooks/i18n/useT";
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +37,8 @@ export function ModelosDocumentos({
   preencher: (campo: CampoDocumento, valor: string) => void;
   inserir: (campo: CampoDocumento) => void;
 }) {
+  const t = useT();
+  const tagDeIdioma = useTagDeIdioma();
   const [nome, setNome] = useState("");
   const [id, setId] = useState<string | null>(null);
   const [origem, setOrigem] = useState<ModeloDocumento["origem"]>(null);
@@ -108,7 +113,7 @@ export function ModelosDocumentos({
     );
   }
   async function salvar() {
-    const modelo = modeloSchema.parse({ id: id ?? crypto.randomUUID(), nome, documento, origem });
+    const modelo = modeloSchema.parse({ id: id ?? randomId(), nome, documento, origem });
     if (origem && !origem.revisado) throw new Error("Confirme a revisão do texto antes de salvar.");
     // Retain identifier on network failure so a retry is idempotent.
     setId(modelo.id);
@@ -146,14 +151,15 @@ export function ModelosDocumentos({
     setMensagem("Modelo carregado. Preencha os dados do cliente para gerar o documento.");
   }
   return (
-    <section className="space-y-4 rounded-lg border p-4" aria-label="Modelos de documentos">
-      <h2 className="text-lg font-semibold">Contratos e modelos reutilizáveis</h2>
+    <section className="space-y-4 rounded-lg border p-4" aria-label={t("Modelos de documentos")}>
+      <h2 className="text-lg font-semibold">{t("Contratos e modelos reutilizáveis")}</h2>
       <p className="text-sm text-muted-foreground">
-        O arquivo é lido neste navegador. Revise o texto e substitua dados pessoais por campos do
-        cliente antes de salvar o modelo. O arquivo original não é enviado nem arquivado.
+        {t(
+          "O arquivo é lido neste navegador. Revise o texto e substitua dados pessoais por campos do cliente antes de salvar o modelo. O arquivo original não é enviado nem arquivado.",
+        )}{" "}
       </p>
       <Label htmlFor="contrato-origem">
-        Contrato em PDF ou imagem (até 10 MB; PDF até 20 páginas)
+        {t("Contrato em PDF ou imagem (até 10 MB; PDF até 20 páginas)")}{" "}
       </Label>
       <Input
         id="contrato-origem"
@@ -164,11 +170,11 @@ export function ModelosDocumentos({
       />
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" disabled={busy || !arquivo} onClick={() => void executar(ler)}>
-          Ler contrato / OCR
+          {t("Ler contrato / OCR")}{" "}
         </Button>
         {busy && lendo ? (
           <Button variant="outline" onClick={() => controller.current?.abort()}>
-            Cancelar leitura
+            {t("Cancelar leitura")}{" "}
           </Button>
         ) : null}
         <Button
@@ -181,7 +187,7 @@ export function ModelosDocumentos({
             })
           }
         >
-          Buscar modelos salvos
+          {t("Buscar modelos salvos")}{" "}
         </Button>
       </div>
       {origem ? (
@@ -191,10 +197,10 @@ export function ModelosDocumentos({
             checked={origem.revisado}
             onChange={(e) => setOrigem({ ...origem, revisado: e.target.checked })}
           />
-          Revisei o texto extraído e os campos do modelo
+          {t("Revisei o texto extraído e os campos do modelo")}{" "}
         </Label>
       ) : null}
-      <Label htmlFor="modelo-nome">Nome do modelo</Label>
+      <Label htmlFor="modelo-nome">{t("Nome do modelo")}</Label>
       <Input
         id="modelo-nome"
         value={nome}
@@ -205,7 +211,7 @@ export function ModelosDocumentos({
         disabled={busy || !nome.trim() || Boolean(origem && !origem.revisado)}
         onClick={() => void executar(salvar)}
       >
-        Salvar modelo e imagens
+        {t("Salvar modelo e imagens")}{" "}
       </Button>
       <Button
         variant="outline"
@@ -218,7 +224,7 @@ export function ModelosDocumentos({
           );
         }}
       >
-        Criar outro modelo com este conteúdo
+        {t("Criar outro modelo com este conteúdo")}{" "}
       </Button>
       {versoes.length ? (
         <ul className="space-y-2">
@@ -229,24 +235,24 @@ export function ModelosDocumentos({
                 disabled={busy}
                 onClick={() => void executar(() => carregar(v))}
               >
-                {v.nome} · {v.criadoEm ? new Date(v.criadoEm).toLocaleString("pt-BR") : ""} ·{" "}
+                {v.nome} · {v.criadoEm ? new Date(v.criadoEm).toLocaleString(tagDeIdioma) : ""} ·{" "}
                 {v.versao.slice(0, 8)}
               </Button>
             </li>
           ))}
         </ul>
       ) : null}
-      <h3 className="font-medium">Campos para preencher por cliente</h3>
+      <h3 className="font-medium">{t("Campos para preencher por cliente")}</h3>
       {proximoOffset !== null ? (
         <Button
           variant="outline"
           disabled={busy}
           onClick={() => void executar(() => buscarModelos(proximoOffset))}
         >
-          Carregar mais modelos
+          {t("Carregar mais modelos")}{" "}
         </Button>
       ) : null}
-      <Label htmlFor="buscar-cliente-doc">Buscar cliente cadastrado</Label>
+      <Label htmlFor="buscar-cliente-doc">{t("Buscar cliente cadastrado")}</Label>
       <div className="flex gap-2">
         <Input
           id="buscar-cliente-doc"
@@ -266,7 +272,7 @@ export function ModelosDocumentos({
             })
           }
         >
-          Buscar cliente
+          {t("Buscar cliente")}{" "}
         </Button>
       </div>
       {clientes.length ? (
@@ -303,8 +309,9 @@ export function ModelosDocumentos({
         </ul>
       ) : null}
       <p className="text-sm text-muted-foreground">
-        Insira o campo no texto da última página. Seus valores preenchem o PDF sem modificar o
-        modelo salvo.
+        {t(
+          "Insira o campo no texto da última página. Seus valores preenchem o PDF sem modificar o modelo salvo.",
+        )}{" "}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {(Object.entries(CAMPOS_DOCUMENTO) as [CampoDocumento, string][]).map(([campo, label]) => (
@@ -322,7 +329,7 @@ export function ModelosDocumentos({
                 aria-label={`Inserir campo ${label}`}
                 onClick={() => inserir(campo)}
               >
-                Inserir
+                {t("Inserir")}{" "}
               </Button>
             </div>
           </div>

@@ -82,7 +82,7 @@ const FRONTEIRAS: Fronteira[] = [
       "https://supabase.com/docs/guides/storage/uploads/file-limits — seção «File name restrictions»",
     lacuna:
       "a mesma página documenta o alfabeto do nome de arquivo e não documenta teto de comprimento da chave. Forma entra no teste; número, não.",
-    medir: () => [ORG, VERSAO, "minha skill", "SKILL.md", "assets", "referencia.md"],
+    medir: () => [ORG, VERSAO, "minha skill", "SKILL.md", "assets", "referencia.md", `${VERSAO}.json`, `${VERSAO}.png`],
   },
   {
     id: "api.idempotency-key",
@@ -160,6 +160,9 @@ function caminhosCom(padrao: RegExp): string[] {
  */
 const SITES: { arquivo: string; fronteira: string; papel?: "gerador" | "validador" }[] = [
   // Storage — a chave do objeto sai daqui e vira objeto lá.
+  // Acervo privado: segmentos UUID + extensões ASCII json/png; a bancada usa o mesmo molde.
+  { arquivo: "lib/documentos/acervo.ts", fronteira: "storage.chave-de-objeto" },
+  { arquivo: "scripts/validate-document-storage.ts", fronteira: "storage.chave-de-objeto" },
   { arquivo: "workers/lgpd-export-worker.ts", fronteira: "storage.chave-de-objeto" },
   { arquivo: "workers/media-persist-worker.ts", fronteira: "storage.chave-de-objeto" },
   { arquivo: "lib/ai/skills/install.ts", fronteira: "storage.chave-de-objeto" },

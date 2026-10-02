@@ -231,14 +231,14 @@ export function ImportsListClient() {
                   <TableHeader>
                     <TableRow>
                       {[
-                        "Posição",
-                        "Nome original",
-                        "Endereço original",
-                        "Data original",
-                        "Valor original",
-                        "Observação original",
+                        t("Posição"),
+                        t("Nome original"),
+                        t("Endereço original"),
+                        t("Data original"),
+                        t("Valor original"),
+                        t("Observação original"),
                       ].map((label) => (
-                        <TableHead key={label}>{t(label)}</TableHead>
+                        <TableHead key={label}>{label}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>

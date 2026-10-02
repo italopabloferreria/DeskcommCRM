@@ -131,11 +131,15 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
     setMessage("");
   }
   return (
-    <section aria-label="Revisar vínculos do histórico" className="space-y-4 rounded-md border p-3">
+    <section
+      aria-label={t("Revisar vínculos do histórico")}
+      className="space-y-4 rounded-md border p-3"
+    >
       <h3 className="font-medium">{t("Escolha os clientes do histórico")}</h3>
       <p className="text-sm text-muted-foreground">
-        As decisões ficam nesta tela enquanto o arquivo estiver aberto. Trocar o arquivo ou sair
-        descarta a revisão. Nenhum cliente, local ou serviço será gravado nesta etapa.
+        {t(
+          "As decisões ficam nesta tela enquanto o arquivo estiver aberto. Trocar o arquivo ou sair descarta a revisão. Nenhum cliente, local ou serviço será gravado nesta etapa.",
+        )}{" "}
       </p>
       {!page && (
         <Button disabled={busy} onClick={() => void analyze(1)}>
@@ -145,9 +149,9 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
       <fieldset disabled={busy} className="flex flex-wrap items-end gap-2">
         <legend className="sr-only">{t("Buscar cliente cadastrado")}</legend>
         <label>
-          Tipo de cliente
+          {t("Tipo de cliente")}{" "}
           <select
-            className="block rounded border p-2"
+            className="block rounded-md border p-2"
             value={kind}
             onChange={(event) => {
               setKind(event.target.value as Kind);
@@ -159,7 +163,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
           </select>
         </label>
         <label>
-          Buscar cliente
+          {t("Buscar cliente")}{" "}
           <Input
             value={search}
             maxLength={200}
@@ -174,7 +178,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
         </Button>
       </fieldset>
       <p role="status" aria-live="polite" className="text-sm">
-        {busy ? "Consultando…" : message}
+        {busy ? t("Consultando…") : message}
       </p>
       {page?.rows.map((row) => {
         const active = [row.raw.address, row.raw.value, row.raw.service_date, row.raw.notes].some(
@@ -185,14 +189,14 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
           <fieldset
             key={row.data_row_index}
             disabled={busy}
-            className="grid gap-3 rounded border p-3 sm:grid-cols-2"
+            className="grid gap-3 rounded-md border p-3 sm:grid-cols-2"
           >
             <legend>
-              Linha {row.data_row_index} · {row.raw.name || "Sem nome identificado"}
+              {t("Linha")} {row.data_row_index} · {row.raw.name || t("Sem nome identificado")}
             </legend>
             <p className="text-sm break-words sm:col-span-2">
-              {row.raw.address || "Sem endereço"} · {row.raw.service_date || "Sem data"} ·{" "}
-              {row.raw.value || "Sem valor"} · {row.raw.notes || "Sem observação"}
+              {row.raw.address || t("Sem endereço")} · {row.raw.service_date || t("Sem data")} ·{" "}
+              {row.raw.value || t("Sem valor")} · {row.raw.notes || t("Sem observação")}
             </p>
             {!active ? (
               <p className="text-sm">
@@ -201,9 +205,9 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
             ) : (
               <>
                 <label>
-                  Cliente da linha {row.data_row_index}
+                  {t("Cliente da linha")} {row.data_row_index}
                   <select
-                    className="block w-full rounded border p-2"
+                    className="block w-full rounded-md border p-2"
                     value={choice ? choice.customer.kind + ":" + choice.customer.id : ""}
                     onChange={(event) => {
                       const selected = matches.find(
@@ -249,9 +253,9 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
                 {choice && (
                   <>
                     <label>
-                      Local da linha {row.data_row_index}
+                      {t("Local da linha")} {row.data_row_index}
                       <select
-                        className="block w-full rounded border p-2"
+                        className="block w-full rounded-md border p-2"
                         value={choice.location}
                         onChange={(event) =>
                           change(row.data_row_index, {
@@ -262,7 +266,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
                         <option value="none">{t("Sem local")}</option>
                         {row.raw.address.trim() && (
                           <option value="create_from_original">
-                            Preservar endereço como novo local
+                            {t("Preservar endereço como novo local")}{" "}
                           </option>
                         )}
                       </select>
@@ -278,7 +282,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
                             })
                           }
                         />
-                        Aceito a data da linha {row.data_row_index}
+                        {t("Aceito a data da linha")} {row.data_row_index}
                       </label>
                     )}
                     {historicalValue(row.raw.value).status === "parsed" && (
@@ -292,7 +296,7 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
                             })
                           }
                         />
-                        Aceito o valor da linha {row.data_row_index}
+                        {t("Aceito o valor da linha")} {row.data_row_index}
                       </label>
                     )}
                   </>
@@ -305,19 +309,19 @@ export function HistoricalReviewEditor({ file, sourceHash }: { file: File; sourc
       {page && (
         <div className="flex flex-wrap items-center gap-2">
           <Button disabled={busy || page.page <= 1} onClick={() => void analyze(page.page - 1)}>
-            Página anterior
+            {t("Página anterior")}{" "}
           </Button>
           <span>
-            Página {page.page} de {page.total_pages}
+            {t("Página")} {page.page} {t("de")} {page.total_pages}
           </span>
           <Button
             disabled={busy || page.page >= page.total_pages}
             onClick={() => void analyze(page.page + 1)}
           >
-            Próxima página
+            {t("Próxima página")}{" "}
           </Button>
           <Button disabled={busy} onClick={() => void analyze(page.page, true)}>
-            Validar decisões sem gravar
+            {t("Validar decisões sem gravar")}{" "}
           </Button>
         </div>
       )}

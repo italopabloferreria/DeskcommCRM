@@ -35,6 +35,8 @@ O JSON privado de conexão contém exclusivamente `host`, `port` (5432), `user`,
 `password` e `database` (`postgres`). O host/usuário deve corresponder à referência
 declarada: conexão direta ou Session pooler Supabase. Nunca passar senha na linha
 de comando. Variáveis PG herdadas são descartadas; TLS não pode ser desligado.
+`row_security=off` faz a consulta falhar se o papel sofrer filtragem RLS; não
+concede bypass nem altera as políticas do aplicativo.
 
 ```bash
 pnpm exec tsx scripts/limpax-recovery-preflight.ts \

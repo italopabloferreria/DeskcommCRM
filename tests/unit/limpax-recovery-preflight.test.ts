@@ -54,13 +54,15 @@ describe("recuperação privada: prévia somente leitura", () => {
     expect(() => recoveryConnection(connection, "x;drop table")).toThrow();
   });
   it("não herda opções libpq e exige TLS verificado e transação readonly", () => {
-    const env = recoveryEnvironment(connection, "/private/ca.crt", { PATH: "/bin", PGOPTIONS: "unsafe", PGSERVICE: "prod", PGPASSFILE: "secret", PGSSLMODE: "disable" });
+    const env = recoveryEnvironment(connection, "/private/ca.crt", { NODE_ENV: "test", PATH: "/bin", PGOPTIONS: "unsafe", PGSERVICE: "prod", PGPASSFILE: "secret", PGSSLMODE: "disable" });
     expect(env.PATH).toBe("/bin");
+    expect(env.NODE_ENV).toBe("test");
     expect(env.PGSERVICE).toBeUndefined();
     expect(env.PGPASSFILE).toBeUndefined();
     expect(env.PGSSLMODE).toBe("verify-full");
     expect(env.PGOPTIONS).toContain("default_transaction_read_only=on");
     expect(env.PGOPTIONS).toContain("statement_timeout=45000");
+    expect(env.PGOPTIONS).toContain("row_security=off");
   });
   it("confere checksum, tamanho e objetos das três áreas do arquivo", () => {
     expect(inspectArchive(receipt, toc, "a".repeat(64), 500).tables).toEqual({ public: 1, auth: 1, storage: 1 });

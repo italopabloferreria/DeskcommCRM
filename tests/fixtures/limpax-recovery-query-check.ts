@@ -31,4 +31,6 @@ const changed: unknown = JSON.parse(query(RECOVERY_QUERY));
 assert.equal(compareRecovery(before, changed, "bzretxzwnudtpxmoqjyv", "abcdefghijklmnopqrst").database_matches, false);
 assert.equal(compareRecovery(before, equal, "bzretxzwnudtpxmoqjyv", "abcdefghijklmnopqrst").restore_proven, false);
 assert.throws(() => query("BEGIN READ ONLY; UPDATE public.organizations SET name='Forbidden'; ROLLBACK;"));
-process.stdout.write("PASS: repeatable snapshot, identical inventory, content change at constant row count, readonly rejection, no full-restore claim.\n");
+query("CREATE ROLE fixture_reader; GRANT USAGE ON SCHEMA public TO fixture_reader; GRANT SELECT ON public.organizations TO fixture_reader;");
+assert.throws(() => query("SET ROLE fixture_reader; SET row_security=off; SELECT count(*) FROM public.organizations;"));
+process.stdout.write("PASS: repeatable snapshot, identical inventory, content change at constant row count, readonly/RLS rejection, no full-restore claim.\n");

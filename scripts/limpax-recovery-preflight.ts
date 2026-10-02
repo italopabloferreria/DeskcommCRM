@@ -36,10 +36,11 @@ export function recoveryConnection(value: unknown, expectedProject: string): Con
 }
 
 export function recoveryEnvironment(c: Connection, ca: string, inherited: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = Object.fromEntries(Object.entries(inherited).filter(([k]) => !k.toUpperCase().startsWith("PG")));
+  const env: NodeJS.ProcessEnv = { ...inherited };
+  for (const key of Object.keys(env)) if (key.toUpperCase().startsWith("PG")) delete env[key];
   return { ...env, PGHOST: c.host, PGPORT: String(c.port), PGUSER: c.user, PGPASSWORD: c.password,
     PGDATABASE: c.database, PGSSLMODE: "verify-full", PGSSLROOTCERT: ca, PGCONNECT_TIMEOUT: "15",
-    PGOPTIONS: "-c default_transaction_read_only=on -c statement_timeout=45000 -c timezone=UTC" };
+    PGOPTIONS: "-c default_transaction_read_only=on -c statement_timeout=45000 -c timezone=UTC -c row_security=off" };
 }
 
 export function inspectArchive(value: unknown, toc: string, sha256: string, size: number) {

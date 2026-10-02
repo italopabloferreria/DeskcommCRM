@@ -1,0 +1,20 @@
+{
+  "project": "bzretxzwnudtpxmoqjyv",
+  "syntheticOnly": true,
+  "testedAt": "2026-10-02T00:36:20.549Z",
+  "existingStoragePoliciesChecked": 9,
+  "pngRoundTrip": true,
+  "immutableVersions": true,
+  "replayIdempotent": true,
+  "catalogNameVerified": true,
+  "crossOrganizationDenied": true,
+  "anonymousReadWriteDenied": true,
+  "publicDownloadDenied": true,
+  "authenticatedDirectSqlReadDenied": true,
+  "authenticatedHttpAcceptance": "Still pending: no new identity/session created by this script.",
+  "privateBucket": true,
+  "ok": true,
+  "cleanup": true,
+  "cleanupRemainingObjects": 0,
+  "anonymousKeyAcceptedByAuthApi": true
+}

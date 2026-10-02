@@ -145,7 +145,7 @@
   ],
   "feedback": "Reviewed OCR text feeds editable templates. Server enforces admin/org/origin/size; private immutable JSON versions retain PNGs, validate content hash and prevent upsert. Original contract stays local; no external OCR requests.",
   "pending": [
-    "real Storage ACL/round-trip acceptance",
+    "hosted authenticated HTTP/UI acceptance",
     "immutable issuance and audit",
     "DocuSign",
     "hosted visual acceptance"

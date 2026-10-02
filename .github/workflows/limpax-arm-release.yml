@@ -9,6 +9,12 @@ on:
       - ".github/workflows/limpax-arm-release.yml"
       - "scripts/publish-limpax-arm-images.mjs"
       - "tests/unit/limpax-arm-publication.test.mjs"
+      - "app/app/documents/**"
+      - "app/api/v1/documents/**"
+      - "lib/documentos/**"
+      - "scripts/prepare-document-ocr.mjs"
+      - "package.json"
+      - "pnpm-lock.yaml"
 permissions: {}
 jobs:
   runtime:
@@ -30,6 +36,17 @@ jobs:
           set -euo pipefail
           pnpm exec eslint scripts/limpax-arm-runtime.mjs tests/unit/limpax-arm-runtime.test.mjs tests/infrastructure/limpax-arm-runtime-config.mjs scripts/publish-limpax-arm-images.mjs tests/unit/limpax-arm-publication.test.mjs tests/unit/workflows-tem-permissions.test.ts lib/crm-b2b/spreadsheet.ts lib/crm-b2b/spreadsheet.test.ts
           pnpm release:conferir
+      - name: Validar documentos e distribuição local do OCR
+        run: |
+          set -euo pipefail
+          pnpm exec vitest run lib/documentos/previa.test.ts lib/documentos/modelos.test.ts lib/documentos/acervo.test.ts app/app/documents/_client.test.tsx app/api/v1/documents/preview/route.test.ts app/api/v1/documents/models/route.test.ts --maxWorkers=1
+          pnpm exec eslint lib/documentos app/app/documents app/api/v1/documents scripts/prepare-document-ocr.mjs scripts/smoke-document-ocr.mjs scripts/validate-document-storage.ts
+          node scripts/prepare-document-ocr.mjs
+          test -s public/document-ocr/por.traineddata.gz
+          test -s public/document-ocr/worker.min.js
+          test -s public/document-ocr/pdf.worker.min.mjs
+        env:
+          NODE_OPTIONS: --max-old-space-size=1024
       - name: Provar plano com Compose real e configurações fictícias
         run: node tests/infrastructure/limpax-arm-runtime-config.mjs
       - name: Verificar o kit de instalação existente

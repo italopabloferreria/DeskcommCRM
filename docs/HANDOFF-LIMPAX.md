@@ -1,5 +1,14 @@
 # Retomada da vertical LimpaxCRM
 
+## Storage real verificado — 01/10/2026
+
+Teste sintético no Supabase isolado aprovado: salvamento/leitura de modelo com assinatura e carimbo PNG, nomes do catálogo, replay idempotente, duas versões imutáveis e recusa de outra organização. Nove policies existentes verificadas. Download anônimo/upload anônimo/download público bloqueados; leitura SQL sob papel authenticated com claims transitórios do proprietário bloqueada. Nenhum usuário ou sessão criado; isso NÃO é aceite HTTP autenticado da tela. Bucket documentos-privados preparado, privado; arquivos fictícios removidos e ausência comprovada. Sem migration, importação real ou alteração do banco antigo.
+
+Prova reproduzível: scripts/validate-document-storage.ts, recibo docs/evidence/limpax-documentos-storage-20261001.json. Credenciais ficam apenas em variáveis de ambiente; a senha atual no arquivo privado autorizado é o valor avulso, não a URI antiga. Não registrar seu conteúdo. Lint/tipos focados e 17 testes de publicação/permissões aprovados.
+
+Workflow ARM passa a testar Documentos, preparar/verificar assets OCR e construir a revisão no GitHub, sem Docker/Next pesado local. Publicação de imagens não equivale a hospedagem; VPS grátis continua sem capacidade e G13 aberto. Próximo: conferir o build/publicação e o manifesto da nova revisão; aceite de tela autenticada em ambiente hospedado. Arquivo de emissões/retorno assinado e DocuSign continuam futuros.
+
+
 ## Entrega atual: OCR, modelos e imagens reutilizáveis
 
 Implementado no fork: OCR em português dentro de /app/documents para PDF escaneado/PNG/JPEG, leitura direta de PDF com texto, revisão explícita e campos de cliente. Até 20 páginas de origem/10 MB, divididas sem truncar em até 40 páginas do editor. Busca de empresa cadastrada preenche nome/documento/telefone/endereço. Modelos, assinatura e carimbo são salvos juntos como versões JSON imutáveis no bucket privado documentos-privados, com hash e acesso pelo servidor/admin/organização. Replay não sobrescreve; auditoria registra a versão sem o conteúdo. Não cria tabelas ou modifica o módulo de propostas.

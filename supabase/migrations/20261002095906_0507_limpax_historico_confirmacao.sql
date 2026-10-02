@@ -31,6 +31,9 @@ end;
 $guard$;
 revoke execute on function public.fn_limpax_history_same_org() from public, anon, authenticated, service_role;
 
+-- Optional policy declarations keep ON on its own line, matching the optional
+-- module pattern: pre-v1.63.1 update kits scan text before tables are provisioned.
+-- The provisioner still installs all five tenant policies; no permission changes.
 create or replace function public.fn_limpax_historico_base_provisionar()
 returns void language plpgsql security definer set search_path = '' as $module$
 begin
@@ -79,10 +82,12 @@ begin
   alter table public.limpax_customer_locations enable row level security;
   alter table public.limpax_service_history enable row level security;
   drop policy if exists limpax_locations_select on public.limpax_customer_locations;
-  create policy limpax_locations_select on public.limpax_customer_locations for select to authenticated
+  create policy limpax_locations_select
+    on public.limpax_customer_locations for select to authenticated
     using (organization_id in (select public.fn_user_org_ids()));
   drop policy if exists limpax_history_select on public.limpax_service_history;
-  create policy limpax_history_select on public.limpax_service_history for select to authenticated
+  create policy limpax_history_select
+    on public.limpax_service_history for select to authenticated
     using (organization_id in (select public.fn_user_org_ids()));
   -- Direct browser writes are deliberately unavailable until atomic command is proved.
   revoke all on public.limpax_customer_locations, public.limpax_service_history from public, anon, authenticated, service_role;
@@ -111,7 +116,8 @@ begin
   alter table public.limpax_history_receipts add column if not exists reversed_at timestamptz;
   alter table public.limpax_history_receipts enable row level security;
   drop policy if exists limpax_history_receipts_select on public.limpax_history_receipts;
-  create policy limpax_history_receipts_select on public.limpax_history_receipts for select to authenticated
+  create policy limpax_history_receipts_select
+    on public.limpax_history_receipts for select to authenticated
     using (organization_id in (select public.fn_user_org_ids()));
   revoke all on public.limpax_history_receipts from public, anon, authenticated, service_role;
   grant select on public.limpax_history_receipts to authenticated, service_role;
@@ -637,10 +643,12 @@ create table if not exists public.limpax_history_management_receipts(
 alter table public.limpax_history_subjects enable row level security;
 alter table public.limpax_history_management_receipts enable row level security;
 drop policy if exists limpax_subject_read on public.limpax_history_subjects;
-create policy limpax_subject_read on public.limpax_history_subjects for select to authenticated
+create policy limpax_subject_read
+    on public.limpax_history_subjects for select to authenticated
  using(organization_id in(select public.fn_user_org_ids()));
 drop policy if exists limpax_management_read on public.limpax_history_management_receipts;
-create policy limpax_management_read on public.limpax_history_management_receipts for select to authenticated
+create policy limpax_management_read
+    on public.limpax_history_management_receipts for select to authenticated
  using(organization_id in(select public.fn_user_org_ids()));
 revoke all on public.limpax_history_subjects,public.limpax_history_management_receipts from public,anon,authenticated,service_role;
 grant select on public.limpax_history_subjects,public.limpax_history_management_receipts to authenticated;

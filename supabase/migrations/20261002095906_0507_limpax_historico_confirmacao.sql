@@ -687,4 +687,3 @@ end;$reverse$;
 revoke all on function public.fn_limpax_history_reverse_batch(uuid,uuid,jsonb) from public,anon,authenticated,service_role;
 
 grant execute on function public.fn_limpax_history_reverse_batch(uuid,uuid,jsonb) to authenticated;
-

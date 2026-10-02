@@ -43343,40 +43343,11 @@ grant execute on function public.fn_import_companies_people_atomic(uuid,text,jso
 -- SOURCE ONLY until isolated recovery and authorized operational preflight pass.
 -- Applying this file distributes fixed functions; it does NOT provision tables,
 -- install triggers, import customers or enable MODULO_CRM_B2B.
-create or replace function public.fn_limpax_history_same_org()
-returns trigger language plpgsql security invoker set search_path = '' as $guard$
-begin
-  if (new.company_id is not null and not exists (
-      select 1 from public.companies c where c.id = new.company_id and c.organization_id = new.organization_id))
-    or (new.person_id is not null and not exists (
-      select 1 from public.people p where p.id = new.person_id and p.organization_id = new.organization_id)) then
-    raise exception using errcode = '23514', message = 'history_customer_organization_mismatch';
-  end if;
-  if tg_table_name = 'limpax_service_history' then
-    if new.location_id is not null and not exists (
-      select 1 from public.limpax_customer_locations l
-      where l.id = new.location_id and l.organization_id = new.organization_id
-        and l.company_id is not distinct from new.company_id
-        and l.person_id is not distinct from new.person_id) then
-      raise exception using errcode = '23514', message = 'history_location_customer_mismatch';
-    end if;
-    if not exists (select 1 from public.import_rows r
-      join public.import_batches b on b.id = r.batch_id
-      where r.id = new.import_row_id and r.organization_id = new.organization_id
-        and b.organization_id = new.organization_id) then
-      raise exception using errcode = '23514', message = 'history_origin_organization_mismatch';
-    end if;
-  end if;
-  return new;
-end;
-$guard$;
-revoke execute on function public.fn_limpax_history_same_org() from public, anon, authenticated, service_role;
-
 -- Optional policy declarations keep ON on its own line, matching the optional
 -- module pattern: pre-v1.63.1 update kits scan text before tables are provisioned.
 -- The provisioner still installs all five tenant policies; no permission changes.
-create or replace function public.fn_limpax_historico_base_provisionar()
-returns void language plpgsql security definer set search_path = '' as $module$
+create or replace function public.fn_limpax_historico_provisionar()
+returns void language plpgsql security definer set search_path='' as $f$
 begin
   create table if not exists public.limpax_customer_locations (
     id uuid primary key default gen_random_uuid(),
@@ -43464,9 +43435,124 @@ begin
   grant select on public.limpax_history_receipts to authenticated, service_role;
 
   perform public.fn_proteger_modulo_provisionado();
+alter table public.limpax_service_history add column if not exists redacted_at timestamptz;
+alter table public.limpax_customer_locations add column if not exists redacted_at timestamptz;
+
+
+
+drop trigger if exists trg_limpax_history_redact on public.contacts;
+create trigger trg_limpax_history_redact after update of is_anonymized on public.contacts
+  for each row when (new.is_anonymized is true and old.is_anonymized is distinct from true)
+  execute function public.fn_limpax_history_redact_contact();
+
+
+
+drop trigger if exists limpax_history_guard_redacted on public.limpax_service_history;
+create trigger limpax_history_guard_redacted before insert on public.limpax_service_history
+  for each row execute function public.fn_limpax_history_guard_redacted_person();
+drop trigger if exists limpax_location_guard_redacted on public.limpax_customer_locations;
+create trigger limpax_location_guard_redacted before insert on public.limpax_customer_locations
+  for each row execute function public.fn_limpax_history_guard_redacted_person();
+alter table public.limpax_service_history add column if not exists revision integer not null default 0 check (revision>=0);
+alter table public.limpax_service_history add column if not exists notes_current text check (length(notes_current)<=16000);
+alter table public.limpax_service_history add column if not exists voided_at timestamptz;
+create table if not exists public.limpax_history_subjects(
+ organization_id uuid not null references public.organizations(id) on delete restrict,
+ person_id uuid not null references public.people(id) on delete restrict,
+ redacted_at timestamptz not null default now(),
+ primary key(organization_id,person_id)
+);
+create table if not exists public.limpax_history_management_receipts(
+ organization_id uuid not null references public.organizations(id) on delete restrict,
+ request_id uuid not null, payload_sha256 text not null,
+ result jsonb not null, created_by uuid not null references auth.users(id) on delete restrict,
+ created_at timestamptz not null default now(),
+ primary key(organization_id,request_id)
+);
+alter table public.limpax_history_subjects enable row level security;
+alter table public.limpax_history_management_receipts enable row level security;
+drop policy if exists limpax_subject_read on public.limpax_history_subjects;
+create policy limpax_subject_read
+    on public.limpax_history_subjects for select to authenticated
+ using(organization_id in(select public.fn_user_org_ids()));
+drop policy if exists limpax_management_read on public.limpax_history_management_receipts;
+create policy limpax_management_read
+    on public.limpax_history_management_receipts for select to authenticated
+ using(organization_id in(select public.fn_user_org_ids()));
+revoke all on public.limpax_history_subjects,public.limpax_history_management_receipts from public,anon,authenticated,service_role;
+grant select on public.limpax_history_subjects,public.limpax_history_management_receipts to authenticated;
+perform public.fn_proteger_modulo_provisionado();
+
+
+
+
+
+
+drop trigger if exists limpax_person_no_restore on public.people;
+create trigger limpax_person_no_restore before update of full_name,normalized_name,email,notes on public.people
+ for each row execute function public.fn_limpax_history_no_restore();
+drop trigger if exists limpax_service_no_restore on public.limpax_service_history;
+create trigger limpax_service_no_restore before insert on public.limpax_service_history
+ for each row execute function public.fn_limpax_history_no_restore();
+drop trigger if exists limpax_location_no_restore on public.limpax_customer_locations;
+create trigger limpax_location_no_restore before insert on public.limpax_customer_locations
+ for each row execute function public.fn_limpax_history_no_restore();
+
+
+
+
+drop trigger if exists limpax_link_no_restore on public.company_people;
+create trigger limpax_link_no_restore before insert or update of person_id,job_title,department,notes on public.company_people
+ for each row execute function public.fn_limpax_history_guard_copies();
+drop trigger if exists limpax_import_no_restore on public.import_rows;
+create trigger limpax_import_no_restore before insert or update of person_id,raw_data,normalized_data,error on public.import_rows
+ for each row execute function public.fn_limpax_history_guard_copies();
+drop trigger if exists limpax_phone_no_restore on public.contacts;
+create trigger limpax_phone_no_restore before insert or update of person_id,is_anonymized on public.contacts
+ for each row execute function public.fn_limpax_history_guard_copies();
+
+
+
+drop trigger if exists trg_limpax_current_redact on public.contacts;
+create trigger trg_limpax_current_redact after update of is_anonymized on public.contacts
+ for each row when(new.is_anonymized and old.is_anonymized is distinct from true)
+ execute function public.fn_limpax_history_clear_current_contact();
+ perform public.fn_proteger_modulo_provisionado();
 end;
-$module$;
-revoke all on function public.fn_limpax_historico_base_provisionar() from public, anon, authenticated, service_role;
+$f$;
+revoke execute on function public.fn_limpax_historico_provisionar() from public, anon, authenticated, service_role;
+grant execute on function public.fn_limpax_historico_provisionar() to service_role;
+
+create or replace function public.fn_limpax_history_same_org()
+returns trigger language plpgsql security invoker set search_path = '' as $guard$
+begin
+  if (new.company_id is not null and not exists (
+      select 1 from public.companies c where c.id = new.company_id and c.organization_id = new.organization_id))
+    or (new.person_id is not null and not exists (
+      select 1 from public.people p where p.id = new.person_id and p.organization_id = new.organization_id)) then
+    raise exception using errcode = '23514', message = 'history_customer_organization_mismatch';
+  end if;
+  if tg_table_name = 'limpax_service_history' then
+    if new.location_id is not null and not exists (
+      select 1 from public.limpax_customer_locations l
+      where l.id = new.location_id and l.organization_id = new.organization_id
+        and l.company_id is not distinct from new.company_id
+        and l.person_id is not distinct from new.person_id) then
+      raise exception using errcode = '23514', message = 'history_location_customer_mismatch';
+    end if;
+    if not exists (select 1 from public.import_rows r
+      join public.import_batches b on b.id = r.batch_id
+      where r.id = new.import_row_id and r.organization_id = new.organization_id
+        and b.organization_id = new.organization_id) then
+      raise exception using errcode = '23514', message = 'history_origin_organization_mismatch';
+    end if;
+  end if;
+  return new;
+end;
+$guard$;
+revoke execute on function public.fn_limpax_history_same_org() from public, anon, authenticated, service_role;
+
+
 
 
 create or replace function public.fn_limpax_history_import_atomic(
@@ -43943,96 +44029,6 @@ revoke all on function public.fn_limpax_history_reverse_batch(uuid,uuid,jsonb) f
 
 grant execute on function public.fn_limpax_history_reverse_batch(uuid,uuid,jsonb) to authenticated;
 
-create or replace function public.fn_limpax_historico_provisionar()
-returns void language plpgsql security definer set search_path='' as $install$
-begin
- perform public.fn_limpax_historico_base_provisionar();
-alter table public.limpax_service_history add column if not exists redacted_at timestamptz;
-alter table public.limpax_customer_locations add column if not exists redacted_at timestamptz;
-
-
-
-drop trigger if exists trg_limpax_history_redact on public.contacts;
-create trigger trg_limpax_history_redact after update of is_anonymized on public.contacts
-  for each row when (new.is_anonymized is true and old.is_anonymized is distinct from true)
-  execute function public.fn_limpax_history_redact_contact();
-
-
-
-drop trigger if exists limpax_history_guard_redacted on public.limpax_service_history;
-create trigger limpax_history_guard_redacted before insert on public.limpax_service_history
-  for each row execute function public.fn_limpax_history_guard_redacted_person();
-drop trigger if exists limpax_location_guard_redacted on public.limpax_customer_locations;
-create trigger limpax_location_guard_redacted before insert on public.limpax_customer_locations
-  for each row execute function public.fn_limpax_history_guard_redacted_person();
-alter table public.limpax_service_history add column if not exists revision integer not null default 0 check (revision>=0);
-alter table public.limpax_service_history add column if not exists notes_current text check (length(notes_current)<=16000);
-alter table public.limpax_service_history add column if not exists voided_at timestamptz;
-create table if not exists public.limpax_history_subjects(
- organization_id uuid not null references public.organizations(id) on delete restrict,
- person_id uuid not null references public.people(id) on delete restrict,
- redacted_at timestamptz not null default now(),
- primary key(organization_id,person_id)
-);
-create table if not exists public.limpax_history_management_receipts(
- organization_id uuid not null references public.organizations(id) on delete restrict,
- request_id uuid not null, payload_sha256 text not null,
- result jsonb not null, created_by uuid not null references auth.users(id) on delete restrict,
- created_at timestamptz not null default now(),
- primary key(organization_id,request_id)
-);
-alter table public.limpax_history_subjects enable row level security;
-alter table public.limpax_history_management_receipts enable row level security;
-drop policy if exists limpax_subject_read on public.limpax_history_subjects;
-create policy limpax_subject_read
-    on public.limpax_history_subjects for select to authenticated
- using(organization_id in(select public.fn_user_org_ids()));
-drop policy if exists limpax_management_read on public.limpax_history_management_receipts;
-create policy limpax_management_read
-    on public.limpax_history_management_receipts for select to authenticated
- using(organization_id in(select public.fn_user_org_ids()));
-revoke all on public.limpax_history_subjects,public.limpax_history_management_receipts from public,anon,authenticated,service_role;
-grant select on public.limpax_history_subjects,public.limpax_history_management_receipts to authenticated;
-perform public.fn_proteger_modulo_provisionado();
-
-
-
-
-
-
-drop trigger if exists limpax_person_no_restore on public.people;
-create trigger limpax_person_no_restore before update of full_name,normalized_name,email,notes on public.people
- for each row execute function public.fn_limpax_history_no_restore();
-drop trigger if exists limpax_service_no_restore on public.limpax_service_history;
-create trigger limpax_service_no_restore before insert on public.limpax_service_history
- for each row execute function public.fn_limpax_history_no_restore();
-drop trigger if exists limpax_location_no_restore on public.limpax_customer_locations;
-create trigger limpax_location_no_restore before insert on public.limpax_customer_locations
- for each row execute function public.fn_limpax_history_no_restore();
-
-
-
-
-drop trigger if exists limpax_link_no_restore on public.company_people;
-create trigger limpax_link_no_restore before insert or update of person_id,job_title,department,notes on public.company_people
- for each row execute function public.fn_limpax_history_guard_copies();
-drop trigger if exists limpax_import_no_restore on public.import_rows;
-create trigger limpax_import_no_restore before insert or update of person_id,raw_data,normalized_data,error on public.import_rows
- for each row execute function public.fn_limpax_history_guard_copies();
-drop trigger if exists limpax_phone_no_restore on public.contacts;
-create trigger limpax_phone_no_restore before insert or update of person_id,is_anonymized on public.contacts
- for each row execute function public.fn_limpax_history_guard_copies();
-
-
-
-drop trigger if exists trg_limpax_current_redact on public.contacts;
-create trigger trg_limpax_current_redact after update of is_anonymized on public.contacts
- for each row when(new.is_anonymized and old.is_anonymized is distinct from true)
- execute function public.fn_limpax_history_clear_current_contact();
- perform public.fn_proteger_modulo_provisionado();
-end;$install$;
-revoke all on function public.fn_limpax_historico_provisionar() from public,anon,authenticated,service_role;
-grant execute on function public.fn_limpax_historico_provisionar() to service_role;
 
 -- ---- VARREDURA anon: função nova nasce exposta em quem ATUALIZA (migration 0116) ----
 --

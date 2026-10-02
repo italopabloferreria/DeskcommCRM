@@ -1360,7 +1360,12 @@ export async function collectExportData(args: CollectArgs): Promise<ExportPayloa
       .limit(500);
     if (eL) throw eL;
     const historico_limpax = personId
-      ? await collectHistorySubject(admin, organizationId, personId)
+      ? await collectHistorySubject(admin, organizationId, personId, {
+          // Enumerate actual sources here so the LGPD inventory covers optional
+          // history too. The helper applies tenant/person filters and all limits.
+          locations: () => admin.from("limpax_customer_locations"),
+          services: () => admin.from("limpax_service_history"),
+        })
       : undefined;
     if (pessoa || vinculos.length > 0 || (linhas ?? []).length > 0 || historico_limpax) {
       b2b = { pessoa, vinculos, linhas_importadas: linhas ?? [], historico_limpax };

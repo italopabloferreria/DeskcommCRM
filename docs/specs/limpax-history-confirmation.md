@@ -51,7 +51,7 @@ Conferir colisões novamente antes de merge/upstream ou aplicação.
 
 Baseline só distribui funções fixas. `fn_limpax_historico_provisionar()` cria
 as tabelas e gatilhos opcionais, reaplicável; EXECUTE somente service_role.
-Provisionador interno não é público nem liberado ao service_role. Sessões
+Um único provisionador cria a estrutura completa; não há provisionador parcial. Sessões
 autenticadas podem executar comandos guardados, nunca escrever recibos.
 Nenhuma chamada a provisionador existe automaticamente no baseline.
 

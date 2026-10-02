@@ -44,6 +44,13 @@ export async function collectHistorySubject(
   admin: SupabaseClient,
   organizationId: string,
   personId: string,
+  tables: {
+    locations: () => ReturnType<SupabaseClient["from"]>;
+    services: () => ReturnType<SupabaseClient["from"]>;
+  } = {
+    locations: () => admin.from("limpax_customer_locations"),
+    services: () => admin.from("limpax_service_history"),
+  },
 ): Promise<HistorySubjectExport | undefined> {
   z.string().uuid().parse(organizationId);
   z.string().uuid().parse(personId);
@@ -57,11 +64,10 @@ export async function collectHistorySubject(
   if (!batch.data?.length) return undefined;
 
   let bytes = 0;
-  async function read<T>(table: string, columns: string, schema: z.ZodType<T>) {
+  async function read<T>(query: () => ReturnType<SupabaseClient["from"]>, columns: string, schema: z.ZodType<T>) {
     const rows: T[] = [];
     for (let start = 0; start <= MAX_ROWS;) {
-      const result = await admin
-        .from(table)
+      const result = await query()
         .select(columns)
         .eq("organization_id", organizationId)
         .eq("person_id", personId)
@@ -89,12 +95,12 @@ export async function collectHistorySubject(
   }
   return {
     locais: await read(
-      "limpax_customer_locations",
+      tables.locations,
       "id,organization_id,person_id,address_original,created_at,redacted_at",
       locationSchema,
     ),
     servicos: await read(
-      "limpax_service_history",
+      tables.services,
       "id,organization_id,person_id,location_id,import_row_id,original_reference,raw_data,service_date,value_cents,currency,notes_original,notes_current,revision,voided_at,created_at,redacted_at",
       serviceSchema,
     ),

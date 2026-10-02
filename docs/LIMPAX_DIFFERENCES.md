@@ -16,8 +16,8 @@ de `origin/main`. Isso não é comparação com uma release futura do upstream.
 | Planilhas | Prévia e mapeamento editável; exportações CSV paginadas; proteção contra fórmulas; limites de expansão XLSX. CSV/XLSX B2B não importa ainda todo o histórico XLSM real. |
 | Importação atômica | RPC preparada para repetição segura e rollback por lote; migração0495 ainda não aplicada. |
 | Implantação | Kit/release ARM, imagens por CI, manifesto e sondas; recuperação endurecida e backup administrativo privado. Não significa implantação final ou restauração comprovada. |
-| Documentos (incremento atual) | Aba e emissor de prévias; assinatura/carimbo em PNG, posição/tamanho/página, administrador e validação no servidor. Ainda sem arquivo persistente, cadastro de modelos ou numeração definitiva. |
-| OCR e assinatura externa | OCR para contratos reutilizáveis é pedido aprovado, ainda sem fluxo no CRM. Gov.br usa portal externo com retorno manual; não anunciar API privada disponível. DocuSign não conectado. Stub PAdES herdado não certifica PDF. |
+| Documentos (incremento atual) | Aba e emissor de prévias; assinatura/carimbo em PNG, posição/tamanho/página, administrador e validação no servidor. Modelos e imagens reutilizáveis em versões privadas imutáveis, com campos e busca de empresas; aceite do Storage real pendente. PDFs emitidos e numeração definitiva ainda não arquivados. |
+| OCR e assinatura externa | OCR pt-BR no navegador e revisão/modelos implementados; PNG/PDF escaneado/PDF textual sintéticos passaram no Chrome, sem serviço externo. Gov.br usa portal externo com retorno manual; não anunciar API privada disponível. DocuSign não conectado. Stub PAdES herdado não certifica PDF. |
 
 Os arquivos reais e textos extraídos ficam fora do Git. A análise da planilha
 preserva o histórico, sem considerar nome repetido prova de identidade.

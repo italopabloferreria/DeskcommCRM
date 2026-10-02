@@ -1,5 +1,5 @@
 {
-  "name": "Prévia documental da vertical",
+  "name": "Documentos, OCR e modelos reutilizáveis",
   "status": "implemented_not_deployed",
   "destination": "vertical_specialization",
   "nodes": [
@@ -44,6 +44,36 @@
       "file": "lib/documentos/previa-pdf.tsx",
       "lane": "server",
       "label": "pdf"
+    },
+    {
+      "id": "models_ui",
+      "file": "app/app/documents/_modelos.tsx",
+      "lane": "ui",
+      "label": "models_ui"
+    },
+    {
+      "id": "ocr",
+      "file": "lib/documentos/ocr-browser.ts",
+      "lane": "ui",
+      "label": "ocr"
+    },
+    {
+      "id": "models_api",
+      "file": "app/api/v1/documents/models/route.ts",
+      "lane": "server",
+      "label": "models_api"
+    },
+    {
+      "id": "models_schema",
+      "file": "lib/documentos/modelos.ts",
+      "lane": "server",
+      "label": "models_schema"
+    },
+    {
+      "id": "storage",
+      "file": "lib/documentos/acervo.ts",
+      "lane": "server",
+      "label": "storage"
     }
   ],
   "edges": [
@@ -76,12 +106,46 @@
       "id": "e6",
       "from": "route",
       "to": "pdf"
+    },
+    {
+      "id": "e7",
+      "from": "screen",
+      "to": "models_ui"
+    },
+    {
+      "id": "e8",
+      "from": "models_ui",
+      "to": "ocr"
+    },
+    {
+      "id": "e9",
+      "from": "models_ui",
+      "to": "models_api"
+    },
+    {
+      "id": "e10",
+      "from": "models_ui",
+      "to": "models_schema"
+    },
+    {
+      "id": "e11",
+      "from": "models_api",
+      "to": "models_schema"
+    },
+    {
+      "id": "e12",
+      "from": "models_api",
+      "to": "storage"
+    },
+    {
+      "id": "e13",
+      "from": "storage",
+      "to": "png"
     }
   ],
-  "feedback": "Validation errors shown in screen; failed PDF generation returns generic error and request ID, no file or image logged. No durable issuance or send occurs.",
+  "feedback": "Reviewed OCR text feeds editable templates. Server enforces admin/org/origin/size; private immutable JSON versions retain PNGs, validate content hash and prevent upsert. Original contract stays local; no external OCR requests.",
   "pending": [
-    "OCR-to-template inside CRM",
-    "private persistent model/issuer registry",
+    "real Storage ACL/round-trip acceptance",
     "immutable issuance and audit",
     "DocuSign",
     "hosted visual acceptance"

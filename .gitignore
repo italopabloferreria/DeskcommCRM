@@ -185,3 +185,6 @@ __pycache__/
 # Configuração gerada pela implantação da vertical Limpax.
 .limpax-runtime.compose.json
 .limpax-runtime.compose.json.tmp
+
+# OCR public assets generated from pinned dependencies.
+/public/document-ocr/

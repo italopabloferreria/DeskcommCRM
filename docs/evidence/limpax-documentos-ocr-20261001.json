@@ -1,0 +1,9 @@
+{
+  "scope": "CRM contracts OCR -> reviewed editable template -> customer variables -> PDF preview; manual signature/stamp reuse",
+  "delivery": "Portuguese browser OCR, local assets, company lookup, immutable private JSON template versions with embedded PNGs; no new database tables",
+  "checks": "234 relevant tests verified across focused runs (232 in seven-file run plus private-bucket provisioning and duplicate-image regressions); focused TypeScript and lint passed; real Chrome synthetic PNG/scanned PDF/text PDF proof, image confidence95, zero external requests",
+  "remote": "No database migration, bucket creation, real data import, deployment or heavy local server. Storage persistence mocked, live acceptance pending; G13 open",
+  "next": "Authenticated real Storage acceptance and hosted release; immutable issuance archive/manual signed returns next; DocuSign later",
+  "git": "Included in the current commit; branch vertical/limpax",
+  "typecheck": "Focused check passed with 768MB heap"
+}

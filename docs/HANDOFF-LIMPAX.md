@@ -1,34 +1,14 @@
 # Retomada da vertical LimpaxCRM
 
-## Tarefa vigente: módulo Documentos — assinatura/carimbo manuais
+## Entrega atual: OCR, modelos e imagens reutilizáveis
 
-O proprietário esclareceu: OCR apenas para contratos/documentos virarem modelos
-reutilizáveis no CRM, preenchidos por cliente. Clientes entram por planilha.
-Assinatura e carimbo em PNG transparente enviados manualmente, posicionados
-independentemente. Gov.br pelo portal com retorno manual, não integração API
-para CRM privado; DocuSign ainda sem conta/configuração de integração.
+Implementado no fork: OCR em português dentro de /app/documents para PDF escaneado/PNG/JPEG, leitura direta de PDF com texto, revisão explícita e campos de cliente. Até 20 páginas de origem/10 MB, divididas sem truncar em até 40 páginas do editor. Busca de empresa cadastrada preenche nome/documento/telefone/endereço. Modelos, assinatura e carimbo são salvos juntos como versões JSON imutáveis no bucket privado documentos-privados, com hash e acesso pelo servidor/admin/organização. Replay não sobrescreve; auditoria registra a versão sem o conteúdo. Não cria tabelas ou modifica o módulo de propostas.
 
-Implementado `/app/documents` e prévia autenticada `/api/v1/documents/preview`:
-até cinco páginas A4, assinatura/carimbo opcionais, posição/tamanho/página,
-PNG privado em memória; upload disponível a administrador. Valida origem,
-organização pelo guard, bytes, expansão/CRC/transparência do PNG e área útil.
-Corrigida altura variável do renderer para manter A4 e não ocultar as imagens.
-235 testes em sete arquivos passaram, incluindo 19 novos, propostas herdadas,
-navegação e mapas; lint focado, tipos focados (heap limitado) e diff aprovados.
-Nenhum Docker/Next/build pesado, migration, envio ou implantação iniciado.
+Provas: 234 testes relevantes aprovados (232 na suíte de sete arquivos, mais provisionamento privado e imagens duplicadas); navegador real com PNG fictício, PDF escaneado e PDF textual aprovados, confiança 95% na imagem, zero requisições externas. Lint e tipos focados aprovados. Assets OCR/idioma/PDF são copiados das dependências fixadas antes de dev/build; não dependem de CDN. Nenhum Next/Docker/build completo, importação real ou alteração remota executados.
 
-Limites: é PRÉVIA, sem cadastro persistente de imagens/modelos, numeração final
-ou valor fiscal. OCR→modelo ainda NÃO implementado no CRM. Não apresentar
-piloto Windows privado como entrega do produto. Função pura de revisão de
-planilha conserva fontes/histórico e não funde automaticamente; não é nova
-tela de importação. Plano/design em `docs/superpowers/`; comparação comprovada
-em `docs/LIMPAX_DIFFERENCES.md`.
+Limites: extração não conserva automaticamente a diagramação original; revisão é obrigatória. Original fica com o usuário; só seu hash e texto do modelo revisado são salvos. Acervo paginado em 25 versões por consulta, sem truncamento silencioso. Persistência foi validada com Storage simulado; bucket/permissões e round-trip no Supabase real precisam de aceite antes de uso. PDF ainda é prévia, sem arquivo de emissões/numeração/valor fiscal. DocuSign não conectado; Gov.br usa portal externo.
 
-Próximo executável: modelo documental reutilizável com campos do cliente,
-cadastro privado de emissores/PNGs e revisão OCR no CRM. Schema opcional deve
-seguir provisionador/RLS/Storage/auditoria/idempotência; nenhuma aplicação
-remota antes dos gates de backup/restauração. Migração0495 segue não aplicada,
-VPS grátis sem capacidade, G13 aberto. Usar as regras CLAUDE.md/AGENTS.md.
+Próximo executável: aceite autenticado do fluxo de modelos/PNGs no Storage real e publicação da revisão quando houver ambiente disponível; depois arquivo de emissões e retorno de documentos assinados. Backup/restauração/0495/VPS/G13 mantêm os gates existentes.
 
 ## Descoberta documental concluída — 01/10/2026
 

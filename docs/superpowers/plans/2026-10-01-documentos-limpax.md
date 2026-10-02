@@ -13,10 +13,10 @@ Execução sequencial pelo agente atual, respeitando o pedido de avançar sem no
 - [x] Criar `lib/documentos/revisao-cadastros.ts` e teste co-localizado: candidatos com evidência, nenhuma fusão.
 - [ ] Aplicar análise à extração privada da planilha, preservar linhas e registrar apenas contagens públicas.
 
-## 2. OCR de contratos dentro do CRM — ainda pendente
+## 2. OCR de contratos dentro do CRM — código implementado
 
-- [ ] Upload de contrato/PDF escaneado pela tela, extração pt-BR limitada por página e revisão.
-- [ ] Transformar extração em modelo reutilizável com variáveis de cliente e diagramação revisada.
+- [x] Upload de contrato/PDF escaneado pela tela, extração pt-BR limitada por página e revisão.
+- [x] Transformar extração em modelo reutilizável com variáveis de cliente e diagramação revisada.
 - [ ] Preservar original/hash e distinguir OCR candidato de conteúdo confirmado; não usar OCR para cadastrar clientes.
 - [ ] Piloto Windows ficou privado fora do repositório e NÃO é funcionalidade do CRM.
 
@@ -44,3 +44,13 @@ Execução sequencial pelo agente atual, respeitando o pedido de avançar sem no
 
 - [x] Documentar diferenças comprovadas contra merge-base `50d14bd983bf35a878876451399e8832ff8e9ee0`.
 - [x] Atualizar handoff e estado nos dois repositórios; commit apenas mudanças desta etapa.
+
+## Incremento executado — OCR e persistência
+
+Implementado no fork: OCR em português dentro de /app/documents para PDF escaneado/PNG/JPEG, leitura direta de PDF com texto, revisão explícita e campos de cliente. Até 20 páginas de origem/10 MB, divididas sem truncar em até 40 páginas do editor. Busca de empresa cadastrada preenche nome/documento/telefone/endereço. Modelos, assinatura e carimbo são salvos juntos como versões JSON imutáveis no bucket privado documentos-privados, com hash e acesso pelo servidor/admin/organização. Replay não sobrescreve; auditoria registra a versão sem o conteúdo. Não cria tabelas ou modifica o módulo de propostas.
+
+Provas: 234 testes relevantes aprovados (232 na suíte de sete arquivos, mais provisionamento privado e imagens duplicadas); navegador real com PNG fictício, PDF escaneado e PDF textual aprovados, confiança 95% na imagem, zero requisições externas. Lint e tipos focados aprovados. Assets OCR/idioma/PDF são copiados das dependências fixadas antes de dev/build; não dependem de CDN. Nenhum Next/Docker/build completo, importação real ou alteração remota executados.
+
+Limites: extração não conserva automaticamente a diagramação original; revisão é obrigatória. Original fica com o usuário; só seu hash e texto do modelo revisado são salvos. Acervo paginado em 25 versões por consulta, sem truncamento silencioso. Persistência foi validada com Storage simulado; bucket/permissões e round-trip no Supabase real precisam de aceite antes de uso. PDF ainda é prévia, sem arquivo de emissões/numeração/valor fiscal. DocuSign não conectado; Gov.br usa portal externo.
+
+Próximo executável: aceite autenticado do fluxo de modelos/PNGs no Storage real e publicação da revisão quando houver ambiente disponível; depois arquivo de emissões e retorno de documentos assinados. Backup/restauração/0495/VPS/G13 mantêm os gates existentes.

@@ -30,7 +30,7 @@ export const previaSchema = z
           .strict(),
       )
       .min(1)
-      .max(5),
+      .max(40),
     assinaturas: z
       .array(
         z
@@ -42,7 +42,7 @@ export const previaSchema = z
               .string()
               .max(180_000)
               .regex(/^data:image\/png;base64,[A-Za-z0-9+/]+={0,2}$/),
-            pagina: z.number().int().min(1).max(5),
+            pagina: z.number().int().min(1).max(40),
             x: z.number().finite().min(10).max(200),
             y: z.number().finite().min(35).max(255),
             largura: z.number().finite().min(15).max(90),
@@ -50,10 +50,16 @@ export const previaSchema = z
           })
           .strict(),
       )
-      .max(3),
+      .max(2),
   })
   .strict()
   .superRefine((doc, ctx) => {
+    if (new Set(doc.assinaturas.map((s) => s.tipo)).size !== doc.assinaturas.length)
+      ctx.addIssue({
+        code: "custom",
+        message: "Use uma assinatura e um carimbo independentes.",
+        path: ["assinaturas"],
+      });
     doc.assinaturas.forEach((s, i) => {
       if (s.pagina > doc.paginas.length || s.x + s.largura > 200 || s.y + s.altura + 12 > 275)
         ctx.addIssue({

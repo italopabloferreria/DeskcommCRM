@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { previaSchema } from "@/lib/documentos/previa";
 import { EditorImagem, type ImagemDocumento } from "./_imagem";
+import { ModelosDocumentos } from "./_modelos";
+import { preencherModelo, type CampoDocumento } from "@/lib/documentos/modelos";
+import type { PreviaDocumento } from "@/lib/documentos/previa";
 
 export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
   const [titulo, setTitulo] = useState("Ordem de serviço");
@@ -39,6 +42,23 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
   ]);
   const [erro, setErro] = useState("");
   const [busy, setBusy] = useState(false);
+  const [valores, setValores] = useState<Partial<Record<CampoDocumento, string>>>({});
+  const documento = {
+    titulo,
+    destinatario,
+    paginas: paginas.map((texto) => ({ texto })),
+    assinaturas: imagens.filter((s) => s.png),
+  };
+  function aplicar(doc: PreviaDocumento) {
+    setTitulo(doc.titulo);
+    setDestinatario(doc.destinatario);
+    setPaginas(doc.paginas.map((p) => p.texto));
+    setImagens((anteriores) =>
+      anteriores.map(
+        (s) => doc.assinaturas.find((a) => a.tipo === s.tipo) ?? { ...s, png: "", pagina: 1 },
+      ),
+    );
+  }
   async function baixar() {
     setErro("");
     const parsed = previaSchema.safeParse({
@@ -53,11 +73,12 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
     }
     setBusy(true);
     try {
+      const preenchido = preencherModelo(parsed.data, valores);
       const response = await fetch("/api/v1/documents/preview", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify(preenchido),
       });
       if (!response.ok) {
         const body = await response.json();
@@ -84,10 +105,22 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
         </p>
       </div>
       <div className="rounded-lg border p-4 text-sm">
-        Prévia em preparação: os campos e o PNG ficam apenas nesta tela enquanto ela está aberta.
-        Modelos, emissores e arquivos definitivos ainda não são salvos. O PDF identifica o rascunho
-        e não é uma nota fiscal.
+        Salve o modelo para reutilizar texto, assinatura, carimbo e posições. O PDF identifica o
+        rascunho e não é uma nota fiscal. Salvar um modelo não arquiva os PDFs emitidos.
       </div>
+      {podeUsarPng ? (
+        <ModelosDocumentos
+          documento={documento}
+          aplicar={aplicar}
+          valores={valores}
+          preencher={(campo, valor) => setValores((v) => ({ ...v, [campo]: valor }))}
+          inserir={(campo) =>
+            setPaginas((p) =>
+              p.map((texto, n) => (n === p.length - 1 ? `${texto}{{${campo}}}` : texto)),
+            )
+          }
+        />
+      ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="doc-titulo">Título</Label>
@@ -126,7 +159,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
       <div className="flex gap-2">
         <Button
           variant="outline"
-          disabled={paginas.length >= 5}
+          disabled={paginas.length >= 40}
           onClick={() => setPaginas((p) => [...p, ""])}
         >
           Adicionar página

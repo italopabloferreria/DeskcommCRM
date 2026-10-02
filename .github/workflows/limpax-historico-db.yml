@@ -30,5 +30,5 @@ jobs:
           CONFERENCIA_KIT_RELEASE: v1.69.0
           TEST_DB_IMAGE: pgvector/pgvector:pg${{ matrix.pg }}
           GH_TOKEN: ${{ github.token }}
-        run: pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts tests/invariants/limpax-history-atomic-draft.test.ts
+        run: pnpm test:db tests/invariants/limpax-history-storage-draft.test.ts tests/invariants/limpax-history-atomic-draft.test.ts tests/invariants/limpax-history-lifecycle-draft.test.ts
 # Public fork only; no operational credentials, migrations, real imports, image publication or deploy.

@@ -138,6 +138,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       bytes,
       nome,
       typeof worksheet === "string" ? worksheet : undefined,
+      form.get("preview") === "true",
     );
     if (!parsed.ok) {
       return fail("validation_failed", parsed.error, 422, { requestId });

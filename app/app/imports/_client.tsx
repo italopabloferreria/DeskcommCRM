@@ -120,8 +120,8 @@ export function ImportsListClient() {
       <div>
         <h1 className="text-xl font-semibold">{t("Importações")}</h1>
         <p className="text-sm text-muted-foreground">
-          {t("CSV ou XLSX para importação. XLSM para analisar as abas, sem executar macros.")}
-          {" "}{t("CSV/XLSX: até 2.000 linhas por carga. Análise XLSM: até 10.000 linhas por aba.")}
+          {t("CSV ou XLSX para importação. XLSM para analisar as abas, sem executar macros.")}{" "}
+          {t("Análise: até 10.000 linhas. Gravação CSV/XLSX: lotes de até 2.000 linhas.")}
         </p>
       </div>
 
@@ -345,9 +345,17 @@ export function ImportsListClient() {
               </TableBody>
             </Table>
           </div>
+          {preview.total_rows > 2000 && (
+            <p className="text-sm text-muted-foreground">
+              {t(
+                "Todas as linhas foram analisadas. A gravação exige lotes de até 2.000 linhas; esta análise não salvou clientes.",
+              )}
+            </p>
+          )}
           <Button
             disabled={
               uploading ||
+              preview.total_rows > 2000 ||
               preview.workbook?.analysis_only ||
               !Array.isArray(preview.column_coverage) ||
               !Object.values(mapping).some(Boolean) ||

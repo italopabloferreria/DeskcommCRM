@@ -21,6 +21,38 @@ function workbook(rows = 2): ArrayBuffer {
 }
 
 describe("XLSM: análise explícita sem executar macros", () => {
+  it("remove só colunas sem título inteiramente vazias, preservando posições e valores", async () => {
+    const bytes = new TextEncoder().encode(
+      ";Nome;Telefone\n;Teste;61999999999\n;Outro;61888888888",
+    ).buffer;
+    const result = await parseImportFile(bytes, "cadastro.csv");
+    expect(result.ok).toBe(true);
+    if (result.ok)
+      expect(result.sheet).toEqual({
+        headers: ["Nome", "Telefone"],
+        rows: [
+          ["Teste", "61999999999"],
+          ["Outro", "61888888888"],
+        ],
+      });
+    const filled = await parseImportFile(
+      new TextEncoder().encode(";Nome\nvalor;Teste").buffer,
+      "cadastro.csv",
+    );
+    expect(filled.ok && filled.sheet.headers[0]).toBe("");
+  });
+  it("analisa XLSX e CSV grandes sem ampliar o limite de gravação", async () => {
+    const xlsx = await parseImportFile(workbook(4180), "cadastro.xlsx", undefined, true);
+    expect(xlsx.ok).toBe(true);
+    if (xlsx.ok) expect(xlsx.sheet.rows).toHaveLength(4180);
+    const csv = new TextEncoder().encode(
+      "Nome\n" + Array.from({ length: 4180 }, (_, i) => `Teste ${i}`).join("\n"),
+    );
+    const preview = await parseImportFile(csv.buffer, "cadastro.csv", undefined, true);
+    expect(preview.ok).toBe(true);
+    if (preview.ok) expect(preview.sheet.rows).toHaveLength(4180);
+    expect((await parseImportFile(csv.buffer, "cadastro.csv")).ok).toBe(false);
+  });
   it("lê todas as 4180 linhas da aba para análise, sem fingir ser um lote importável", async () => {
     const result = await parseImportFile(workbook(4180), "cadastro.XLSM");
     expect(result.ok).toBe(true);

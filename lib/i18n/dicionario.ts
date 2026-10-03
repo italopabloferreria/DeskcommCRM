@@ -5536,6 +5536,8 @@ export const DICIONARIO: Traducoes = {
   "CSV/XLSX: até 2.000 linhas por carga. Análise XLSM: até 10.000 linhas por aba.": { es: "CSV/XLSX: hasta 2.000 filas por carga. Análisis XLSM: hasta 10.000 filas por hoja." },
   "Nenhuma conexão cadastrada ainda.": { es: "Todavía no hay conexiones registradas." },
   "conexão cadastrada": { es: "conexión registrada" },
+  "Análise: até 10.000 linhas. Gravação CSV/XLSX: lotes de até 2.000 linhas.": { es: "Análisis: hasta 10.000 filas. Guardado CSV/XLSX: lotes de hasta 2.000 filas." },
+  "Todas as linhas foram analisadas. A gravação exige lotes de até 2.000 linhas; esta análise não salvou clientes.": { es: "Todas las filas fueron analizadas. El guardado requiere lotes de hasta 2.000 filas; este análisis no guardó clientes." },
   "conexões cadastradas": { es: "conexiones registradas" },
   "números conectados": { es: "números conectados" },
   "Atualizar saúde": { es: "Actualizar salud" },

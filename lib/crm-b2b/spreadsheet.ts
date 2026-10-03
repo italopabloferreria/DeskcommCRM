@@ -55,6 +55,7 @@ export async function parseImportFile(
   bytes: ArrayBuffer,
   filename: string,
   worksheetName?: string,
+  preview = false,
 ): Promise<Leitura> {
   if (bytes.byteLength > IMPORT_MAX_BYTES) {
     return { ok: false, error: `Arquivo maior que ${IMPORT_MAX_BYTES} bytes.` };
@@ -62,8 +63,10 @@ export async function parseImportFile(
   if (isXlsmFilename(filename)) return parseXlsx(bytes, { worksheetName });
   if (worksheetName !== undefined)
     return { ok: false, error: "A seleção de aba está disponível somente na análise XLSM." };
-  if (isXlsxFilename(filename)) return parseXlsx(bytes);
-  if (isCsvFilename(filename)) return parseCsvBytes(bytes);
+  if (isXlsxFilename(filename))
+    return parseXlsx(bytes, undefined, preview ? XLSM_MAX_PREVIEW_ROWS : IMPORT_MAX_DATA_ROWS);
+  if (isCsvFilename(filename))
+    return parseCsvBytes(bytes, preview ? XLSM_MAX_PREVIEW_ROWS : IMPORT_MAX_DATA_ROWS);
   return { ok: false, error: "Formato não suportado — envie .csv ou .xlsx." };
 }
 
@@ -90,13 +93,24 @@ function matrizParaPlanilha(matrix: string[][], maxRows = IMPORT_MAX_DATA_ROWS):
     while (out.length < width) out.push("");
     return out;
   });
-  return { ok: true, sheet: { headers, rows: normalized } };
+  // Excel conserva células de formatação vazias. Só retirar uma coluna sem
+  // título se nenhuma linha do arquivo contém dado nela; manter as posições.
+  const kept = headers.flatMap((header, index) =>
+    header || normalized.some((row) => row[index]!.trim() !== "") ? [index] : [],
+  );
+  return {
+    ok: true,
+    sheet: {
+      headers: kept.map((index) => headers[index]!),
+      rows: normalized.map((row) => kept.map((index) => row[index]!)),
+    },
+  };
 }
 
-function parseCsvBytes(bytes: ArrayBuffer): Leitura {
+function parseCsvBytes(bytes: ArrayBuffer, maxRows = IMPORT_MAX_DATA_ROWS): Leitura {
   const decoded = decodificarCsv(bytes);
   if ("erro" in decoded) return { ok: false, error: decoded.erro };
-  return matrizParaPlanilha(parseCsv(decoded.texto));
+  return matrizParaPlanilha(parseCsv(decoded.texto), maxRows);
 }
 
 const ENTIDADES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
@@ -143,7 +157,11 @@ function valorDaCelula(attrs: string, corpo: string, compartilhados: string[]): 
   return Number.isFinite(n) ? String(n) : v;
 }
 
-function parseXlsx(bytes: ArrayBuffer, analysis?: { worksheetName?: string }): Leitura {
+function parseXlsx(
+  bytes: ArrayBuffer,
+  analysis?: { worksheetName?: string },
+  previewMaxRows = IMPORT_MAX_DATA_ROWS,
+): Leitura {
   let arquivos: Record<string, Uint8Array>;
   let grandeDemais = false;
   let totalXmlBytes = 0;
@@ -226,15 +244,12 @@ function parseXlsx(bytes: ArrayBuffer, analysis?: { worksheetName?: string }): L
       celulas[i] = valorDaCelula(attrs, c[2] ?? "", compartilhados);
     }
     if (celulas.some((v) => v.trim() !== "")) matriz.push(celulas);
-    const maxRows = analysis ? XLSM_MAX_PREVIEW_ROWS : IMPORT_MAX_DATA_ROWS;
+    const maxRows = analysis ? XLSM_MAX_PREVIEW_ROWS : previewMaxRows;
     if (matriz.length > maxRows + 1) {
       return { ok: false, error: `Máximo de ${maxRows} linhas de dados.` };
     }
   }
-  const result = matrizParaPlanilha(
-    matriz,
-    analysis ? XLSM_MAX_PREVIEW_ROWS : IMPORT_MAX_DATA_ROWS,
-  );
+  const result = matrizParaPlanilha(matriz, analysis ? XLSM_MAX_PREVIEW_ROWS : previewMaxRows);
   if (!result.ok || !analysis) return result;
   return {
     ...result,

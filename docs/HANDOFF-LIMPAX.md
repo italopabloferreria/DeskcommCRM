@@ -1,5 +1,25 @@
 # Retomada da vertical LimpaxCRM
 
+## Teste solicitado com planilha real — 03/10/2026
+
+Titular autorizou testar arquivo da pasta Documentos e corrigir erro2000.
+Leitor real executado sobre o original XLSM: CADASTRO4180 linhas; encontrou
+coluna sem título totalmente vazia que bloqueava a validação de cabeçalho.
+Corrigido descarte somente de colunas sem título e sem dados em todas as
+linhas. CADASTRO agora4180 linhas/7 colunas úteis/zero cabeçalhos vazios.
+Original406280 bytes e hash inalterados, macros não executadas, zero escritas
+no banco. Recibo privado real-workbook-result.json fora do Git.
+Análise CSV/XLSX até10000 linhas também implementada, com regressão RED/GREEN;
+38 testes em4 arquivos passaram. Confirmar acima2000 bloqueado na UI antes
+de falhar no servidor; carga continua por lotes e não é análise XLSM.
+Duas abas auxiliares ainda contêm dados fora de colunas tituladas: recusa
+explícita; não truncar nem considerar abas auxiliares cadastros novos.
+Gravação real permanece NÃO executada: RPC0495 não instalada e recuperação
+isolada não comprovada; endereços/histórico exigem contrato0507 revisado.
+Autorização de testar/carga existe; não substitui esses pré-requisitos de
+integridade. Próximo executável é comprovar recuperação, validar/aplicar
+migrações condicionadas e então confirmar lotes reais com rastreabilidade.
+
 ## Aceite autenticado complementar — 03/10/2026
 
 CRM3001 HTTP200 e Chrome autenticado. Arquivamento recuperável executado

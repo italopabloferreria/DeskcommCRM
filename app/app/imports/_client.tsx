@@ -24,6 +24,7 @@ import {
 import type { MappingField, WorkbookAnalysis } from "@/lib/crm-b2b/spreadsheet";
 import type { historicalPreview } from "@/lib/crm-b2b/historical-preview";
 interface Preview {
+  operational_columns?: { header: string; destination: string; populated_rows: number }[];
   workbook?: WorkbookAnalysis;
   source_sha256?: string;
   headers: string[];
@@ -210,28 +211,74 @@ export function ImportsListClient() {
               "Esta análise não gravou clientes. Sem telefone, o registro fica em Empresas/Pessoas. Não cria oportunidades nem envia mensagens.",
             )}
           </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {IMPORT_FIELDS.map((field) => (
-              <label key={field.key} className="grid gap-1 text-sm">
-                {t(field.label)}
-                <select
-                  className="rounded-md border bg-background p-2 focus-visible:outline-2"
-                  value={mapping[field.key] ?? ""}
-                  disabled={uploading}
-                  onChange={(e) =>
-                    setMapping((current) => ({ ...current, [field.key]: e.target.value }))
-                  }
-                >
-                  <option value="">{t("Não importar este campo")}</option>
-                  {preview.headers.map((header) => (
-                    <option key={header} value={header}>
-                      {header}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-          </div>
+          <p className="text-sm text-muted-foreground">
+            {t(
+              "Cliente pode ser pessoa ou empresa. Uma coluna NOME não determina o tipo. Não use o mesmo nome como empresa e pessoa sem revisar.",
+            )}
+          </p>
+          {[
+            { title: "Pessoa / contato", keys: ["person_name", "job_title", "phone", "email"] },
+            {
+              title: "Empresa — somente quando aplicável",
+              keys: ["company_name", "legal_name", "trade_name", "cnpj"],
+            },
+          ].map((group) => (
+            <fieldset key={group.title} className="rounded-md border p-3">
+              <legend className="px-2 font-medium">{t(group.title)}</legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {IMPORT_FIELDS.filter((field) => group.keys.includes(field.key)).map((field) => (
+                  <label key={field.key} className="grid gap-1 text-sm">
+                    {t(field.label)}
+                    <select
+                      className="rounded-md border bg-background p-2 focus-visible:outline-2"
+                      value={mapping[field.key] ?? ""}
+                      disabled={uploading}
+                      onChange={(e) =>
+                        setMapping((current) => ({ ...current, [field.key]: e.target.value }))
+                      }
+                    >
+                      <option value="">{t("Não importar este campo")}</option>
+                      {preview.headers.map((header) => (
+                        <option key={header} value={header}>
+                          {header}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+          {preview.operational_columns && (
+            <section className="space-y-2 rounded-md border p-3">
+              <h3 className="font-medium">{t("Correlação operacional — somente análise")}</h3>
+              <p className="text-sm">
+                {t(
+                  "Estes destinos são sugestões de revisão. Não criam clientes, serviços, pagamentos ou notas fiscais.",
+                )}
+              </p>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t("Coluna")}</TableHead>
+                      <TableHead>{t("Destino sugerido")}</TableHead>
+                      <TableHead>{t("Linhas preenchidas")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {preview.operational_columns.map((column) => (
+                      <TableRow key={column.header}>
+                        <TableCell>{column.header}</TableCell>
+                        <TableCell>{t(column.destination)}</TableCell>
+                        <TableCell>{column.populated_rows}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </section>
+          )}
           {preview.historical_review && (
             <section
               aria-label={t("Locais e histórico de serviços")}

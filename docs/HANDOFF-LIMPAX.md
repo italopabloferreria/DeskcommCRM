@@ -1,5 +1,29 @@
 # Retomada da vertical LimpaxCRM
 
+## Correlação operacional implementada03/10
+
+UI separa Pessoa/contato de Empresa; API de prévia acrescenta
+operational_columns com destinos sugeridos e contagem integral de cada coluna.
+Reconhece cadastro/local/serviço/equipe/solicitante/financeiro histórico;
+desconhecidos vão para revisão. Não é gravação nem mapeamento histórico editável.
+Planilha real revalidada: CADASTRO4180 linhas;7 destinos; original inalterado.
+26 testes em3 arquivos aprovados, lint direcionado aprovado. Typecheck integral aprovado.
+Chrome confirmou grupos novos com prévia anterior. Reanálise seguida de HMR
+reinicializou upload; tabela nova ainda não recebeu aceite visual final.
+Servidor3001 ativo. Nenhuma escrita/migração, convite ou mensagem.
+Próximo: revisão por linha/aba com títulos repetidos, fechamentos e datas
+Excel; depois recuperação/migrações/carga. Contrato operacional permanece
+em docs/LIMPAX_OPERATIONAL_WORKBOOK.md; G13 aberto.
+
+## Esclarecimento operacional do titular03/10
+
+Planilha é cadastro + histórico de serviços + locais + equipes + pagamentos
+e referências NF. Não tratar abas específicas como descartáveis. Ler
+docs/LIMPAX_OPERATIONAL_WORKBOOK.md antes de alterar mapeamento/importação.
+UI atual B2B genérica ainda não cobre esse modelo; nenhuma correção de
+mapeamento implementada após o envio das imagens. Nome genérico e cores
+não autorizam inferir tipo de cliente/status. Servidor3001 HTTP200 mantido.
+
 ## Teste solicitado com planilha real — 03/10/2026
 
 Titular autorizou testar arquivo da pasta Documentos e corrigir erro2000.

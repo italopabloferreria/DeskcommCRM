@@ -1,5 +1,6 @@
 import { applyMapping, type MappingField, type SheetMatrix } from "./spreadsheet";
 import { historicalPreview } from "./historical-preview";
+import { operationalColumns } from "./operational-columns";
 export const IMPORT_FIELDS: { key: MappingField; label: string }[] = [
   { key: "company_name", label: "Empresa" },
   { key: "legal_name", label: "Razão social" },
@@ -50,6 +51,7 @@ export function importPreview(sheet: SheetMatrix, mapping: Partial<Record<Mappin
   const coverage = importColumnCoverage(sheet);
   return {
     headers: sheet.headers,
+    operational_columns: operationalColumns(sheet),
     total_rows: sheet.rows.length,
     mapping,
     column_coverage: coverage,

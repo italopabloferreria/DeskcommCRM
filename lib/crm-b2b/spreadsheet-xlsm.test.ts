@@ -21,6 +21,24 @@ function workbook(rows = 2): ArrayBuffer {
 }
 
 describe("XLSM: análise explícita sem executar macros", () => {
+  it("preserva coluna preenchida sem título na análise XLSM", async () => {
+    const zip = zipSync({
+      "xl/workbook.xml": strToU8('<workbook><sheet name="Serviços" r:id="rId1"/></workbook>'),
+      "xl/_rels/workbook.xml.rels": strToU8(
+        '<Relationships><Relationship Id="rId1" Target="worksheets/sheet1.xml"/></Relationships>',
+      ),
+      "xl/worksheets/sheet1.xml": strToU8(
+        '<worksheet><row><c r="A1" t="inlineStr"><is><t>Data</t></is></c></row><row><c r="A2"><v>45183</v></c><c r="B2" t="inlineStr"><is><t>informação sem título</t></is></c></row></worksheet>',
+      ),
+    });
+    const result = await parseImportFile(new Uint8Array(zip).buffer, "servicos.xlsm");
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.sheet.headers).toEqual(["Data", "Coluna sem título 2"]);
+      expect(result.sheet.rows[0]).toEqual(["45183", "informação sem título"]);
+    }
+    expect((await parseImportFile(new Uint8Array(zip).buffer, "servicos.xlsx")).ok).toBe(false);
+  });
   it("remove só colunas sem título inteiramente vazias, preservando posições e valores", async () => {
     const bytes = new TextEncoder().encode(
       ";Nome;Telefone\n;Teste;61999999999\n;Outro;61888888888",

@@ -71,7 +71,11 @@ export async function parseImportFile(
 }
 
 /** Cabeçalho + linhas, cada linha aparada ou completada até a largura do cabeçalho. */
-function matrizParaPlanilha(matrix: string[][], maxRows = IMPORT_MAX_DATA_ROWS): Leitura {
+function matrizParaPlanilha(
+  matrix: string[][],
+  maxRows = IMPORT_MAX_DATA_ROWS,
+  allowUntitled = false,
+): Leitura {
   if (matrix.length < 2) {
     return { ok: false, error: "Preciso de cabeçalho e ao menos uma linha de dados." };
   }
@@ -80,8 +84,11 @@ function matrizParaPlanilha(matrix: string[][], maxRows = IMPORT_MAX_DATA_ROWS):
   if (rows.length > maxRows) {
     return { ok: false, error: `Máximo de ${maxRows} linhas de dados.` };
   }
-  const width = headers.length;
-  if (rows.some((row) => row.slice(width).some((cell) => cell.trim() !== ""))) {
+  const width = allowUntitled
+    ? Math.max(headers.length, ...rows.map((row) => row.length))
+    : headers.length;
+  while (headers.length < width) headers.push("");
+  if (!allowUntitled && rows.some((row) => row.slice(width).some((cell) => cell.trim() !== ""))) {
     return {
       ok: false,
       error:
@@ -101,7 +108,13 @@ function matrizParaPlanilha(matrix: string[][], maxRows = IMPORT_MAX_DATA_ROWS):
   return {
     ok: true,
     sheet: {
-      headers: kept.map((index) => headers[index]!),
+      headers: kept.map((index) => {
+        if (headers[index] || !allowUntitled) return headers[index]!;
+        let title = `Coluna sem título ${index + 1}`;
+        while (headers.includes(title)) title += " (sem título)";
+        headers[index] = title;
+        return title;
+      }),
       rows: normalized.map((row) => kept.map((index) => row[index]!)),
     },
   };
@@ -249,7 +262,11 @@ function parseXlsx(
       return { ok: false, error: `Máximo de ${maxRows} linhas de dados.` };
     }
   }
-  const result = matrizParaPlanilha(matriz, analysis ? XLSM_MAX_PREVIEW_ROWS : previewMaxRows);
+  const result = matrizParaPlanilha(
+    matriz,
+    analysis ? XLSM_MAX_PREVIEW_ROWS : previewMaxRows,
+    Boolean(analysis),
+  );
   if (!result.ok || !analysis) return result;
   return {
     ...result,

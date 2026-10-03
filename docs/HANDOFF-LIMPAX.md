@@ -1,5 +1,18 @@
 # Retomada da vertical LimpaxCRM
 
+## Revisão operacional por linha03/10
+
+Prévia inclui contagens de possíveis registros, cabeçalhos repetidos,
+fechamentos e linhas/datas para revisão. Nenhuma classificação exclui linhas;
+conteúdo bruto permanece preservado. XLSM permite análise de colunas sem
+nome com títulos provisórios únicos; CSV/XLSX mantêm validação estrita.
+Teste privado leu as9 abas:4180/260/487/9/18/3/10/63/8 linhas.
+CALENDARIO é auxiliar, não cadastro. Original inalterado; zero escrita no banco.
+45 testes passaram; lint direcionado e typecheck integral aprovados.
+CRM3001 aberto, tela sem arquivo selecionado: aceite visual da nova seção
+pendente; upload automatizado permanece bloqueado pela extensão.
+Próximo executável: mapeamento operacional editável e revisão de identidades;
+carga exige recuperação isolada e validação das migrações0495/0507. G13 aberto.
 ## Correlação operacional implementada03/10
 
 UI separa Pessoa/contato de Empresa; API de prévia acrescenta

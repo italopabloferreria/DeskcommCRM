@@ -16,7 +16,7 @@ e o arquivo real ficam privados; este documento registra somente a estrutura.
 | Mês, dia da semana, blocos mensais e total fechado | Organização e fechamento de período; não transformar total em atendimento |
 | CALENDARIO | Ferramenta auxiliar; não contém clientes a importar |
 
-As abas de serviços não são descartáveis. A recusa atual de abas com células
+As abas de serviços não são descartáveis. A recusa anterior de abas com células
 mescladas/títulos ausentes é limitação do leitor genérico, não indicação de
 que esses dados não importam. Datas em intervalos/múltiplos dias, valores
 ausentes, linhas sem nome e marcadores de asteriscos devem ir para revisão.
@@ -37,9 +37,8 @@ Preservar conteúdo bruto e origem arquivo/aba/linha antes de normalizar.
 
 ## Situação e próximo bloco
 
-Leitura CADASTRO4180 linhas/7 colunas úteis comprovada; gravação não executada.
-A tela ainda é B2B genérica e precisa grupos cliente/pessoa, empresa, local,
-atendimento, equipe e financeiro histórico, com cobertura integral das colunas.
-Antes de importar: classificação por aba/linha, revisão de identidade,
+Leitura das9 abas comprovada03/10, incluindo CADASTRO4180 linhas/7 colunas úteis e ULTRABOX487 linhas. Colunas preenchidas sem título recebem nome provisório apenas na análise XLSM; nenhuma célula preenchida é descartada. Prévia classifica candidatos a cabeçalho/fechamento/registro/revisão e conserva células brutas. Gravação não executada.
+A tela separa pessoa/contato e empresa e mostra destinos operacionais por coluna. Falta correlação editável de local, atendimento, equipe e financeiro histórico.
+Antes de importar: revisão das sugestões por aba/linha, correlação de identidade,
 recuperação isolada e migrações transacionais validadas. Gates anteriores
 continuam vigentes. Este esclarecimento não comprova migração ou produção.

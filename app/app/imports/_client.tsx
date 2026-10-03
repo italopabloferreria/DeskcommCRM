@@ -24,6 +24,12 @@ import {
 import type { MappingField, WorkbookAnalysis } from "@/lib/crm-b2b/spreadsheet";
 import type { historicalPreview } from "@/lib/crm-b2b/historical-preview";
 interface Preview {
+  operational_review?: {
+    total_rows: number;
+    counts: { header: number; closure: number; record: number; review: number };
+    dates_for_review: number;
+    sample: { data_row_index: number; kind: string; date_raw: string; date_status: string }[];
+  };
   operational_columns?: { header: string; destination: string; populated_rows: number }[];
   workbook?: WorkbookAnalysis;
   source_sha256?: string;
@@ -249,6 +255,25 @@ export function ImportsListClient() {
               </div>
             </fieldset>
           ))}
+          {preview.operational_review && (
+            <section className="space-y-2 rounded-md border p-3">
+              <h3 className="font-medium">{t("Revisão de linhas operacionais")}</h3>
+              <p className="text-sm">
+                {t("Possíveis registros")}: {preview.operational_review.counts.record} ·{" "}
+                {t("Cabeçalhos repetidos")}: {preview.operational_review.counts.header} ·{" "}
+                {t("Possíveis fechamentos")}: {preview.operational_review.counts.closure} ·{" "}
+                {t("Linhas para revisão")}: {preview.operational_review.counts.review}
+              </p>
+              <p className="text-sm">
+                {t("Datas para revisão")}: {preview.operational_review.dates_for_review}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "Nenhuma linha foi excluída. Cabeçalhos e fechamentos são sugestões de classificação; datas numéricas do Excel e intervalos permanecem no original para revisão.",
+                )}
+              </p>
+            </section>
+          )}
           {preview.operational_columns && (
             <section className="space-y-2 rounded-md border p-3">
               <h3 className="font-medium">{t("Correlação operacional — somente análise")}</h3>

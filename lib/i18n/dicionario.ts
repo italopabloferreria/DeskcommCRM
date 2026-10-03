@@ -5533,6 +5533,10 @@ export const DICIONARIO: Traducoes = {
   "Não foi possível carregar seus números.": { es: "No se pudieron cargar tus números." },
   "Nenhum número conectado ainda.": { es: "Todavía no hay números conectados." },
   "número conectado": { es: "número conectado" },
+  "CSV/XLSX: até 2.000 linhas por carga. Análise XLSM: até 10.000 linhas por aba.": { es: "CSV/XLSX: hasta 2.000 filas por carga. Análisis XLSM: hasta 10.000 filas por hoja." },
+  "Nenhuma conexão cadastrada ainda.": { es: "Todavía no hay conexiones registradas." },
+  "conexão cadastrada": { es: "conexión registrada" },
+  "conexões cadastradas": { es: "conexiones registradas" },
   "números conectados": { es: "números conectados" },
   "Atualizar saúde": { es: "Actualizar salud" },
   "O serviço do WhatsApp não está configurado.": {

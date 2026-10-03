@@ -121,6 +121,7 @@ export function ImportsListClient() {
         <h1 className="text-xl font-semibold">{t("Importações")}</h1>
         <p className="text-sm text-muted-foreground">
           {t("CSV ou XLSX para importação. XLSM para analisar as abas, sem executar macros.")}
+          {" "}{t("CSV/XLSX: até 2.000 linhas por carga. Análise XLSM: até 10.000 linhas por aba.")}
         </p>
       </div>
 

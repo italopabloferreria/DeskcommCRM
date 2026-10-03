@@ -1,5 +1,21 @@
 # Retomada da vertical LimpaxCRM
 
+## Aceite autenticado complementar — 03/10/2026
+
+CRM3001 HTTP200 e Chrome autenticado. Arquivamento recuperável executado
+pela interface na conexão órfã antiga terminada615887; saiu da lista e
+persistiu após reload. Número do titular preservado; outra conexão não
+verificada preservada. Contagem caiu3 para2; banner atualizado após reload.
+Não há WAHA ativo, QR operacional ou logout remoto comprovado.
+Imagem de evidência privada fora do Git: conexoes-arquivamento-20261003.png.
+Textos agora distinguem conexões cadastradas de conectadas e limites por
+formato. Lint direcionado e19 testes da UI passaram. Typecheck anterior
+aprovado; alteração complementar apenas texto/traduções.
+Upload sintético XLSM pelo conector bloqueado pela permissão da extensão
+para arquivos locais; não afrouxada. Teste automatizado comprova4180 linhas,
+seleção de aba, cache de fórmula, recusa10001 e preservação do limiteXLSX.
+Oracle segue na tela de autenticação: sem novo resultado de capacidade.
+
 ## Correções XLSM e conexão órfã — 03/10/2026
 
 XLSM aceito para análise por aba até10000 linhas, sem executar macros nem

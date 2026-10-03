@@ -266,8 +266,8 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
           {isError
             ? t("Não foi possível carregar seus números.")
             : list.length === 0
-              ? t("Nenhum número conectado ainda.")
-              : `${list.length} ${list.length === 1 ? t("número conectado") : t("números conectados")}.`}
+              ? t("Nenhuma conexão cadastrada ainda.")
+              : `${list.length} ${list.length === 1 ? t("conexão cadastrada") : t("conexões cadastradas")}.`}
         </p>
         <div className="flex gap-2">
           {list.length > 0 && (

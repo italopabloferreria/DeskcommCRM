@@ -37,6 +37,15 @@ import type { Idioma } from "./idiomas";
 type Traducoes = Record<string, Partial<Record<Exclude<Idioma, "pt-BR">, string>>>;
 
 export const DICIONARIO: Traducoes = {
+  "Arquivar no CRM": { es: "Archivar en el CRM" },
+  "Conexão arquivada no CRM. A sessão do aparelho não foi alterada.": { es: "Conexión archivada en el CRM. No se modificó la sesión del dispositivo." },
+  "A conexão sai da lista do CRM, preservando histórico e configurações. A sessão no aparelho não será desconectada; se ainda existir, remova-a em Aparelhos conectados do WhatsApp.": { es: "La conexión sale de la lista del CRM, conservando el historial y la configuración. No se desconectará la sesión del dispositivo; si sigue existiendo, elimínala en Dispositivos vinculados de WhatsApp." },
+  "CSV ou XLSX para importação. XLSM para analisar as abas, sem executar macros.": { es: "CSV o XLSX para importar. XLSM para analizar las hojas sin ejecutar macros." },
+  "Análise XLSM": { es: "Análisis XLSM" },
+  "Somente análise: nenhuma macro foi executada ou fórmula recalculada. Cada aba é analisada separadamente; nenhuma linha desta aba foi cortada.": { es: "Solo análisis: no se ejecutaron macros ni se recalcularon fórmulas. Cada hoja se analiza por separado; no se recortó ninguna fila de esta hoja." },
+  "Aba da planilha": { es: "Hoja del archivo" },
+  "abas no arquivo": { es: "hojas en el archivo" },
+  "A carga integral desta planilha exige lotes revisados e recuperação validada. Esta tela não importa o XLSM.": { es: "La carga completa de este archivo requiere lotes revisados y recuperación validada. Esta pantalla no importa el XLSM." },
   "Conferi os clientes e autorizo gravar este lote.": { es: "Revisé los clientes y autorizo guardar este lote." },
   "Confirmar histórico": { es: "Confirmar historial" },
   "Recibo": { es: "Comprobante" },

@@ -1,5 +1,80 @@
 # Retomada da vertical LimpaxCRM
 
+## Correções XLSM e conexão órfã — 03/10/2026
+
+XLSM aceito para análise por aba até10000 linhas, sem executar macros nem
+recalcular fórmulas. Carga XLSM bloqueada no servidor e UI; CSV/XLSX mantêm
+2000 linhas. Nenhuma importação real realizada. Conexões QR agora oferecem
+Arquivar no CRM: preserva histórico e configurações, exige administrador,
+mesma origem/organização e conexão sem operação em andamento; não chama
+WAHA nem desconecta aparelho. Fluxo normal de desconexão permanece separado.
+
+Validação:99 testes em7 arquivos passaram; lint direcionado passou; diff
+sem erros. Typecheck aprovado; aceite autenticado pendente.
+Servidor na3001 porque3000 está ocupada por outro projeto do titular;
+login LimpaxCRM confirmado no Chrome. Não parar o outro projeto.
+Oracle03/10 pediu login antes da verificação de capacidade; último erro
+comprovado é falta de capacidade A1 em02/10. Nenhum recurso pago criado.
+Render Free suspende após15min sem tráfego e não oferece disco persistente:
+não substitui VPS contínua do WAHA. Vercel Hobby restringe uso comercial.
+Fontes: https://render.com/docs/free e https://vercel.com/docs/plans/hobby.
+G13 aberto; restauração isolada e aceite hospedado precedem carga real.
+
+## Documentos e dados: verificação local e localização dos módulos — 02/10/2026
+
+Servidor conferido antes do trabalho: /login HTTP200; Next dev mantido ativo.
+Chrome autenticado verificou /app/documents: busca de modelos retornou
+“Acervo atualizado”; busca da empresa fictícia [DEMO] Horizonte preencheu o
+nome. Variáveis de cliente/data foram preenchidas; ausência de data recusada
+na UI. POST /api/v1/documents/preview HTTP200; documento-previa.pdf baixado
+(2252 bytes, uma página), texto extraído e render visual conferido sem cortes.
+Espera de download do conector expirou, mas arquivo e resposta200 confirmaram
+sucesso. Modelo não salvo; sem upload de original/PNG real, migração ou importação.
+Presença usual da interface permanece automática.
+
+Caminho verificado: CRM > Ver tudo em CRM (/app/crm): Empresas/Pessoas em
+“O dia a dia da venda”; Importações em “Preparar a venda”; Documentos em
+“Fechar a venda”. PNG assinatura/carimbo e OCR estão dentro de Documentos.
+Links da central e tela de Documentos mantidos no Chrome externo. Painel
+interno tem sessão independente; não presumir que esteja autenticado.
+
+Implementado: OCR local pt-BR para PDF textual/escaneado e PNG/JPEG; revisão
+para texto editável/variáveis; modelos e imagens versionados em Storage
+privado; prévia PDF com posições por página. OCR não reproduz fielmente o
+layout original; arquivo original não é arquivado. PNG é sobreposição visual,
+sem assinatura criptográfica. Gov.br é portal externo/manual; DocuSign não
+conectado. Prévia emitida não é arquivada nem recebe numeração definitiva.
+Base real XLSM preservada em staging privado:4148 linhas com nome não são
+4148 clientes únicos; nenhuma mesclagem/importação operacional realizada.
+Vínculos de empresa/pessoa/contato e locais/histórico precisam revisão explícita.
+
+Próximo executável: provar restauração integral isolada antes0495/0507;
+aceite local de documentos não fecha G13 nem substitui aceite hospedado.
+Bloqueios externos: quota gratuita de destino Supabase e capacidade A1 Oracle.
+Roadmap: arquivo de emitidos/retorno assinado, DocuSign, OpenRouter, fiscal,
+domínio crm.limpaxdf.com.br. Evidências sintéticas privadas fora do Git.
+
+## Visualização local retomada — 02/10/2026
+
+Pedido do titular: abrir o CRM para acompanhar e sempre conferir o servidor
+local antes de iniciar os próximos trabalhos. Regra permanente registrada
+nos AGENTS.md do site e do fork. Substitui a restrição anterior de Next OFF;
+Docker/WAHA/workers/crons continuam desligados. Uma instância Next dev do
+fork atual em127.0.0.1:3000, heap Node limitado a2048 MB, processo inicial4152
+e listener3556; logs privados fora do Git. Assets OCR preparados das deps
+locais. Não utilizar build30/09 para representar o código atual.
+Chrome externo abriu http://localhost:3000/app/companies com sessão já
+autenticada: tela Empresas carregou12 empresas[DEMO] e1[TESTE]. API companies
+HTTP200. Presença normal da interface executou automaticamente; nenhum
+seed/importação/migração/convite realizado. A abertura no painel Codex foi
+enfileirada; a visualização efetiva foi verificada no Chrome. Servidor mantido
+ativo para acompanhamento. G13 continua aberto; disponibilidade local não
+comprova aceite hospedado. Oracle recusou A1 por capacidade nesta data.
+Próximo executável: acompanhar/revisar telas locais mantendo o servidor;
+gate de dados ainda exige restauração integral antes0495/0507. Bloqueios
+externos: VPS Oracle e destino separado gratuito Supabase. Roadmap posterior:
+DocuSign, OpenRouter, fiscal e domínio crm.limpaxdf.com.br.
+
 ## Preparação da recuperação concluída — 02/10/2026
 
 Autorização: continuar o máximo possível sem consultas repetidas. Código

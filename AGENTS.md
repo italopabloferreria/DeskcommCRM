@@ -6,6 +6,18 @@
 > Precedência quando dois documentos discordam: `CLAUDE.md` > `docs/specs/` > `docs/prd/` >
 > `HANDOFF-*.md` > `README.md`.
 
+## Acompanhamento local do LimpaxCRM — preferência do titular (02/10/2026)
+
+Antes de iniciar qualquer trabalho do LimpaxCRM, verificar se o servidor local
+em http://localhost:3000 está acessível e pertence a este fork. Se estiver
+desligado, iniciar uma única instância Next de desenvolvimento com o código
+atual e verificar a resposta HTTP/tela. Reutilizar a instância existente;
+manter o servidor e a interface disponíveis para o titular acompanhar.
+Não encerrar/reiniciar sem necessidade. Não iniciar Docker, WAHA, workers,
+crons ou builds completos apenas para visualizar o CRM. Esta autorização
+substitui a restrição anterior de Next local desligado, mantendo o cuidado
+com RAM. Pedido posterior explícito de parar os serviços prevalece.
+
 ## Project Overview
 
 Sistema operacional de vendas open source com agentes de IA nativos, multi-nicho (e-commerce,

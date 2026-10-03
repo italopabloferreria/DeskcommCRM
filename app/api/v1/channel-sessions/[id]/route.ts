@@ -175,15 +175,17 @@ export async function GET(
     req.nextUrl.searchParams.get("impact") === "1"
       ? await loadDeletionImpact(activeOrg.orgId, id)
       : null;
-  const comImpacto = <T extends object>(corpo: T): T & { deletion_impact?: ChannelDeletionImpact } =>
+  const comImpacto = <T extends object>(
+    corpo: T,
+  ): T & { deletion_impact?: ChannelDeletionImpact } =>
     impact ? { ...corpo, deletion_impact: impact } : corpo;
 
-  if (user.support?.access_mode === "support_readonly") return ok(comImpacto({ ...session, waha_configured: false }), { requestId });
+  if (user.support?.access_mode === "support_readonly")
+    return ok(comImpacto({ ...session, waha_configured: false }), { requestId });
   const waha = getWahaClient();
   // Canal oficial não tem sessão no transporte para consultar — `waha_session_name`
   // é NULL nele por CHECK, e perguntar assim mesmo pediria `/api/sessions/null`.
-  const nomeSessao =
-    session.provider === CHANNEL_PROVIDER_WAHA ? session.waha_session_name : null;
+  const nomeSessao = session.provider === CHANNEL_PROVIDER_WAHA ? session.waha_session_name : null;
   if (!waha || !nomeSessao) {
     // Nada a checar ao vivo (transporte fora do ar, ou canal que não vive nele):
     // devolve o que está no DB, sinalizando que o estado não foi confirmado agora.
@@ -205,7 +207,12 @@ export async function GET(
       gravado: phoneNumber,
     });
   } catch {
-    return fail("connection_status_failed", "Não foi possível conferir a conexão. Tente novamente.", 502, { requestId });
+    return fail(
+      "connection_status_failed",
+      "Não foi possível conferir a conexão. Tente novamente.",
+      502,
+      { requestId },
+    );
   }
 
   // Sincroniza o DB: sempre carimba o health check; atualiza status/telefone só se válido.
@@ -302,7 +309,7 @@ export async function GET(
  * Admin only. organization_id vem da sessão — nunca do path/body.
  */
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const supportDenied = await requireSupportWrite();
@@ -319,7 +326,12 @@ export async function DELETE(
   if (!authz.ok) return authz.response;
   const t = (texto: string) => traduzir(texto, authz.user.idioma);
   const { user, org: activeOrg } = authz;
-  if (await mfaEmDivida()) return fail("mfa_required", "Confirme a verificação em duas etapas.", 403, { requestId });
+  if (await mfaEmDivida())
+    return fail("mfa_required", "Confirme a verificação em duas etapas.", 403, { requestId });
+  const archiveLocal = req.nextUrl.searchParams.get("archive_local") === "1";
+  if (archiveLocal && req.headers.get("origin") !== req.nextUrl.origin) {
+    return fail("forbidden", "Origem inválida.", 403, { requestId });
+  }
 
   const supabase = await createClient();
   const { data: session } = await supabase
@@ -332,7 +344,16 @@ export async function DELETE(
     .maybeSingle();
   if (!session) return fail("not_found", t("Canal não encontrado."), 404, { requestId });
 
-  const impact = await loadDeletionImpact(activeOrg.orgId, id);
+  if (archiveLocal && session.provider !== CHANNEL_PROVIDER_WAHA) {
+    return fail("validation_failed", "Arquivamento local indisponível para este canal.", 422, {
+      requestId,
+    });
+  }
+  const measuredImpact = await loadDeletionImpact(activeOrg.orgId, id);
+  // A intenção local nunca apaga, mesmo sem dependências: permite recuperação.
+  const impact: ChannelDeletionImpact = archiveLocal
+    ? { ...measuredImpact, outcome: "archive" }
+    : measuredImpact;
   const arquivar = impact.outcome === "archive";
 
   const now = new Date().toISOString();
@@ -350,24 +371,52 @@ export async function DELETE(
   let webhookOverride: "desfeito" | "sem_credencial" | "falhou" = "sem_credencial";
 
   if (session.provider === CHANNEL_PROVIDER_WAHA) {
-    const waha = getWahaClient();
-    if (!waha) {
-      return fail(
-        "waha_not_configured",
-        t("O WhatsApp (WAHA) não está configurado neste ambiente (faltam WAHA_API_BASE_URL e/ou WAHA_API_KEY) — sem ele o número não pode ser desconectado do aparelho."),
-        503,
-        { requestId },
-      );
-    }
-    try {
-      await assertWahaConnectionIdle(createAdminClient(), activeOrg.orgId, id);
-      await waha.logoutSession(session.waha_session_name as string);
-      await waha.deleteSession(session.waha_session_name as string);
-    } catch (err) {
-      if (err instanceof ChannelConnectionError) return fail(err.code, "Uma conexão está em andamento. Aguarde e tente novamente.", err.status, { requestId });
-      await supabase.from("channel_sessions").update({ status: "FAILED", status_reason: "connection_repair_required", last_status_change_at: now })
-        .eq("organization_id", activeOrg.orgId).eq("id", id);
-      return fail("waha_error", wahaFriendlyError(err), 502, { requestId });
+    if (archiveLocal) {
+      try {
+        await assertWahaConnectionIdle(createAdminClient(), activeOrg.orgId, id);
+      } catch (err) {
+        return fail(
+          err instanceof ChannelConnectionError ? err.code : "internal_error",
+          "Não foi possível confirmar que nenhuma conexão está em andamento.",
+          err instanceof ChannelConnectionError ? err.status : 503,
+          { requestId },
+        );
+      }
+    } else {
+      const waha = getWahaClient();
+      if (!waha) {
+        return fail(
+          "waha_not_configured",
+          t(
+            "O WhatsApp (WAHA) não está configurado neste ambiente (faltam WAHA_API_BASE_URL e/ou WAHA_API_KEY) — sem ele o número não pode ser desconectado do aparelho.",
+          ),
+          503,
+          { requestId },
+        );
+      }
+      try {
+        await assertWahaConnectionIdle(createAdminClient(), activeOrg.orgId, id);
+        await waha.logoutSession(session.waha_session_name as string);
+        await waha.deleteSession(session.waha_session_name as string);
+      } catch (err) {
+        if (err instanceof ChannelConnectionError)
+          return fail(
+            err.code,
+            "Uma conexão está em andamento. Aguarde e tente novamente.",
+            err.status,
+            { requestId },
+          );
+        await supabase
+          .from("channel_sessions")
+          .update({
+            status: "FAILED",
+            status_reason: "connection_repair_required",
+            last_status_change_at: now,
+          })
+          .eq("organization_id", activeOrg.orgId)
+          .eq("id", id);
+        return fail("waha_error", wahaFriendlyError(err), 502, { requestId });
+      }
     }
   } else {
     // ─── O OVERRIDE NÃO FICA ÓRFÃO NA META (issue #1334) ─────────────────────
@@ -395,10 +444,7 @@ export async function DELETE(
     // organização desta instalação — e desfazê-la apagaria o webhook deles.
     if (session.meta_token_encrypted && session.meta_phone_number_id) {
       try {
-        const token = await decryptWebhookSecret(
-          createAdminClient(),
-          session.meta_token_encrypted,
-        );
+        const token = await decryptWebhookSecret(createAdminClient(), session.meta_token_encrypted);
         if (!token) {
           // Credencial ilegível (cifra de outro ambiente, por exemplo): sem token
           // não há como falar com a Meta pela linha. Fica registrado que o override
@@ -507,10 +553,14 @@ export async function DELETE(
       provider: session.provider,
       avisos_fechados: avisosFechados,
       webhook_override: webhookOverride,
+      ...(archiveLocal ? { removal_mode: "local_archive", transport_disconnected: false } : {}),
       ...impact.history,
       ...impact.configuration,
     },
   });
 
-  return ok({ id, archived: arquivar, impact }, { requestId });
+  return ok(
+    { id, archived: arquivar, impact, ...(archiveLocal ? { transport_disconnected: false } : {}) },
+    { requestId },
+  );
 }

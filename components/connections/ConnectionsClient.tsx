@@ -143,13 +143,18 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
   const [busyId, setBusyId] = useState<string | null>(null);
   const createKey = useRef<string | null>(null);
   const [connectionDetail, setConnectionDetail] = useState<string | null>(null);
-  const routing = useQuery({ queryKey: ["channel-routing-settings"], queryFn: () => apiClient.get<{ data: ChannelRoutingSettings }>("/api/v1/settings/routing/channels") });
+  const routing = useQuery({
+    queryKey: ["channel-routing-settings"],
+    queryFn: () =>
+      apiClient.get<{ data: ChannelRoutingSettings }>("/api/v1/settings/routing/channels"),
+  });
   const [creating, setCreating] = useState(false);
   const [checking, setChecking] = useState(false);
   const [qr, setQr] = useState<{ sessionId: string; title: string } | null>(null);
   const [antiBanId, setAntiBanId] = useState<string | null>(null);
   const [gruposId, setGruposId] = useState<string | null>(null);
   const [toDelete, setToDelete] = useState<ChannelSession | null>(null);
+  const [localArchive, setLocalArchive] = useState(false);
   const pacingItems = usePacingKnobs().data?.items ?? [];
 
   // Mexer nos canais (criar, excluir, reconectar, health check) muda a LISTA de
@@ -195,14 +200,17 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
       const res = await apiClient.post<{ data: ChannelSession }>(
         "/api/v1/channel-sessions",
         {},
-        { idempotencyKey: createKey.current ??= randomId(), timeoutMs: 120_000 },
+        { idempotencyKey: (createKey.current ??= randomId()), timeoutMs: 120_000 },
       );
       invalidate();
       createKey.current = null;
       setQr({ sessionId: res.data.id, title: t("Conectar novo WhatsApp") });
     } catch (err) {
       toast.error(errMsg(err, "Não foi possível iniciar a conexão.", t));
-      if (err instanceof ApiError) setConnectionDetail(JSON.stringify({ code: err.code, request_id: err.requestId, ...err.details }, null, 2));
+      if (err instanceof ApiError)
+        setConnectionDetail(
+          JSON.stringify({ code: err.code, request_id: err.requestId, ...err.details }, null, 2),
+        );
       invalidate();
     } finally {
       setCreating(false);
@@ -289,7 +297,9 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
       </div>
 
       <p className="text-sm text-muted-foreground">
-        {t("Novos canais começam em modo de teste, sem respostas automáticas até você autorizar números ou liberar o público.")}
+        {t(
+          "Novos canais começam em modo de teste, sem respostas automáticas até você autorizar números ou liberar o público.",
+        )}
       </p>
 
       {list.length > 0 ? (
@@ -317,11 +327,25 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
           }
         />
       ) : null}
-      {connectionDetail && <details className="rounded-md border p-3 text-sm"><summary>{t("Detalhes para suporte")}</summary><pre className="mt-2 whitespace-pre-wrap break-words">{connectionDetail}</pre><Button variant="outline" size="sm" onClick={async () => {
-        if (await copyToClipboard(connectionDetail)) toast.success(t("Copiado!"));
-        else toast.error(t("Não foi possível copiar. Selecione e copie manualmente."));
-      }}>{t("Copiar detalhes")}</Button></details>}
-      <Link href="/app/settings/atendimento" className="text-sm underline">{t("Configurar responsáveis por número")}</Link>
+      {connectionDetail && (
+        <details className="rounded-md border p-3 text-sm">
+          <summary>{t("Detalhes para suporte")}</summary>
+          <pre className="mt-2 break-words whitespace-pre-wrap">{connectionDetail}</pre>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              if (await copyToClipboard(connectionDetail)) toast.success(t("Copiado!"));
+              else toast.error(t("Não foi possível copiar. Selecione e copie manualmente."));
+            }}
+          >
+            {t("Copiar detalhes")}
+          </Button>
+        </details>
+      )}
+      <Link href="/app/settings/atendimento" className="text-sm underline">
+        {t("Configurar responsáveis por número")}
+      </Link>
       {!wahaConfigured && (
         <div className="rounded-md border border-warning bg-warning-bg p-4 text-sm text-warning-fg">
           <p className="font-medium">{t("O serviço do WhatsApp não está configurado.")}</p>
@@ -418,7 +442,17 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
                     : t("Ainda não verificado")}
                 </p>
                 <ChannelAiAccess channelId={c.id} />
-                <p className="text-xs text-muted-foreground">{t(!policy ? "Consulte os responsáveis em Atendimento." : policy.mode === "legacy_unconfigured" ? "Usa todos os atendentes elegíveis da organização." : policy.mode === "restricted_empty" ? "Ninguém configurado — as conversas ficarão na fila." : "Somente as pessoas selecionadas recebem este número.")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    !policy
+                      ? "Consulte os responsáveis em Atendimento."
+                      : policy.mode === "legacy_unconfigured"
+                        ? "Usa todos os atendentes elegíveis da organização."
+                        : policy.mode === "restricted_empty"
+                          ? "Ninguém configurado — as conversas ficarão na fila."
+                          : "Somente as pessoas selecionadas recebem este número.",
+                  )}
+                </p>
                 <div className="mt-auto flex flex-wrap gap-2">
                   {/* Some no canal oficial em vez de aparecer desabilitado: não é
                       indisponibilidade passageira (como o Excluir sem o serviço no
@@ -443,8 +477,8 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
                     <ShieldCheck size={14} aria-hidden />
                     {t("Proteção de envio")}
                   </Button>
-                  {capabilitiesOf((c.provider ?? DEFAULT_CHANNEL_PROVIDER) as ChannelProvider).groups !==
-                    "none" && (
+                  {capabilitiesOf((c.provider ?? DEFAULT_CHANNEL_PROVIDER) as ChannelProvider)
+                    .groups !== "none" && (
                     <Button variant="outline" size="sm" onClick={() => setGruposId(c.id)}>
                       <UsersThree size={14} aria-hidden />
                       {t("Grupos")}
@@ -459,10 +493,27 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
                         ? `${t("Excluir")} ${channelLabel(c, t)}`
                         : `${t("Excluir")} ${channelLabel(c, t)} — ${t("indisponível enquanto o serviço do WhatsApp não estiver ativo")}`
                     }
-                    onClick={() => setToDelete(c)}
+                    onClick={() => {
+                      setLocalArchive(false);
+                      setToDelete(c);
+                    }}
                   >
                     <Trash size={14} aria-hidden />
                   </Button>
+                  {vivaNoTransporte && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={busyId === c.id}
+                      aria-label={`${t("Arquivar no CRM")} ${channelLabel(c, t)}`}
+                      onClick={() => {
+                        setLocalArchive(true);
+                        setToDelete(c);
+                      }}
+                    >
+                      {t("Arquivar no CRM")}
+                    </Button>
+                  )}
                 </div>
               </Card>
             );
@@ -490,6 +541,7 @@ export function ConnectionsClient({ wahaConfigured }: { wahaConfigured: boolean 
       {toDelete && (
         <ExcluirCanalDialog
           canal={toDelete}
+          localArchive={localArchive}
           onCancel={() => setToDelete(null)}
           onDeleted={handleDeleted}
         />
@@ -554,8 +606,7 @@ export function frasesDoImpacto(
 
   const frases: string[] = [];
   if (noInbox) frases.push(`${t("Continua no inbox:")} ${noInbox}.`);
-  if (semNumero)
-    frases.push(`${t("Fica salvo, mas sem número — para de atender:")} ${semNumero}.`);
+  if (semNumero) frases.push(`${t("Fica salvo, mas sem número — para de atender:")} ${semNumero}.`);
   // Sobra o caso em que só há registro interno (auditoria de envio): nada a
   // listar, mas o canal continua sendo arquivado, e prometer "não tem nada
   // ligado" seria falso.
@@ -580,10 +631,12 @@ export function frasesDoImpacto(
  */
 function ExcluirCanalDialog({
   canal,
+  localArchive = false,
   onCancel,
   onDeleted,
 }: {
   canal: ChannelSession;
+  localArchive?: boolean;
   onCancel: () => void;
   onDeleted: () => void;
 }) {
@@ -595,6 +648,7 @@ function ExcluirCanalDialog({
     isError,
   } = useQuery({
     queryKey: ["channel-deletion-impact", canal.id],
+    enabled: !localArchive,
     queryFn: async () => {
       const res = await apiClient.get<{ data: { deletion_impact?: ChannelDeletionImpact } }>(
         `/api/v1/channel-sessions/${canal.id}?impact=1`,
@@ -611,14 +665,16 @@ function ExcluirCanalDialog({
     try {
       const res = await apiClient.delete<{
         data: { id: string; archived: boolean; impact: ChannelDeletionImpact };
-      }>(`/api/v1/channel-sessions/${canal.id}`);
+      }>(`/api/v1/channel-sessions/${canal.id}${localArchive ? "?archive_local=1" : ""}`);
       const conversas = res.data.impact.history.conversations;
       toast.success(
-        !res.data.archived
-          ? t("Canal excluído.")
-          : conversas > 0
-            ? `${t("Canal removido.")} ${contar(conversas, "conversa continua", "conversas continuam", t)} ${t("no inbox.")}`
-            : t("Canal removido. O que estava ligado a ele continua guardado."),
+        localArchive
+          ? t("Conexão arquivada no CRM. A sessão do aparelho não foi alterada.")
+          : !res.data.archived
+            ? t("Canal excluído.")
+            : conversas > 0
+              ? `${t("Canal removido.")} ${contar(conversas, "conversa continua", "conversas continuam", t)} ${t("no inbox.")}`
+              : t("Canal removido. O que estava ligado a ele continua guardado."),
       );
       onDeleted();
     } catch (err) {
@@ -633,12 +689,18 @@ function ExcluirCanalDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {t("Excluir")} {channelLabel(canal, t)}?
+            {localArchive ? t("Arquivar no CRM") : t("Excluir")} {channelLabel(canal, t)}?
           </DialogTitle>
           <DialogDescription asChild>
             <div className="space-y-2">
-              <p>{t("O número será desconectado do WhatsApp e sai desta lista.")}</p>
-              {isPending ? (
+              <p>
+                {localArchive
+                  ? t(
+                      "A conexão sai da lista do CRM, preservando histórico e configurações. A sessão no aparelho não será desconectada; se ainda existir, remova-a em Aparelhos conectados do WhatsApp.",
+                    )
+                  : t("O número será desconectado do WhatsApp e sai desta lista.")}
+              </p>
+              {localArchive ? null : isPending ? (
                 <p>{t("Verificando o que está ligado a este número…")}</p>
               ) : isError || !impact ? (
                 <p>
@@ -664,13 +726,17 @@ function ExcluirCanalDialog({
           {/* Enquanto o preflight não volta, confirmar seria confirmar no escuro:
               o diálogo ainda não sabe o que vai acontecer, então não pode pedir
               a decisão. */}
-          <Button variant="destructive" disabled={excluindo || isPending} onClick={excluir}>
+          <Button
+            variant={localArchive ? "outline" : "destructive"}
+            disabled={excluindo || (!localArchive && isPending)}
+            onClick={excluir}
+          >
             {excluindo ? (
               <CircleNotch size={14} className="animate-spin" aria-hidden />
             ) : (
               <Trash size={14} aria-hidden />
             )}
-            {t("Excluir")}
+            {localArchive ? t("Arquivar no CRM") : t("Excluir")}
           </Button>
         </div>
       </DialogContent>
@@ -746,24 +812,26 @@ function QrDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {t(
-              "Escolha QR Code ou código de pareamento e confirme no WhatsApp do celular.",
-            )}
+            {t("Escolha QR Code ou código de pareamento e confirme no WhatsApp do celular.")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex min-h-[16rem] flex-col items-center justify-center gap-3 py-2">
           {status === "SCAN_QR_CODE" ? (
-            <PairingOptions key={sessionId} sessionId={sessionId} qr={
-            // Sem `key={tick}`: trocar só o src reaproveita o mesmo <img>, e o
-            // browser segura o frame anterior até decodificar o novo. Remontar o
-            // elemento a cada refresh é o que causaria o flash branco.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={`/api/v1/channel-sessions/${sessionId}/qr?t=${tick}`}
-              alt={t("QR Code para conectar WhatsApp")}
-              className="h-64 w-64 rounded-md border bg-white p-2"
+            <PairingOptions
+              key={sessionId}
+              sessionId={sessionId}
+              qr={
+                // Sem `key={tick}`: trocar só o src reaproveita o mesmo <img>, e o
+                // browser segura o frame anterior até decodificar o novo. Remontar o
+                // elemento a cada refresh é o que causaria o flash branco.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`/api/v1/channel-sessions/${sessionId}/qr?t=${tick}`}
+                  alt={t("QR Code para conectar WhatsApp")}
+                  className="h-64 w-64 rounded-md border bg-white p-2"
+                />
+              }
             />
-            } />
           ) : status === "WORKING" ? (
             <div className="flex flex-col items-center gap-2 text-sm font-medium text-success-fg">
               <CheckCircle size={28} weight="fill" aria-hidden />

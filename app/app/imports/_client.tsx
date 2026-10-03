@@ -21,9 +21,10 @@ import {
   uncoveredImportColumns,
   type ImportColumnCoverage,
 } from "@/lib/crm-b2b/import-preview";
-import type { MappingField } from "@/lib/crm-b2b/spreadsheet";
+import type { MappingField, WorkbookAnalysis } from "@/lib/crm-b2b/spreadsheet";
 import type { historicalPreview } from "@/lib/crm-b2b/historical-preview";
 interface Preview {
+  workbook?: WorkbookAnalysis;
   source_sha256?: string;
   headers: string[];
   total_rows: number;
@@ -77,13 +78,14 @@ export function ImportsListClient() {
     };
   }, [load]);
 
-  async function upload(analyze: boolean) {
+  async function upload(analyze: boolean, worksheet?: string) {
     if (!file) return;
     setUploading(true);
     setMessage(null);
     try {
       const fd = new FormData();
       fd.set("file", file);
+      if (worksheet) fd.set("worksheet", worksheet);
       if (analyze) fd.set("preview", "true");
       else {
         fd.set("mapping", JSON.stringify(mapping));
@@ -118,7 +120,7 @@ export function ImportsListClient() {
       <div>
         <h1 className="text-xl font-semibold">{t("Importações")}</h1>
         <p className="text-sm text-muted-foreground">
-          {t("CSV ou XLSX com empresa, CNPJ, pessoa, cargo, telefone e e-mail.")}
+          {t("CSV ou XLSX para importação. XLSM para analisar as abas, sem executar macros.")}
         </p>
       </div>
 
@@ -150,7 +152,7 @@ export function ImportsListClient() {
           <label className="text-sm font-medium">{t("Arquivo")}</label>
           <Input
             type="file"
-            accept=".csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+            accept=".csv,.xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12,text/csv"
             onChange={(e) => {
               setFile(e.target.files?.[0] ?? null);
               setPreview(null);
@@ -167,6 +169,38 @@ export function ImportsListClient() {
 
       {preview && (
         <Card className="space-y-4 p-4">
+          {preview.workbook && (
+            <section className="space-y-2 rounded-md border p-3" aria-label={t("Análise XLSM")}>
+              <p role="status" className="text-sm">
+                {t(
+                  "Somente análise: nenhuma macro foi executada ou fórmula recalculada. Cada aba é analisada separadamente; nenhuma linha desta aba foi cortada.",
+                )}
+              </p>
+              <label className="grid gap-1 text-sm">
+                {t("Aba da planilha")}
+                <select
+                  className="rounded-md border bg-background p-2 focus-visible:outline-2"
+                  value={preview.workbook.selected_sheet}
+                  disabled={uploading}
+                  onChange={(e) => void upload(true, e.target.value)}
+                >
+                  {preview.workbook.sheets.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="text-sm">
+                {preview.workbook.sheets.length} {t("abas no arquivo")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "A carga integral desta planilha exige lotes revisados e recuperação validada. Esta tela não importa o XLSM.",
+                )}
+              </p>
+            </section>
+          )}
           <h2 className="font-semibold">
             {t("Revise as colunas antes de importar")} · {preview.total_rows} {t("linhas")}
           </h2>
@@ -258,13 +292,16 @@ export function ImportsListClient() {
               </div>
             </section>
           )}
-          {file && preview.historical_review && preview.source_sha256 && (
-            <HistoricalReviewEditor
-              key={preview.source_sha256}
-              file={file}
-              sourceHash={preview.source_sha256}
-            />
-          )}
+          {file &&
+            !preview.workbook?.analysis_only &&
+            preview.historical_review &&
+            preview.source_sha256 && (
+              <HistoricalReviewEditor
+                key={preview.source_sha256}
+                file={file}
+                sourceHash={preview.source_sha256}
+              />
+            )}
           {uncovered.length > 0 && (
             <div role="status" className="rounded-md border p-3 text-sm">
               <p className="font-medium">{t("Importação bloqueada: há colunas sem destino.")}</p>
@@ -310,6 +347,7 @@ export function ImportsListClient() {
           <Button
             disabled={
               uploading ||
+              preview.workbook?.analysis_only ||
               !Array.isArray(preview.column_coverage) ||
               !Object.values(mapping).some(Boolean) ||
               (preview.historical_review?.blocked_columns.length ?? 0) > 0 ||

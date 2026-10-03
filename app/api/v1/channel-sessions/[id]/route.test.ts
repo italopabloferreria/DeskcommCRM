@@ -152,8 +152,11 @@ function makeDb(opts: DbOpts = {}): Registro {
 
     private casam(): Linha[] {
       const linhas = tabelas[this.table] ?? [];
-      return linhas.filter((l) => this.filtros.every(([c, v]) => (l[c] ?? null) === v)
-        && this.inclusoes.every(([c, values]) => values.includes(l[c])));
+      return linhas.filter(
+        (l) =>
+          this.filtros.every(([c, v]) => (l[c] ?? null) === v) &&
+          this.inclusoes.every(([c, values]) => values.includes(l[c])),
+      );
     }
 
     private executar(): { data: unknown; error: unknown; count?: number } {
@@ -162,7 +165,11 @@ function makeDb(opts: DbOpts = {}): Registro {
         if (error) return { data: null, error };
         let achadas = this.casam();
         const order = this.ordenacao;
-        if (order) achadas.sort((a, b) => String(a[order.col]).localeCompare(String(b[order.col])) * (order.ascending ? 1 : -1));
+        if (order)
+          achadas.sort(
+            (a, b) =>
+              String(a[order.col]).localeCompare(String(b[order.col])) * (order.ascending ? 1 : -1),
+          );
         if (this.limite !== undefined) achadas = achadas.slice(0, this.limite);
         if (this.contar) return { data: null, error: null, count: achadas.length };
         if (this.head) return { data: null, error: null };
@@ -190,7 +197,8 @@ function makeDb(opts: DbOpts = {}): Registro {
     }
 
     then<R1 = unknown, R2 = never>(
-      onOk?: ((v: { data: unknown; error: unknown; count?: number }) => R1 | PromiseLike<R1>) | null,
+      onOk?:
+        ((v: { data: unknown; error: unknown; count?: number }) => R1 | PromiseLike<R1>) | null,
       onErr?: ((r: unknown) => R2 | PromiseLike<R2>) | null,
     ): PromiseLike<R1 | R2> {
       return Promise.resolve(this.executar()).then(onOk, onErr);
@@ -239,7 +247,11 @@ function wahaOk(registro: Registro) {
     deleteSession: vi.fn(async () => {
       registro.eventos.push("waha:delete");
     }),
-    getVerifiedSession: vi.fn(async () => ({ name: "org_2222_abc", status: "WORKING", me: { id: "5531999998888@c.us" } })),
+    getVerifiedSession: vi.fn(async () => ({
+      name: "org_2222_abc",
+      status: "WORKING",
+      me: { id: "5531999998888@c.us" },
+    })),
   };
   vi.mocked(getWahaClient).mockReturnValue(cliente as never);
   return cliente;
@@ -434,8 +446,11 @@ describe("DELETE /api/v1/channel-sessions/[id]", () => {
     expect(waha.logoutSession).toHaveBeenCalledWith("org_2222_abc");
     expect(waha.deleteSession).not.toHaveBeenCalled();
     expect(db.escritas).toHaveLength(1);
-    expect(db.escritas[0]).toMatchObject({ tipo: "update", table: "channel_sessions",
-      patch: { status: "FAILED", status_reason: "connection_repair_required" } });
+    expect(db.escritas[0]).toMatchObject({
+      tipo: "update",
+      table: "channel_sessions",
+      patch: { status: "FAILED", status_reason: "connection_repair_required" },
+    });
     expect(db.escritas[0]?.patch).not.toHaveProperty("archived_at");
     expect(db.escritas[0]?.filtros).toContainEqual(["organization_id", ORG]);
     expect(audit).not.toHaveBeenCalled();
@@ -443,33 +458,68 @@ describe("DELETE /api/v1/channel-sessions/[id]", () => {
 
   it("lease vigente da mesma org e canal bloqueia exclusão sem efeito", async () => {
     authOk();
-    const db = makeDb({ rows: { channel_connection_requests: [
-      { id: "expired", organization_id: ORG, channel_session_id: CANAL, state: "processing", lease_until: new Date(Date.now() - 60000).toISOString() },
-      { id: "busy", organization_id: ORG, channel_session_id: CANAL, state: "processing", lease_until: new Date(Date.now() + 60000).toISOString() },
-    ] } });
-    const waha = wahaOk(db); const { DELETE } = await import("./route");
+    const db = makeDb({
+      rows: {
+        channel_connection_requests: [
+          {
+            id: "expired",
+            organization_id: ORG,
+            channel_session_id: CANAL,
+            state: "processing",
+            lease_until: new Date(Date.now() - 60000).toISOString(),
+          },
+          {
+            id: "busy",
+            organization_id: ORG,
+            channel_session_id: CANAL,
+            state: "processing",
+            lease_until: new Date(Date.now() + 60000).toISOString(),
+          },
+        ],
+      },
+    });
+    const waha = wahaOk(db);
+    const { DELETE } = await import("./route");
     const res = await DELETE(reqDelete(), ctx());
-    expect(res.status).toBe(409);expect((await res.json()).error.code).toBe("connection_in_progress");
-    expect(db.escritas).toEqual([]);expect(waha.logoutSession).not.toHaveBeenCalled();expect(waha.deleteSession).not.toHaveBeenCalled();
+    expect(res.status).toBe(409);
+    expect((await res.json()).error.code).toBe("connection_in_progress");
+    expect(db.escritas).toEqual([]);
+    expect(waha.logoutSession).not.toHaveBeenCalled();
+    expect(waha.deleteSession).not.toHaveBeenCalled();
   });
 
-  it.each(["other_tenant", "other_channel", "failed", "expired"])("recibo %s não bloqueia a exclusão autorizada", async (scenario) => {
-    authOk();
-    const receipt = { id: "r1", organization_id: scenario === "other_tenant" ? OUTRA_ORG : ORG,
-      channel_session_id: scenario === "other_channel" ? USER : CANAL,
-      state: scenario === "failed" ? "failed" : "processing",
-      lease_until: new Date(Date.now() + (scenario === "expired" ? -60000 : 60000)).toISOString() };
-    const db = makeDb({ rows: { channel_connection_requests: [receipt] } });
-    const waha = wahaOk(db);const { DELETE } = await import("./route");
-    expect((await DELETE(reqDelete(), ctx())).status).toBe(200);
-    expect(waha.logoutSession).toHaveBeenCalledWith("org_2222_abc");expect(waha.deleteSession).toHaveBeenCalledWith("org_2222_abc");
-  });
+  it.each(["other_tenant", "other_channel", "failed", "expired"])(
+    "recibo %s não bloqueia a exclusão autorizada",
+    async (scenario) => {
+      authOk();
+      const receipt = {
+        id: "r1",
+        organization_id: scenario === "other_tenant" ? OUTRA_ORG : ORG,
+        channel_session_id: scenario === "other_channel" ? USER : CANAL,
+        state: scenario === "failed" ? "failed" : "processing",
+        lease_until: new Date(Date.now() + (scenario === "expired" ? -60000 : 60000)).toISOString(),
+      };
+      const db = makeDb({ rows: { channel_connection_requests: [receipt] } });
+      const waha = wahaOk(db);
+      const { DELETE } = await import("./route");
+      expect((await DELETE(reqDelete(), ctx())).status).toBe(200);
+      expect(waha.logoutSession).toHaveBeenCalledWith("org_2222_abc");
+      expect(waha.deleteSession).toHaveBeenCalledWith("org_2222_abc");
+    },
+  );
 
   it("erro ao consultar reserva retorna503 sem revogar nem escrever", async () => {
-    authOk();const db = makeDb({ readError: (table) => table === "channel_connection_requests" ? { message: "DB unavailable" } : null });
-    const waha = wahaOk(db);const { DELETE } = await import("./route");
+    authOk();
+    const db = makeDb({
+      readError: (table) =>
+        table === "channel_connection_requests" ? { message: "DB unavailable" } : null,
+    });
+    const waha = wahaOk(db);
+    const { DELETE } = await import("./route");
     expect((await DELETE(reqDelete(), ctx())).status).toBe(503);
-    expect(db.escritas).toEqual([]);expect(waha.logoutSession).not.toHaveBeenCalled();expect(waha.deleteSession).not.toHaveBeenCalled();
+    expect(db.escritas).toEqual([]);
+    expect(waha.logoutSession).not.toHaveBeenCalled();
+    expect(waha.deleteSession).not.toHaveBeenCalled();
   });
 
   it("canal de outra organização → 404, nenhuma escrita, nenhuma revogação", async () => {
@@ -494,14 +544,63 @@ describe("DELETE /api/v1/channel-sessions/[id]", () => {
   });
 });
 
+describe("arquivamento local explícito de conexão órfã", () => {
+  const reqArchive = (origin = "http://localhost") =>
+    new NextRequest(`http://localhost/api/v1/channel-sessions/${CANAL}?archive_local=1`, {
+      method: "DELETE",
+      headers: { origin },
+    });
+  it("arquiva com o transporte desligado sem apagar a linha, histórico ou configuração", async () => {
+    authOk();
+    const db = makeDb();
+    vi.mocked(getWahaClient).mockReturnValue(null);
+    const { DELETE } = await import("./route");
+    const res = await DELETE(reqArchive(), ctx());
+    expect(res.status).toBe(200);
+    expect((await res.json()).data).toMatchObject({
+      archived: true,
+      transport_disconnected: false,
+    });
+    expect(db.linhas("channel_sessions")[0]?.archived_at).toBeTruthy();
+    expect(db.escritas.some((w) => w.tipo === "delete")).toBe(false);
+    expect(getWahaClient).not.toHaveBeenCalled();
+  });
+  it("não desloga nem apaga a sessão externa no modo local", async () => {
+    authOk();
+    const db = makeDb();
+    const waha = wahaOk(db);
+    const { DELETE } = await import("./route");
+    expect((await DELETE(reqArchive(), ctx())).status).toBe(200);
+    expect(waha.logoutSession).not.toHaveBeenCalled();
+    expect(waha.deleteSession).not.toHaveBeenCalled();
+  });
+  it("recusa origem externa, canal de outra organização e canal oficial", async () => {
+    authOk();
+    let db = makeDb();
+    const { DELETE } = await import("./route");
+    expect((await DELETE(reqArchive("https://other.example"), ctx())).status).toBe(403);
+    expect(db.escritas).toEqual([]);
+    db = makeDb({ sessions: [canal({ organization_id: OUTRA_ORG })] });
+    expect((await DELETE(reqArchive(), ctx())).status).toBe(404);
+    expect(db.escritas).toEqual([]);
+    db = makeDb({ sessions: [canal({ provider: "meta_cloud" })] });
+    expect((await DELETE(reqArchive(), ctx())).status).toBe(422);
+    expect(db.escritas).toEqual([]);
+  });
+});
+
 describe("GET /api/v1/channel-sessions/[id]", () => {
   it("erro de identidade/transporte não publica status nem grava saúde", async () => {
-    authOk();const db = makeDb();const waha = wahaOk(db);
+    authOk();
+    const db = makeDb();
+    const waha = wahaOk(db);
     waha.getVerifiedSession.mockRejectedValue(new Error("session_identity_mismatch"));
     const { GET } = await import("./route");
     const res = await GET(reqGet(), ctx());
-    expect(res.status).toBe(502);expect((await res.json()).error.code).toBe("connection_status_failed");
-    expect(waha.getVerifiedSession).toHaveBeenCalledWith("org_2222_abc");expect(db.escritas).toEqual([]);
+    expect(res.status).toBe(502);
+    expect((await res.json()).error.code).toBe("connection_status_failed");
+    expect(waha.getVerifiedSession).toHaveBeenCalledWith("org_2222_abc");
+    expect(db.escritas).toEqual([]);
   });
 
   it("?impact=1 devolve o preflight — o diálogo sabe o desfecho ANTES do clique", async () => {
@@ -700,9 +799,7 @@ describe("#1023 — a conexão removida fecha o próprio aviso", () => {
     await DELETE(reqDelete(), ctx());
 
     // Só a linha do canal. Sem aviso aberto e sem episódio, não há update.
-    expect(db.escritas.map((e) => `${e.tipo}:${e.table}`)).toEqual([
-      "delete:channel_sessions",
-    ]);
+    expect(db.escritas.map((e) => `${e.tipo}:${e.table}`)).toEqual(["delete:channel_sessions"]);
   });
 
   it("o aviso de OUTRA conexão continua aberto — ela pode seguir caída", async () => {
@@ -757,7 +854,7 @@ describe("#1023 — a conexão removida fecha o próprio aviso", () => {
     );
   });
 
-  it("erro ao RESOLVER os avisos → auditoria diz \"falhou\", não \"resolvido\"", async () => {
+  it('erro ao RESOLVER os avisos → auditoria diz "falhou", não "resolvido"', async () => {
     authOk();
     const warn = vi.spyOn(logger, "warn").mockImplementation(() => undefined);
     const db = makeDb({
@@ -975,7 +1072,14 @@ describe("#1334 — a conexão oficial devolve o webhook do número à Meta", ()
   it("canal oficial já sem credencial → não chama a Graph e diz por quê", async () => {
     authOk();
     const db = makeDb({
-      sessions: [canal({ provider: "meta_cloud", waha_session_name: null, meta_phone_number_id: "1234567890", meta_token_encrypted: null })],
+      sessions: [
+        canal({
+          provider: "meta_cloud",
+          waha_session_name: null,
+          meta_phone_number_id: "1234567890",
+          meta_token_encrypted: null,
+        }),
+      ],
       rows: historico,
     });
     wahaOk(db);

@@ -21,6 +21,7 @@ import {
   IMPORT_MAX_BYTES,
   isCsvFilename,
   isXlsxFilename,
+  isXlsmFilename,
   parseImportFile,
   suggestColumnMapping,
   type MappingField,
@@ -93,13 +94,33 @@ export async function POST(req: NextRequest): Promise<Response> {
       return fail("validation_failed", "Envie o arquivo no campo 'file'.", 422, { requestId });
     }
     const nome = file.name ?? "import.csv";
-    if (!isCsvFilename(nome) && !isXlsxFilename(nome)) {
-      return fail("validation_failed", "Formato não suportado — envie .csv ou .xlsx.", 422, {
-        requestId,
-      });
+    if (!isCsvFilename(nome) && !isXlsxFilename(nome) && !isXlsmFilename(nome)) {
+      return fail(
+        "validation_failed",
+        "Formato não suportado — envie .csv, .xlsx ou .xlsm para análise.",
+        422,
+        {
+          requestId,
+        },
+      );
     }
     if (file.size > IMPORT_MAX_BYTES) {
       return fail("validation_failed", "Arquivo grande demais.", 422, { requestId });
+    }
+    if (isXlsmFilename(nome) && form.get("preview") !== "true") {
+      return fail(
+        "validation_failed",
+        "XLSM está disponível somente para análise. A carga integral exige lotes revisados e recuperação validada; nenhum cadastro foi criado.",
+        422,
+        { requestId },
+      );
+    }
+    const worksheet = form.get("worksheet");
+    if (
+      worksheet !== null &&
+      (typeof worksheet !== "string" || !worksheet || worksheet.length > 100)
+    ) {
+      return fail("validation_failed", "Aba inválida.", 422, { requestId });
     }
 
     let mapping: Partial<Record<MappingField, string>> = {};
@@ -113,7 +134,11 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
 
     const bytes = await file.arrayBuffer();
-    const parsed = await parseImportFile(bytes, nome);
+    const parsed = await parseImportFile(
+      bytes,
+      nome,
+      typeof worksheet === "string" ? worksheet : undefined,
+    );
     if (!parsed.ok) {
       return fail("validation_failed", parsed.error, 422, { requestId });
     }
@@ -221,6 +246,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           source_sha256: sourceHash,
           reviewed_draft: reviewedDraft,
           historical_page: historicalPage,
+          ...(parsed.workbook ? { workbook: parsed.workbook } : {}),
         },
         { requestId },
       );

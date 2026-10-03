@@ -22,6 +22,13 @@ export type SheetMatrix = { headers: string[]; rows: string[][] };
 
 export const IMPORT_MAX_BYTES = 2 * 1024 * 1024;
 export const IMPORT_MAX_DATA_ROWS = 2_000;
+const XLSM_MAX_PREVIEW_ROWS = 10_000;
+export type WorkbookAnalysis = {
+  analysis_only: true;
+  macros_executed: false;
+  selected_sheet: string;
+  sheets: string[];
+};
 /**
  * Teto do XML DESCOMPACTADO no zip inteiro. Os 2 MB do upload são do zip; XML
  * repetitivo comprime 100x, inclusive quando dividido em muitas abas.
@@ -29,7 +36,12 @@ export const IMPORT_MAX_DATA_ROWS = 2_000;
 const XLSX_MAX_XML_BYTES = 40 * 1024 * 1024;
 const XLSX_MAX_COLUMNS = 256;
 
-type Leitura = { ok: true; sheet: SheetMatrix } | { ok: false; error: string };
+type Leitura =
+  { ok: true; sheet: SheetMatrix; workbook?: WorkbookAnalysis } | { ok: false; error: string };
+
+export function isXlsmFilename(name: string): boolean {
+  return name.toLowerCase().endsWith(".xlsm");
+}
 
 export function isXlsxFilename(name: string): boolean {
   return name.toLowerCase().endsWith(".xlsx");
@@ -39,24 +51,31 @@ export function isCsvFilename(name: string): boolean {
   return name.toLowerCase().endsWith(".csv");
 }
 
-export async function parseImportFile(bytes: ArrayBuffer, filename: string): Promise<Leitura> {
+export async function parseImportFile(
+  bytes: ArrayBuffer,
+  filename: string,
+  worksheetName?: string,
+): Promise<Leitura> {
   if (bytes.byteLength > IMPORT_MAX_BYTES) {
     return { ok: false, error: `Arquivo maior que ${IMPORT_MAX_BYTES} bytes.` };
   }
+  if (isXlsmFilename(filename)) return parseXlsx(bytes, { worksheetName });
+  if (worksheetName !== undefined)
+    return { ok: false, error: "A seleção de aba está disponível somente na análise XLSM." };
   if (isXlsxFilename(filename)) return parseXlsx(bytes);
   if (isCsvFilename(filename)) return parseCsvBytes(bytes);
   return { ok: false, error: "Formato não suportado — envie .csv ou .xlsx." };
 }
 
 /** Cabeçalho + linhas, cada linha aparada ou completada até a largura do cabeçalho. */
-function matrizParaPlanilha(matrix: string[][]): Leitura {
+function matrizParaPlanilha(matrix: string[][], maxRows = IMPORT_MAX_DATA_ROWS): Leitura {
   if (matrix.length < 2) {
     return { ok: false, error: "Preciso de cabeçalho e ao menos uma linha de dados." };
   }
   const headers = matrix[0]!.map((h) => h.trim());
   const rows = matrix.slice(1);
-  if (rows.length > IMPORT_MAX_DATA_ROWS) {
-    return { ok: false, error: `Máximo de ${IMPORT_MAX_DATA_ROWS} linhas de dados.` };
+  if (rows.length > maxRows) {
+    return { ok: false, error: `Máximo de ${maxRows} linhas de dados.` };
   }
   const width = headers.length;
   if (rows.some((row) => row.slice(width).some((cell) => cell.trim() !== ""))) {
@@ -124,7 +143,7 @@ function valorDaCelula(attrs: string, corpo: string, compartilhados: string[]): 
   return Number.isFinite(n) ? String(n) : v;
 }
 
-function parseXlsx(bytes: ArrayBuffer): Leitura {
+function parseXlsx(bytes: ArrayBuffer, analysis?: { worksheetName?: string }): Leitura {
   let arquivos: Record<string, Uint8Array>;
   let grandeDemais = false;
   let totalXmlBytes = 0;
@@ -155,16 +174,37 @@ function parseXlsx(bytes: ArrayBuffer): Leitura {
   const workbook = texto("xl/workbook.xml");
   if (workbook === null) return { ok: false, error: "Não consegui ler o arquivo XLSX." };
 
-  // A PRIMEIRA aba na ordem das abas, que não é necessariamente `sheet1.xml`.
-  const rid = /<sheet\b[^>]*\br:id="([^"]+)"/.exec(workbook)?.[1];
+  const sheets = [...workbook.matchAll(/<sheet\b[^>]*>/g)].map((m) => ({
+    name: decodificarXml(/\bname="([^"]+)"/.exec(m[0])?.[1] ?? ""),
+    rid: /\br:id="([^"]+)"/.exec(m[0])?.[1],
+  }));
+  if (
+    analysis &&
+    (sheets.length === 0 ||
+      sheets.length > 100 ||
+      sheets.some((s) => !s.name || s.name.length > 100 || !s.rid) ||
+      new Set(sheets.map((s) => s.name)).size !== sheets.length)
+  ) {
+    return { ok: false, error: "Lista de abas inválida ou grande demais." };
+  }
+  // XLSX mantém a primeira aba; XLSM permite escolha explícita apenas para análise.
+  const selected =
+    analysis?.worksheetName === undefined
+      ? sheets[0]
+      : sheets.find((s) => s.name === analysis.worksheetName);
+  if (analysis && !selected) return { ok: false, error: "Aba não encontrada nesta planilha." };
+  const rid = selected?.rid;
   const rels = texto("xl/_rels/workbook.xml.rels") ?? "";
   let alvo: string | undefined;
   for (const m of rels.matchAll(/<Relationship\b[^>]*>/g)) {
-    if (m[0].includes(`Id="${rid}"`)) alvo = /Target="([^"]+)"/.exec(m[0])?.[1];
+    if (m[0].includes(`Id="${rid}"`) && !/TargetMode="External"/.test(m[0]))
+      alvo = /Target="([^"]+)"/.exec(m[0])?.[1];
   }
   const caminho = alvo
     ? `xl/${alvo.replace(/^\/?xl\//, "").replace(/^\//, "")}`
     : "xl/worksheets/sheet1.xml";
+  if (analysis && (!alvo || !/^xl\/worksheets\/[^/]+\.xml$/.test(caminho)))
+    return { ok: false, error: "Referência de aba inválida." };
   const aba = texto(caminho);
   if (aba === null) return { ok: false, error: "Planilha vazia." };
 
@@ -186,11 +226,25 @@ function parseXlsx(bytes: ArrayBuffer): Leitura {
       celulas[i] = valorDaCelula(attrs, c[2] ?? "", compartilhados);
     }
     if (celulas.some((v) => v.trim() !== "")) matriz.push(celulas);
-    if (matriz.length > IMPORT_MAX_DATA_ROWS + 1) {
-      return { ok: false, error: `Máximo de ${IMPORT_MAX_DATA_ROWS} linhas de dados.` };
+    const maxRows = analysis ? XLSM_MAX_PREVIEW_ROWS : IMPORT_MAX_DATA_ROWS;
+    if (matriz.length > maxRows + 1) {
+      return { ok: false, error: `Máximo de ${maxRows} linhas de dados.` };
     }
   }
-  return matrizParaPlanilha(matriz);
+  const result = matrizParaPlanilha(
+    matriz,
+    analysis ? XLSM_MAX_PREVIEW_ROWS : IMPORT_MAX_DATA_ROWS,
+  );
+  if (!result.ok || !analysis) return result;
+  return {
+    ...result,
+    workbook: {
+      analysis_only: true,
+      macros_executed: false,
+      selected_sheet: selected!.name,
+      sheets: sheets.map((s) => s.name),
+    },
+  };
 }
 
 /** Sugere mapeamento por apelidos comuns de coluna. */

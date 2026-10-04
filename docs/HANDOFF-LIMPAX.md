@@ -471,3 +471,31 @@ Preparação avançou:4.148 entradas de revisão de identidade,4.156 de endereç
 ## Proteção de cobertura implementada — 01/10/2026
 
 Fork: import-preview.ts calcula colunas preenchidas em TODAS as linhas; prévia expõe contagens; tela lista colunas sem destino e bloqueia confirmação; POST/imports recusa confirmação incompleta antes de createClient/RPC/auditoria. Colunas vazias não bloqueiam.29 testes relevantes em5 arquivos aprovados; lint dos6 arquivos TS aprovado. Não importa endereço/local/histórico ainda e não valida a semântica de mapeamento deliberadamente incorreto. Não houve escrita remota, migração ou deploy. Prova no fork: docs/evidence/limpax-import-coverage-20261001.json. Aceite visual hospedado pendente; serviços pesados locais OFF. Próximo: contrato e prévia específicos para locais/serviços históricos, mantendo origem e decisões de identidade; restauração antes0495 eG13 aberto.
+
+## Integridade da preparação — 04/10/2026
+Verificador workbook-integrity implementado: valida hashes salvos, cobertura,
+origem workbook/aba/linha, repetição e identidade pendente; conserva metadados
+brutos e ordem serializada.10 testes passaram; tipos direcionados aprovados.
+Prova privada dos11 arquivos:5050 linhas/9 abas, original SHA inalterado,
+0 escritas. Consulta remota READ ONLY/ROLLBACK04/10:13 empresas,13 pessoas,
+15 contatos,0 lotes;0495/0507/tabela histórica ausentes. Banco ativo responde;
+não prova ausência de aviso futuro de pausa. Chrome inventaria abas mas bind
+retorna Debugger unattached; Oracle/email não verificados nesta sessão.
+Próximo: persistência por origem e identidade explícita, restore separado,
+migrações/carga reconciliada. Não declarar MVP pronto nem carga concluída.
+Checklist: entrada11 lotes privados; saída recibo privado de integridade;
+sem mutação/auditoria de clientes; consumidor atual preparação privada,
+não UI/RPC. Erros interrompem carga, não descartam origem. Peça interna
+preparatória; nenhuma mudança no núcleo comum ou comportamento de VPS.
+
+## Adaptador de origem histórica04/10
+workbook-history-command.ts prepara comando histórico por hash de lote, não
+hash global do workbook; original_reference conserva workbook/aba/linha
+física e raw_data.workbook_source conserva bruto/fórmulas/metadados.
+Valida integridade antes de decisões; preserva vínculo explícito pessoa/empresa
+sem mescla automática. Limites reavaliados após acrescentar origem completa.
+20 testes em4 arquivos passaram. Nenhuma RPC/migração/carga/tela ativada.
+Local3001 estava parado; instância única Next iniciada e mantida.
+Próximo: ligação da revisão por lote à UI e persistência; restore separado e
+provas RLS/transação antes uso remoto. G13 permanece aberto.
+Typecheck integral04/10 interrompido por consumo de3GB RAM; não afirmar aprovado.20 testes/lint direcionado passaram. Login3001 HTTP200 confirmado. Nenhuma carga realizada.

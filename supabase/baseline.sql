@@ -4531,6 +4531,14 @@ GRANT ALL ON TABLE "public"."ai_budgets" TO "anon";
 GRANT ALL ON TABLE "public"."ai_budgets" TO "authenticated";
 GRANT ALL ON TABLE "public"."ai_budgets" TO "service_role";
 
+-- I/U/D/T de `anon` e `authenticated` saem junto dos grants: morando no bloco
+-- da 0160, no fim do arquivo, a chave anon recuperava a escrita a cada passada
+-- até a linha de lá — e a mantinha se a passada morresse no meio (#2255). O `T`
+-- entrou na #2258: TRUNCATE não passa pela RLS e nenhum consumidor o usa (toda
+-- escrita de `ai_budgets` é service role, medido na 0160). A decisão segue
+-- comentada no bloco da 0160.
+revoke insert, update, delete, truncate on table public.ai_budgets from authenticated, anon;
+
 
 
 GRANT ALL ON TABLE "public"."ai_chunks" TO "authenticated";
@@ -4584,6 +4592,14 @@ GRANT ALL ON TABLE "public"."ai_provider_credentials_safe" TO "service_role";
 GRANT SELECT,INSERT,REFERENCES,TRIGGER,TRUNCATE ON TABLE "public"."api_audit_log" TO "anon";
 GRANT SELECT,INSERT,REFERENCES,TRIGGER,TRUNCATE ON TABLE "public"."api_audit_log" TO "authenticated";
 GRANT SELECT,INSERT,REFERENCES,TRIGGER,TRUNCATE ON TABLE "public"."api_audit_log" TO "service_role";
+
+-- O bloco da 0258, no fim do arquivo, revoga U/D/T destes papéis e continua
+-- sendo a fonte do contrato (o invariante `audit-log-sob-o-default-acl-do-supabase`
+-- o extrai por rótulo). Mas o TRUNCATE que o snapshot concede às chaves anon e
+-- service_role — o único destes que a RLS não alcança — sai JÁ AQUI: entre o
+-- grant e o bloco, a chave o recuperava a cada passada, e uma passada
+-- interrompida o deixaria de pé (#2255; `service_role` entrou na #2258).
+revoke update, delete, truncate on table public.api_audit_log from public, anon, authenticated, service_role;
 
 
 
@@ -14832,9 +14848,9 @@ notify pgrst, 'reload schema';
 -- tabela com o JWT do usuário.
 --
 -- SELECT fica: ler o próprio orçamento pelo PostgREST continua escopado pela
--- policy de SELECT da 0150. `revoke` é idempotente por natureza — este bloco
--- pode ser re-aplicado à vontade pelo `update.sh`.
-revoke insert, update, delete on table public.ai_budgets from authenticated, anon;
+-- policy de SELECT da 0150. O `revoke` de I/U/D/T acompanha os grants do
+-- snapshot desde a #2255/#2258 — aqui ele era reaplicado a cada passada, e a
+-- chave anon recuperava a escrita até esta linha.
 
 -- ---- o arquivo do webhook pode perder o corpo (migration 0163) ----
 --
@@ -46605,3 +46621,80 @@ do $$ begin
       check (tipo_envio in ('resposta', 'disparo'));
   end if;
 end $$;
+
+-- ---- dedupe do job_dead da conversa atômico: índice único parcial (migration 0538) ----
+-- Só a conversa: `job_dead` de job/cron é registro de ocorrência. `status` fica
+-- fora da chave para a reabertura continuar funcionando. Cabeçalho da 0538 para
+-- o racional inteiro.
+with repetidas as (
+  select id,
+         row_number() over (
+           partition by organization_id, kind, ref_id
+           order by created_at asc, id asc
+         ) as ordem
+    from public.agent_inbox_items
+   where status = 'open'
+     and kind = 'job_dead'
+     and ref_kind = 'conversation'
+)
+update public.agent_inbox_items i
+   set status = 'resolved',
+       resolved_at = now()
+  from repetidas r
+ where i.id = r.id
+   and r.ordem > 1;
+
+create unique index if not exists agent_inbox_job_dead_conversa_aberto_unico
+  on public.agent_inbox_items (organization_id, kind, ref_id)
+  where status = 'open' and kind = 'job_dead' and ref_kind = 'conversation';
+
+-- ---- dedupe dos avisos other por título: índice único parcial (migration 0539) ----
+-- Os avisos de `kind='other'` cuja chave é o TÍTULO (sem ref própria, ou com a
+-- credencial de IA): os de grão próprio (`lead`, `agent_case`, etc.) ficam fora
+-- pelo `ref_kind`. Cabeçalho da 0539 para o racional inteiro.
+with repetidas as (
+  select id,
+         row_number() over (
+           partition by organization_id, kind, title
+           order by created_at asc, id asc
+         ) as ordem
+    from public.agent_inbox_items
+   where status = 'open'
+     and kind = 'other'
+     and (ref_kind is null or ref_kind = 'ai_provider_credential')
+)
+update public.agent_inbox_items i
+   set status = 'resolved',
+       resolved_at = now()
+  from repetidas r
+ where i.id = r.id
+   and r.ordem > 1;
+
+create unique index if not exists agent_inbox_other_por_titulo_aberto_unico
+  on public.agent_inbox_items (organization_id, kind, title)
+  where status = 'open' and kind = 'other' and (ref_kind is null or ref_kind = 'ai_provider_credential');
+
+-- ---- dedupe dos avisos de orçamento: índice único parcial (migration 0540) ----
+-- Os dois kinds de orçamento deduplicam pelo par (organização, kind) — um
+-- relata que a IA parou, o outro que o gasto passou do aviso e ela segue.
+-- Cabeçalho da 0540 para o racional inteiro.
+with repetidas as (
+  select id,
+         row_number() over (
+           partition by organization_id, kind
+           order by created_at asc, id asc
+         ) as ordem
+    from public.agent_inbox_items
+   where status = 'open'
+     and kind in ('budget_exceeded','budget_warning')
+)
+update public.agent_inbox_items i
+   set status = 'resolved',
+       resolved_at = now()
+  from repetidas r
+ where i.id = r.id
+   and r.ordem > 1;
+
+create unique index if not exists agent_inbox_budget_aberto_unico
+  on public.agent_inbox_items (organization_id, kind)
+  where status = 'open' and kind in ('budget_exceeded','budget_warning');

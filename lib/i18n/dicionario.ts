@@ -2761,6 +2761,10 @@ export const DICIONARIO: Traducoes = {
     es: "No encontré texto en este archivo. Si es un PDF escaneado, exporta la propuesta original como PDF con texto.",
   },
   "Modelos de proposta": { es: "Modelos de propuesta" },
+  "As propostas estão desligadas para esta organização. Para editar os modelos, ligue as propostas em Configurações › Propostas e salve.": {
+    es: "Las propuestas están desactivadas para esta organización. Para editar los modelos, activa las propuestas en Configuración › Propuestas y guarda.",
+  },
+  "Ir para Configurações › Propostas": { es: "Ir a Configuración › Propuestas" },
   "Personalize os modelos da plataforma ou crie os da sua empresa, inclusive a partir de uma proposta que você já usa.": {
     es: "Personaliza los modelos de la plataforma o crea los de tu empresa, incluso a partir de una propuesta que ya usas.",
   },
@@ -12985,6 +12989,11 @@ export const DICIONARIO: Traducoes = {
   Links: { es: "Enlaces" },
   "Abrir no WhatsApp": { es: "Abrir en WhatsApp" },
   "Ver ficha completa do contato": { es: "Ver la ficha completa del contacto" },
+  // ─── #1506 F1: as outras pessoas do negócio, abaixo do contato principal ───
+  "Pessoas relacionadas": { es: "Personas relacionadas" },
+  "Não consegui carregar as pessoas relacionadas.": {
+    es: "No pude cargar las personas relacionadas.",
+  },
   "Confira os links marcados: só endereços http(s) valem.": {
     es: "Revisa los enlaces marcados: solo son válidas las direcciones http(s).",
   },
@@ -13136,6 +13145,26 @@ export const DICIONARIO: Traducoes = {
     es: "Clientes persona jurídica y los contactos de cada uno.",
   },
   "Nova empresa": { es: "Nueva empresa" },
+  // Ciclo B2B da issue #1937: consulta de CNPJ antes de criar, edição e
+  // exclusão segura na tela de detalhe.
+  "Consultar CNPJ": { es: "Consultar CNPJ" },
+  "Consultando…": { es: "Consultando…" },
+  "Dados públicos preenchidos. Revise antes de criar.": {
+    es: "Datos públicos rellenados. Revíselos antes de crear.",
+  },
+  "Já existe uma empresa com este CNPJ nesta organização. Revise antes de criar.": {
+    es: "Ya existe una empresa con este CNPJ en esta organización. Revísela antes de crear.",
+  },
+  "Não foi possível consultar o CNPJ.": { es: "No fue posible consultar el CNPJ." },
+  Rua: { es: "Calle" },
+  Bairro: { es: "Barrio" },
+  Cidade: { es: "Ciudad" },
+  Complemento: { es: "Complemento" },
+  "Excluir empresa": { es: "Eliminar empresa" },
+  "Não foi possível excluir.": { es: "No fue posible eliminar." },
+  "A exclusão apaga o cadastro da empresa. Se houver pessoas vinculadas, a exclusão é recusada e a tela mostra o motivo; nada é apagado.": {
+    es: "La eliminación borra el registro de la empresa. Si hay personas vinculadas, la eliminación se rechaza y la pantalla muestra el motivo; no se borra nada.",
+  },
   "Buscar por nome, fantasia ou CNPJ…": { es: "Buscar por nombre, fantasía o CNPJ…" },
   "Erro ao carregar empresas.": { es: "Error al cargar empresas." },
   "Nenhuma empresa ainda.": { es: "Ninguna empresa todavía." },

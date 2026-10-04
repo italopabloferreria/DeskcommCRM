@@ -16,6 +16,15 @@ import {
 } from "@/lib/documentos/modelos";
 import type { PreviaDocumento } from "@/lib/documentos/previa";
 
+type ClienteDocumento = {
+  id: string;
+  origem: "Contato" | "Empresa";
+  nome: string;
+  documento: string;
+  telefone: string;
+  endereco: string;
+};
+
 type Versao = { id: string; versao: string; nome: string; criadoEm: string };
 async function consultar(url: string, init?: RequestInit) {
   const response = await fetch(url, { ...init, credentials: "same-origin", cache: "no-store" });
@@ -50,7 +59,7 @@ export function ModelosDocumentos({
   const [erro, setErro] = useState("");
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [busca, setBusca] = useState("");
-  const [clientes, setClientes] = useState<Record<string, string | null>[]>([]);
+  const [clientes, setClientes] = useState<ClienteDocumento[]>([]);
   const controller = useRef<AbortController | null>(null);
   const mounted = useRef(true);
   useEffect(() => {
@@ -265,10 +274,57 @@ export function ModelosDocumentos({
           disabled={busy || !busca.trim()}
           onClick={() =>
             void executar(async () => {
-              setClientes(
-                await consultar(`/api/v1/companies?search=${encodeURIComponent(busca)}&limit=20`),
+              setClientes([]);
+              const query = encodeURIComponent(busca.trim());
+              const [contatos, empresas] = await Promise.all([
+                consultar(`/api/v1/contacts?search=${query}&limit=20`),
+                consultar(`/api/v1/companies?search=${query}&limit=20`),
+              ]);
+              const encontrados: ClienteDocumento[] = [
+                ...contatos.map(
+                  (c: {
+                    id: string;
+                    name?: string;
+                    display_name?: string;
+                    phone_number?: string;
+                    source_metadata?: { address_original?: unknown };
+                  }) => ({
+                    id: c.id,
+                    origem: "Contato" as const,
+                    nome: c.name || c.display_name || "",
+                    documento: "",
+                    telefone: c.phone_number || "",
+                    endereco:
+                      typeof c.source_metadata?.address_original === "string"
+                        ? c.source_metadata.address_original
+                        : "",
+                  }),
+                ),
+                ...empresas.map((c: Record<string, string | null>) => ({
+                  id: c.id!,
+                  origem: "Empresa" as const,
+                  nome: c.legal_name || c.trade_name || "",
+                  documento: c.cnpj || "",
+                  telefone: c.phone || "",
+                  endereco: [
+                    c.street,
+                    c.number,
+                    c.complement,
+                    c.district,
+                    c.city,
+                    c.state,
+                    c.zip_code,
+                  ]
+                    .filter(Boolean)
+                    .join(", "),
+                })),
+              ];
+              setClientes(encontrados);
+              setMensagem(
+                encontrados.length
+                  ? "Busca concluída. Selecione o contato ou a empresa e revise os dados."
+                  : "Nenhum cliente encontrado. Revise a busca ou preencha os campos manualmente.",
               );
-              setMensagem("Busca concluída. Selecione a empresa desejada.");
             })
           }
         >
@@ -278,31 +334,22 @@ export function ModelosDocumentos({
       {clientes.length ? (
         <ul>
           {clientes.map((cliente) => (
-            <li key={cliente.id}>
+            <li key={`${cliente.origem}-${cliente.id}`}>
+              <p className="text-xs break-words text-muted-foreground">
+                {[cliente.endereco, cliente.telefone].filter(Boolean).join(" · ") ||
+                  cliente.id.slice(0, 8)}
+              </p>
               <Button
                 variant="outline"
                 onClick={() => {
-                  preencher("cliente.nome", cliente.legal_name || cliente.trade_name || "");
-                  preencher("cliente.documento", cliente.cnpj || "");
-                  preencher("cliente.telefone", cliente.phone || "");
-                  preencher(
-                    "cliente.endereco",
-                    [
-                      cliente.street,
-                      cliente.number,
-                      cliente.complement,
-                      cliente.district,
-                      cliente.city,
-                      cliente.state,
-                      cliente.zip_code,
-                    ]
-                      .filter(Boolean)
-                      .join(", "),
-                  );
+                  preencher("cliente.nome", cliente.nome);
+                  preencher("cliente.documento", cliente.documento);
+                  preencher("cliente.telefone", cliente.telefone);
+                  preencher("cliente.endereco", cliente.endereco);
                   setMensagem("Dados do cliente preenchidos. Confira antes de gerar o PDF.");
                 }}
               >
-                {cliente.legal_name || cliente.trade_name} {cliente.cnpj}
+                {cliente.nome} · {cliente.origem}
               </Button>
             </li>
           ))}

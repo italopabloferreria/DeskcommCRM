@@ -1,0 +1,4 @@
+# Origem importada na ficha e documentos
+
+Destino: vertical Limpax. Contatos > ficha > Histórico da planilha é a entrada; GET contacts/[id]/workbook consulta import_rows por organização e contact_id com RLS. saved-workbook-row traduz somente o layout CADASTRO e conserva valores literais; WorkbookContactHistory mostra resultado paginado e link ao lote. ImportedWorkbookSource mostra origem e avisa telefone pendente. Sem mutações, workers ou auditoria nova. Falha de leitura retorna aviso e Tentar novamente. Contato anonimizado recebe404 e não exibe cartão/tab.
+Documentos > buscar cliente usa APIs existentes de contatos/empresas, escolhe valores originais disponíveis e mantém revisão manual antes da prévia. Não mescla registros nem converte CPF/CNPJ. Se o vínculo das demais abas não foi aprovado, essas linhas permanecem consultáveis no lote, sem aparecer como atendimento de cliente errado.

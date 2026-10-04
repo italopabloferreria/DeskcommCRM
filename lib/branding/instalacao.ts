@@ -400,6 +400,8 @@ async function lerLinha(): Promise<LinhaDaMarca | null | "erro"> {
       .from("platform_branding")
       .select(COLUNAS)
       .eq("id", 1)
+      // Marca é opcional no render; o transporte lento degrada para o piso existente.
+      .abortSignal(AbortSignal.timeout(2_000))
       .maybeSingle();
     if (error) {
       avisarUmaVez(

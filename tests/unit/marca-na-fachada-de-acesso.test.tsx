@@ -28,6 +28,9 @@ import type { MarcaDeSaida } from "@/lib/branding/saida";
  */
 
 const marcaDaSaida = vi.hoisted(() => vi.fn());
+vi.mock("next/headers", () => ({
+  headers: async () => new Headers({ "accept-language": "pt-BR" }),
+}));
 vi.mock("@/lib/branding/saida", () => ({ marcaDaSaida }));
 // A casca passou a resolver o idioma da interface (ver `IdiomaProvider` no
 // próprio layout) e por isso chama `createClient()`, que lê cookies — algo que

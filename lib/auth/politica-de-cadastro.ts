@@ -202,6 +202,8 @@ async function lerModo(): Promise<ModoDeCadastro | null> {
       .from("platform_settings")
       .select("signup_mode")
       .eq("id", 1)
+      // Prazo da leitura: em falha continua valendo o último modo conhecido/piso.
+      .abortSignal(AbortSignal.timeout(2_000))
       .maybeSingle();
 
     if (error) {

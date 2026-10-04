@@ -4,7 +4,6 @@ import { EntrarComGoogle } from "@/components/auth/EntrarComGoogle";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { branding } from "@/lib/branding";
 import { modoDeCadastro } from "@/lib/auth/politica-de-cadastro";
-import { createClient } from "@/lib/supabase/server";
 import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { traduzir } from "@/lib/i18n/dicionario";
 
@@ -16,17 +15,9 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string; reset?: string; error?: string }>;
 }) {
   const { next, reset, error } = await searchParams;
-  // Fora da árvore de `app/app/layout.tsx` — sem `IdiomaProvider` do lado do
-  // servidor (o cliente já tem o seu, montado em `app/(public)/layout.tsx`).
-  // Quase nunca há sessão aqui (é a própria tela de entrar), mas resolve do
-  // mesmo jeito por segurança — `user` opcional.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const idioma = await idiomaDoVisitante(
-    (user?.user_metadata?.locale as string | undefined) ?? null,
-  );
+  // Página pública: idioma do navegador, sem depender da sessão remota para
+  // mostrar o formulário. O login e as rotas privadas validam a sessão no servidor.
+  const idioma = await idiomaDoVisitante(null);
   const t = (texto: string) => traduzir(texto, idioma);
   const cadastroSomentePorConvite = (await modoDeCadastro()) === "so_convite";
 

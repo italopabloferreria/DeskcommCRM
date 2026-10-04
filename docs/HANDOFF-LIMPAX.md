@@ -1,3 +1,7 @@
+## Login local lento e erro enganoso corrigidos —04/10/2026
+
+Leituras opcionais de marca/cadastro agora abortam em2s mantendo fallback/política existentes. Página e casca públicas escolhem idioma do navegador sem consultar Auth; MFA/rotas privadas mantêm validação. Erro de transporte/status0/5xx no login retorna service_unavailable, não incrementa falhas da conta; credenciais inválidas continuam bloqueadas pelo orçamento existente. HTTP login200 em2,69s. Navegador testou formulário preenchido: mensagem correta de conexão indisponível. Health Supabase falhou Node/PowerShell/curl (timeout TCP5s); não prova senha incorreta nem projeto pausado. Sem mudança de senha/conta.
+Validação:27 testes de branding/cadastro/prazo passaram +10 testes de login/fachada/transporte passaram, lint e diff check. Servidor3000 permanece aberto. Próximo: restabelecer conectividadeHTTPS ao Supabase, validar login real e PDFs, enviar commits aoGitHub. G13/VPS/HTTPS hospedado continuam pendentes.
 ## Arquivamento privado de PDFs — 04/10/2026
 
 Implementado /api/v1/documents/archive e interface Salvar PDF no CRM: snapshot PDF da prévia, consulta paginada, download autenticado e vínculo opcional ao contato selecionado. Apenas administrador; organização autenticada no caminho Storage privado; contato validado via sessão/RLS, sem anonimizado. Envelope JSON imutável <=1MB, hash PDF e hash da requisição, replay sem sobrescrever o primeiro PDF. Auditoria document.created apenas na criação. Reutiliza bucket privado existente; sem migração ou mutação remota nesta etapa.

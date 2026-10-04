@@ -1,7 +1,7 @@
 import { LogotipoDoProduto } from "@/components/branding/MarcaDoProduto";
 import { marcaEhADoProduto } from "@/lib/branding";
 import { marcaDaSaida } from "@/lib/branding/saida";
-import { createClient } from "@/lib/supabase/server";
+import { idiomaDoVisitante } from "@/lib/i18n/idiomaAnonimo";
 import { IdiomaProvider } from "@/lib/i18n/IdiomaProvider";
 
 /**
@@ -38,16 +38,9 @@ import { IdiomaProvider } from "@/lib/i18n/IdiomaProvider";
  */
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const marca = await marcaDaSaida(null);
-  // A maioria destas telas roda ANTES do login (não há usuário nenhum), mas
-  // duas — `/login/mfa` e, em parte, `/login/recovery` — rodam com uma sessão
-  // parcial já criada (primeiro fator verificado, segundo pendente). Onde há
-  // sessão, o idioma salvo no perfil vale; sem ela, `IdiomaProvider` já cai no
-  // padrão pt-BR sozinho (ver o cabeçalho do provider) — nunca lança.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const locale = (user?.user_metadata?.locale as string | undefined) ?? null;
+  // A casca pública não valida sessão para escolher idioma. MFA e recuperação
+  // mantêm suas próprias verificações; o formulário deve aparecer mesmo offline.
+  const locale = await idiomaDoVisitante(null);
 
   return (
     <IdiomaProvider locale={locale}>
@@ -77,7 +70,11 @@ export default async function PublicLayout({ children }: { children: React.React
                     ? "rounded-md"
                     : "rounded-md px-3 py-2 dark:bg-white dark:shadow-sm"
                 }
-                style={marca.logoDarkUrl ? undefined : { backgroundColor: "var(--app-logo-surface, #fff)" }}
+                style={
+                  marca.logoDarkUrl
+                    ? undefined
+                    : { backgroundColor: "var(--app-logo-surface, #fff)" }
+                }
               >
                 {marca.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element

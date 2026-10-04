@@ -81,4 +81,16 @@ describe("signInWithPassword — teto de tentativas", () => {
     expect(resultados.filter((r) => r?.error === "rate_limited")).toHaveLength(0);
     expect(signIn).toHaveBeenCalledTimes(10);
   });
+  it("falha de rede não é senha errada nem bloqueia a conta", async () => {
+    const { signInWithPassword } = await import("./signInWithPassword");
+    signIn.mockResolvedValue({
+      data: { user: null, session: null },
+      error: { message: "fetch failed", status: 0, name: "AuthRetryableFetchError" },
+    } as never);
+    const input = { email: "rede@example.com", password: "teste-de-rede-123" };
+    for (let i = 0; i < 6; i++) {
+      expect((await signInWithPassword(input)).error).toBe("service_unavailable");
+    }
+    expect(signIn).toHaveBeenCalledTimes(6);
+  });
 });

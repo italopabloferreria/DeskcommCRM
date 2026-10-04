@@ -69,19 +69,21 @@ vi.mock("@/lib/supabase/admin", () => ({
     from: () => ({
       select: () => ({
         eq: () => ({
-          maybeSingle: async () => {
-            banco.leituras += 1;
-            // A linha é capturada AGORA, antes de esperar o portão — é o que um
-            // banco real faz: a consulta sai antes da escrita, e a resposta que
-            // volta é a de antes dela. Ler `banco.linha` depois do `await` faria
-            // a leitura "em voo" enxergar o valor NOVO e o caso não reproduziria
-            // corrida nenhuma (foi o primeiro jeito que escrevi, e a asserção de
-            // controle o pegou).
-            const capturada = banco.linha;
-            if (banco.portao) await banco.portao.esperar;
-            if (banco.erro) return { data: null, error: banco.erro };
-            return { data: capturada, error: null };
-          },
+          abortSignal: () => ({
+            maybeSingle: async () => {
+              banco.leituras += 1;
+              // A linha é capturada AGORA, antes de esperar o portão — é o que um
+              // banco real faz: a consulta sai antes da escrita, e a resposta que
+              // volta é a de antes dela. Ler `banco.linha` depois do `await` faria
+              // a leitura "em voo" enxergar o valor NOVO e o caso não reproduziria
+              // corrida nenhuma (foi o primeiro jeito que escrevi, e a asserção de
+              // controle o pegou).
+              const capturada = banco.linha;
+              if (banco.portao) await banco.portao.esperar;
+              if (banco.erro) return { data: null, error: banco.erro };
+              return { data: capturada, error: null };
+            },
+          }),
         }),
       }),
     }),
@@ -126,10 +128,9 @@ describe("o memo da marca da instalação atravessa instâncias do módulo", () 
   it("a invalidação feita pela instância da ROTA alcança a instância da TELA", async () => {
     const tela = await instancia();
     const rota = await instancia();
-    expect(
-      tela,
-      "controle: sem duas instâncias distintas este teste não reproduz nada",
-    ).not.toBe(rota);
+    expect(tela, "controle: sem duas instâncias distintas este teste não reproduz nada").not.toBe(
+      rota,
+    );
 
     // 1. A tela renderizou uma vez — o memo guardou a linha SEM logo.
     expect((await tela.marcaDaInstalacao())?.logo_path).toBeNull();
@@ -298,10 +299,7 @@ describe("a leitura que FALHOU depois da escrita não vira fato memoizado", () =
     //    fica vermelha sem o conserto.
     banco.erro = null;
     const linha = await tela.marcaDaInstalacao();
-    expect(
-      banco.leituras,
-      "a falha não pode ser servida do memo como se fosse leitura",
-    ).toBe(2);
+    expect(banco.leituras, "a falha não pode ser servida do memo como se fosse leitura").toBe(2);
     expect(linha?.logo_path, "o logo recém-subido tem de aparecer no render seguinte").toBe(
       CAMINHO_SUBIDO,
     );

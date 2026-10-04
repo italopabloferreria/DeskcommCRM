@@ -7,6 +7,50 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
+it("permite consultar origem e células preservadas sem interpretar datas ou executar fórmulas", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        data: {
+          batch: {
+            filename: "synthetic.xlsm",
+            status: "completed",
+            successful_rows: 1,
+            conflict_rows: 0,
+            failed_rows: 0,
+          },
+          rows: [
+            {
+              id,
+              row_number: 42,
+              status: "success",
+              raw_data: {
+                workbook_source: {
+                  sheet: "SERVIÇOS",
+                  row: 42,
+                  cells: [
+                    { coordinate: "C42", value: { type: "str", value: "Local sintético" } },
+                    { coordinate: "D42", value: "=SUM(A1:A2)", data_type: "f" },
+                  ],
+                },
+              },
+            },
+          ],
+          receipt: null,
+          can_reverse: false,
+          next_after: null,
+        },
+      }),
+    })),
+  );
+  render(<ImportDetailClient id={id} />);
+  await screen.findByText("SERVIÇOS · linha 42");
+  expect(screen.getByText("Local sintético")).toBeInTheDocument();
+  expect(screen.getByText("=SUM(A1:A2)")).toBeInTheDocument();
+  expect(screen.getByText("C42")).toBeInTheDocument();
+});
 function setup(admin = true, failReverse = false, failRead = false) {
   let reversed = false,
     first = true;

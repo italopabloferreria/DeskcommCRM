@@ -55,7 +55,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     const { data, error } = await supabase
       .from("import_batches")
       .select(
-        "id, filename, status, kind, total_rows, processed_rows, successful_rows, failed_rows, conflict_rows, created_by, created_at, completed_at",
+        "id, filename, status, kind, total_rows, processed_rows, successful_rows, failed_rows, conflict_rows, created_by, created_at, completed_at, column_mapping",
       )
       .eq("organization_id", authz.org.orgId)
       .order("created_at", { ascending: false })

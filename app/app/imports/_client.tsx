@@ -42,6 +42,7 @@ interface Preview {
   historical_review: ReturnType<typeof historicalPreview>;
 }
 interface BatchRow {
+  column_mapping?: { sheet?: string } | null;
   id: string;
   filename: string;
   status: string;
@@ -466,6 +467,11 @@ export function ImportsListClient() {
                   <TableCell>
                     <Link className="hover:underline" href={`/app/imports/${b.id}`}>
                       {b.filename}
+                      {typeof b.column_mapping?.sheet === "string" && (
+                        <span className="block text-xs text-muted-foreground">
+                          {b.column_mapping.sheet}
+                        </span>
+                      )}
                     </Link>
                   </TableCell>
                   <TableCell>{b.status}</TableCell>

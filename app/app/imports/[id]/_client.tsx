@@ -202,6 +202,7 @@ export function ImportDetailClient({ id }: { id: string }) {
                   <TableHead>{t("Empresa")}</TableHead>
                   <TableHead>{t("Pessoa")}</TableHead>
                   <TableHead>{t("Contato")}</TableHead>
+                  <TableHead>{t("Dados originais")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -220,6 +221,9 @@ export function ImportDetailClient({ id }: { id: string }) {
                     </TableCell>
                     <TableCell className="font-mono text-xs">
                       {(row.contact_id as string)?.slice(0, 8) || "—"}
+                    </TableCell>
+                    <TableCell className="max-w-xl min-w-64 whitespace-normal">
+                      <OriginalRow raw={row.raw_data} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -253,5 +257,60 @@ export function ImportDetailClient({ id }: { id: string }) {
         </>
       )}
     </div>
+  );
+}
+
+function OriginalRow({ raw }: { raw: unknown }) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return <>—</>;
+  const data = raw as Record<string, unknown>;
+  const source = data.workbook_source;
+  if (source && typeof source === "object" && !Array.isArray(source)) {
+    const workbook = source as Record<string, unknown>;
+    const cells = Array.isArray(workbook.cells) ? workbook.cells : [];
+    return (
+      <details>
+        <summary className="cursor-pointer rounded focus-visible:outline-2">
+          {typeof workbook.sheet === "string" ? workbook.sheet : "Planilha"} · linha{" "}
+          {String(workbook.row ?? "")}
+        </summary>
+        <dl className="mt-2 space-y-1 text-xs">
+          {cells.map((cell: unknown, index) => {
+            if (!cell || typeof cell !== "object") return null;
+            const c = cell as Record<string, unknown>;
+            const stored = c.value;
+            const value =
+              stored && typeof stored === "object" && "value" in stored
+                ? (stored as Record<string, unknown>).value
+                : stored;
+            if (value === null || value === undefined || value === "") return null;
+            return (
+              <div key={index}>
+                <dt className="font-medium">{String(c.coordinate ?? index + 1)}</dt>
+                <dd className="break-words">
+                  {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+      </details>
+    );
+  }
+  return (
+    <details>
+      <summary className="cursor-pointer rounded focus-visible:outline-2">
+        Ver dados da linha
+      </summary>
+      <dl className="mt-2 space-y-1 text-xs">
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key}>
+            <dt className="font-medium">{key}</dt>
+            <dd className="break-words">
+              {typeof value === "object" ? JSON.stringify(value) : String(value ?? "")}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </details>
   );
 }

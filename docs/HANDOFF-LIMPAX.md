@@ -1,3 +1,7 @@
+## Consulta da base e histórico validada na interface — 04/10/2026
+
+Sessão autenticada no navegador interno: contatos com tag Base Limpax visíveis, paginação com mais resultados e11 lotes reais exibidos. Detalhes dos lotes agora mostram aba, linha física e valores originais expansíveis (inclusive células tipadas e fórmulas literais). Serviço real de LOJAS MANGAÍ conferido na tela. Lista passa a identificar a aba de cada lote. API mantém guard viewer, organização e RLS existentes; nenhuma nova gravação ou migração nesta etapa.
+Destino: extensão vertical Limpax sobre a consulta de importações existente. Entrada: Importações > lote. Saída: consulta de células preservadas; erros permanecem no aviso com Tentar novamente; sem worker ou efeitos externos. 27 testes de API/UI passaram; 5 testes do detalhe repetidos após correção das células tipadas; lint direcionado passou. Histórico operacional e revisão de identidades continuam pendentes. G13 aberto.
 ## Carga real concluída — 04/10/2026
 
 Importação COMMIT no Supabase bzretxzwnudtpxmoqjyv: 4050 contatos nomeados da aba CADASTRO, 5050 linhas originais das 9 abas preservadas em 11 lotes. Reexecução verificada com ROLLBACK: 0 contatos novos, 5050 linhas reutilizadas. Nenhuma mesclagem automática; telefones ambíguos conservados no bruto para revisão. Histórico das outras abas preservado, ainda não convertido em serviços operacionais.
@@ -503,3 +507,5 @@ Local3001 estava parado; instância única Next iniciada e mantida.
 Próximo: ligação da revisão por lote à UI e persistência; restore separado e
 provas RLS/transação antes uso remoto. G13 permanece aberto.
 Typecheck integral04/10 interrompido por consumo de3GB RAM; não afirmar aprovado.20 testes/lint direcionado passaram. Login3001 HTTP200 confirmado. Nenhuma carga realizada.
+
+Verificação integral de tipos tentou2048MB e terminou por falta de memória; não aprovada nesta etapa. Não repetir ampliando RAM nesta máquina sem necessidade.

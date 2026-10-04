@@ -39,12 +39,14 @@ export function ModelosDocumentos({
   valores,
   preencher,
   inserir,
+  selecionarContato,
 }: {
   documento: PreviaDocumento;
   aplicar: (documento: PreviaDocumento) => void;
   valores: Partial<Record<CampoDocumento, string>>;
   preencher: (campo: CampoDocumento, valor: string) => void;
   inserir: (campo: CampoDocumento) => void;
+  selecionarContato: (id: string | null) => void;
 }) {
   const t = useT();
   const tagDeIdioma = useTagDeIdioma();
@@ -346,6 +348,7 @@ export function ModelosDocumentos({
                   preencher("cliente.documento", cliente.documento);
                   preencher("cliente.telefone", cliente.telefone);
                   preencher("cliente.endereco", cliente.endereco);
+                  selecionarContato(cliente.origem === "Contato" ? cliente.id : null);
                   setMensagem("Dados do cliente preenchidos. Confira antes de gerar o PDF.");
                 }}
               >

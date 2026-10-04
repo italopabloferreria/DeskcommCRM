@@ -12,6 +12,7 @@ import { EditorImagem, type ImagemDocumento } from "./_imagem";
 import { ModelosDocumentos } from "./_modelos";
 import { preencherModelo, type CampoDocumento } from "@/lib/documentos/modelos";
 import type { PreviaDocumento } from "@/lib/documentos/previa";
+import { ArquivosDocumentos } from "./_arquivos";
 
 export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
   const t = useT();
@@ -45,6 +46,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
   const [erro, setErro] = useState("");
   const [busy, setBusy] = useState(false);
   const [valores, setValores] = useState<Partial<Record<CampoDocumento, string>>>({});
+  const [contatoId, setContatoId] = useState<string | null>(null);
   const documento = {
     titulo,
     destinatario,
@@ -52,6 +54,7 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
     assinaturas: imagens.filter((s) => s.png),
   };
   function aplicar(doc: PreviaDocumento) {
+    setContatoId(null);
     setTitulo(doc.titulo);
     setDestinatario(doc.destinatario);
     setPaginas(doc.paginas.map((p) => p.texto));
@@ -116,7 +119,11 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
           documento={documento}
           aplicar={aplicar}
           valores={valores}
-          preencher={(campo, valor) => setValores((v) => ({ ...v, [campo]: valor }))}
+          selecionarContato={setContatoId}
+          preencher={(campo, valor) => {
+            if (campo.startsWith("cliente.")) setContatoId(null);
+            setValores((v) => ({ ...v, [campo]: valor }));
+          }}
           inserir={(campo) =>
             setPaginas((p) =>
               p.map((texto, n) => (n === p.length - 1 ? `${texto}{{${campo}}}` : texto)),
@@ -140,7 +147,10 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
             id="doc-destinatario"
             value={destinatario}
             maxLength={180}
-            onChange={(e) => setDestinatario(e.target.value)}
+            onChange={(e) => {
+              setContatoId(null);
+              setDestinatario(e.target.value);
+            }}
           />
         </div>
       </div>
@@ -207,6 +217,12 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
       <Button disabled={busy} onClick={() => void baixar()}>
         {busy ? t("Gerando PDF…") : t("Baixar prévia em PDF")}
       </Button>
+      {podeUsarPng ? (
+        <ArquivosDocumentos
+          preparar={() => preencherModelo(documento, valores)}
+          contatoId={contatoId}
+        />
+      ) : null}
       <div className="flex flex-wrap gap-4 border-t pt-4 text-sm">
         <Link className="underline" href="/app/proposals">
           {t("Propostas comerciais")}{" "}

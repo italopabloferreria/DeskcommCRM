@@ -1,3 +1,8 @@
+## Arquivamento privado de PDFs — 04/10/2026
+
+Implementado /api/v1/documents/archive e interface Salvar PDF no CRM: snapshot PDF da prévia, consulta paginada, download autenticado e vínculo opcional ao contato selecionado. Apenas administrador; organização autenticada no caminho Storage privado; contato validado via sessão/RLS, sem anonimizado. Envelope JSON imutável <=1MB, hash PDF e hash da requisição, replay sem sobrescrever o primeiro PDF. Auditoria document.created apenas na criação. Reutiliza bucket privado existente; sem migração ou mutação remota nesta etapa.
+Testes de armazenamento9 e API4 passaram; testes UI3 passaram. Regressão da busca ajustada para mocks por URL, resultado final registrado abaixo. Lint direcionado aprovado. Sessão visual expirou e retornou login; gravação real autenticada ainda não validada. Typecheck integral continua limitado por memória. PDF é prévia identificada, não emissão fiscal nem assinatura eletrônica certificada.
+Próximo executável: validar salvar/reabrir/baixar com sessão autenticada e conferir release; organizar vínculo explícito do histórico das outras abas. Bloqueios externos: VPS gratuita/HTTPS/WhatsApp hospedado, G13 aberto. Roadmap: DocuSign e retorno manual Gov.br. CRM local3001 preservado.
 ## Ficha do contato e preenchimento de documentos — 04/10/2026
 
 Contatos importados agora têm cartão de origem e aba Histórico da planilha, consultando import_rows já vinculadas ao contato. Mantém dados literais (inclusive datas múltiplas e fórmulas), exibe endereço, valor, atendimento e observações de CADASTRO sem presumir pagamento. GET /contacts/[id]/workbook usa sessão viewer, RLS, filtro explícito de organização/contato, paginação50; recusa contato anonimizado. Não mescla históricos entre nomes iguais. Tela autenticada conferida com registro real.
@@ -514,3 +519,6 @@ provas RLS/transação antes uso remoto. G13 permanece aberto.
 Typecheck integral04/10 interrompido por consumo de3GB RAM; não afirmar aprovado.20 testes/lint direcionado passaram. Login3001 HTTP200 confirmado. Nenhuma carga realizada.
 
 Verificação integral de tipos tentou2048MB e terminou por falta de memória; não aprovada nesta etapa. Não repetir ampliando RAM nesta máquina sem necessidade.
+
+Validação final:18 testes direcionados e lint aprovados. GitHub indisponível nas duas tentativas de push; commit permanece local. Servidor3001 está escutando (processo10480), mas resposta/login falha por fetch de autenticação Supabase; HTTP final expirou20s. Não reiniciado nem encerrado. Retomar conexão externa, enviar commit e validar PDF autenticado antes de aceite.
+

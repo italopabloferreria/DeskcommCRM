@@ -15,7 +15,7 @@ export function caminhoModelo(org: string, id: string, versao: string) {
   return `${prefixo(org)}/${id}-${versao}.json`;
 }
 /** Bucket novo sem policies de leitura/escrita públicas: acesso apenas pelo servidor. */
-async function verificarBucket(db: SupabaseClient, criar: boolean): Promise<boolean> {
+export async function verificarBucket(db: SupabaseClient, criar: boolean): Promise<boolean> {
   let { data, error } = await db.storage.getBucket(BUCKET_DOCUMENTOS);
   if (error) {
     const missing =

@@ -3,28 +3,34 @@ import { afterEach, expect, it, vi } from "vitest";
 import { DocumentsClient } from "./_client";
 afterEach(() => vi.unstubAllGlobals());
 it("preenche contato importado e empresa sem inferir documento e mantém edição", async () => {
-  const fetchMock = vi.fn(async (url: string) => ({
-    ok: true,
-    json: async () => ({
-      data: url.includes("/contacts?")
-        ? [
-            {
-              id: "1",
-              name: "Cliente teste",
-              phone_number: null,
-              source_metadata: { address_original: "Local original", phone_original: "ambíguo" },
-            },
-          ]
-        : [
-            {
-              id: "1",
-              legal_name: "Empresa teste",
-              cnpj: "documento empresa",
-              phone: "telefone empresa",
-            },
-          ],
-    }),
-  }));
+  const fetchMock = vi.fn(async (url: string) => {
+    if (url.startsWith("/api/v1/documents/archive"))
+      return { ok: true, json: async () => ({ data: { documentos: [], proximoOffset: null } }) };
+    if (!url.startsWith("/api/v1/contacts?") && !url.startsWith("/api/v1/companies?"))
+      throw new Error(`Consulta inesperada: ${url}`);
+    return {
+      ok: true,
+      json: async () => ({
+        data: url.includes("/contacts?")
+          ? [
+              {
+                id: "1",
+                name: "Cliente teste",
+                phone_number: null,
+                source_metadata: { address_original: "Local original", phone_original: "ambíguo" },
+              },
+            ]
+          : [
+              {
+                id: "1",
+                legal_name: "Empresa teste",
+                cnpj: "documento empresa",
+                phone: "telefone empresa",
+              },
+            ],
+      }),
+    };
+  });
   vi.stubGlobal("fetch", fetchMock);
   render(<DocumentsClient podeUsarPng />);
   fireEvent.change(screen.getByLabelText("Buscar cliente cadastrado"), {
@@ -51,13 +57,19 @@ it("limpa resultados anteriores quando nova consulta falha", async () => {
   let failed = false;
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => ({
-      ok: !failed,
-      json: async () =>
-        failed
-          ? { error: { message: "Busca indisponível" } }
-          : { data: [{ id: "1", name: "Teste", legal_name: "Empresa" }] },
-    })),
+    vi.fn(async (url: string) => {
+      if (url.startsWith("/api/v1/documents/archive"))
+        return { ok: true, json: async () => ({ data: { documentos: [], proximoOffset: null } }) };
+      if (!url.startsWith("/api/v1/contacts?") && !url.startsWith("/api/v1/companies?"))
+        throw new Error(`Consulta inesperada: ${url}`);
+      return {
+        ok: !failed,
+        json: async () =>
+          failed
+            ? { error: { message: "Busca indisponível" } }
+            : { data: [{ id: "1", name: "Teste", legal_name: "Empresa" }] },
+      };
+    }),
   );
   render(<DocumentsClient podeUsarPng />);
   fireEvent.change(screen.getByLabelText("Buscar cliente cadastrado"), {

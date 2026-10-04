@@ -1,3 +1,7 @@
+## Carga real concluída — 04/10/2026
+
+Importação COMMIT no Supabase bzretxzwnudtpxmoqjyv: 4050 contatos nomeados da aba CADASTRO, 5050 linhas originais das 9 abas preservadas em 11 lotes. Reexecução verificada com ROLLBACK: 0 contatos novos, 5050 linhas reutilizadas. Nenhuma mesclagem automática; telefones ambíguos conservados no bruto para revisão. Histórico das outras abas preservado, ainda não convertido em serviços operacionais.
+Backup anterior restaurado em PostgreSQL17 isolado: dados de222 tabelas,632 políticas e permissões conferidos. Isso valida recuperação do banco, não login Auth nem G13. Simulação remota passou antes do COMMIT. CRM local reiniciado em3001, HTTP200. Verificação visual bloqueada por timeout CDP no Chrome; não afirmar aceite visual. Próximo: conferir navegação autenticada e apresentar histórico operacional; hospedagem/HTTPS continuam pendentes.
 # Retomada da vertical LimpaxCRM
 
 ## Preservação integral em lotes04/10

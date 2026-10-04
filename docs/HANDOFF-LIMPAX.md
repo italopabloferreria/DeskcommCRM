@@ -1,5 +1,39 @@
 # Retomada da vertical LimpaxCRM
 
+## Preservação integral em lotes04/10
+
+Planejador privado implementado em lib/crm-b2b/workbook-batches.ts: identidade
+por hash do workbook, aba e linha física; lotes<=2000, hashes distintos e
+rejeição de coordenada repetida/tamanho excessivo. Não decide identidade,
+não chama RPC e não cria clientes.4 testes passaram, lint/tipos direcionados
+aprovados. Não foi repetido typecheck integral; módulo independente.
+Prova real privada:5050 linhas com conteúdo,9 abas,11 lotes e51 fórmulas,
+células brutas reconciliadas integralmente com staging checksum verificado;
+original intacto,0 escritas. Inclui cabeçalhos e auxiliares, não5050 clientes.
+Preparação Supabase oficial PG17 isolado obtida no discoD; configuração
+privada restringe banco a768MB/1CPU e loopback. Nenhum banco foi criado:
+Docker Linux não inicializou, API500 e logs de init ping/socket indisponível.
+Tentativa interrompida e processos Docker/WSL próprios encerrados; CRM3001
+permanece HTTP200. Bloqueio anterior de política não se repetiu ao clone.
+Revisão de código confirmou que0495 une identidades por nome/telefone e0507
+não distingue abas no SHA/índice. Não aplicar esses caminhos à planilha real
+sem contrato de origem e identidade explícita. XLSM permanece análise apenas.
+Próximo: caminho de gravação por origem sem mescla automática e confirmação
+integral; recuperação em Supabase compatível; migração/aceite/carga reconciliada.
+
+## Carga real autorizada03/10 — estado confirmado
+
+Pedido explícito: importar toda a base real e preparar publicação. Autorização
+não está pendente. Consulta administrativa READ ONLY/ROLLBACK confirmou13
+empresas,13 pessoas,15 contatos,0 lotes,0 funções B2B de importação e ausência
+de limpax_service_history. Nenhuma migração/gravação neste bloco.
+Restore isolado permanece pendente. Preparação local de Docker/repositório
+oficial rejeitada pela revisão automática, sem razão específica retornada;
+quota gratuita Supabase permanece impedimento registrado. C agora cerca12GB
+livres; sem limpeza realizada. WAHA auto-iniciado com Docker foi parado. CRM3001 estava parado depois da interrupção; uma única instância Next reiniciada, GET/login200 confirmado.
+Próximo: provar recuperação, ensaiar/aplicar0495/0507, resolver correlação sem
+mesclar nomes, carregar/reconciliar origem inteira; HTTPS/aceite antesG13.
+
 ## Revisão operacional por linha03/10
 
 Prévia inclui contagens de possíveis registros, cabeçalhos repetidos,

@@ -517,6 +517,22 @@ Pra **vulnerabilidades de segurança**, **NÃO abra issue pública** — use o [
 
 ---
 
+## Variantes da comunidade
+
+Escolha o projeto conforme os recursos e a operação que você precisa:
+
+| Opção | Experiência | WhatsApp | Operação |
+| --- | --- | --- | --- |
+| DeskcommCRM | Produto principal e seus recursos descritos neste README | Integrações e automações do projeto principal | Self-host conforme as instruções deste repositório |
+| [I Can't Believe CRM — Lightweight](https://github.com/italopabloferreria/icantbelievecrm-lighweight) | Core reaproveitado, navegação Hoje, Clientes, Vendas e Agenda | Mensagem editável e link oficial wa.me; envio manual pelo usuário | Arquitetura de referência Vercel + Supabase, sem VPS ou worker permanente obrigatórios |
+
+A Lightweight é uma variante comunitária independente, mantida por [@italopabloferreria](https://github.com/italopabloferreria). Cada pessoa escolhe onde hospedar e pode adaptar o código; não há serviço hospedado pelos mantenedores nem troca automática entre os dois projetos. Instale cada opção a partir de seu próprio repositório e siga sua documentação.
+
+Na variante, foram validados localmente login/MFA, clientes/tarefas, criação e edição de vendas, agendamento pela interface, upload de logo e abertura assistida do WhatsApp. Os limites e as evidências estão na [documentação da Lightweight](https://github.com/italopabloferreria/icantbelievecrm-lighweight/blob/main/docs/lightweight-foundation.md). Isso não certifica todas as funcionalidades herdadas ou toda infraestrutura escolhida por quem instala.
+
+O trabalho original de Rafael Melgaço e a licença MIT são preservados. Dúvidas, bugs e adaptações específicos da variante devem ser encaminhados ao repositório dela; sua manutenção não é responsabilidade do DeskcommCRM.
+
+---
 ## 📜 Licença
 
 Distribuído sob a licença **MIT** — veja [`LICENSE`](LICENSE). Você pode usar, modificar

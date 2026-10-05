@@ -26,8 +26,9 @@ type ClienteDocumento = {
 };
 
 type Versao = { id: string; versao: string; nome: string; criadoEm: string };
-async function consultar(url: string, init?: RequestInit) {
+async function consultar(url: string, init?: RequestInit, permitirAusente = false) {
   const response = await fetch(url, { ...init, credentials: "same-origin", cache: "no-store" });
+  if (permitirAusente && response.status === 404) return [];
   const body = await response.json();
   if (!response.ok) throw new Error(body.error?.message ?? "Não foi possível concluir a operação.");
   return body.data;
@@ -280,7 +281,7 @@ export function ModelosDocumentos({
               const query = encodeURIComponent(busca.trim());
               const [contatos, empresas] = await Promise.all([
                 consultar(`/api/v1/contacts?search=${query}&limit=20`),
-                consultar(`/api/v1/companies?search=${query}&limit=20`),
+                consultar(`/api/v1/companies?search=${query}&limit=20`, undefined, true),
               ]);
               const encontrados: ClienteDocumento[] = [
                 ...contatos.map(

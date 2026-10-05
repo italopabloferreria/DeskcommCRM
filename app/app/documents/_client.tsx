@@ -126,7 +126,10 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
           documento={documento}
           aplicar={aplicar}
           valores={valores}
-          selecionarContato={setContatoId}
+          selecionarContato={(id) => {
+            setContatoId(id);
+            setDestinatario("{{cliente.nome}}");
+          }}
           preencher={(campo, valor) => {
             if (campo.startsWith("cliente.")) setContatoId(null);
             if (campo === "cliente.nome")

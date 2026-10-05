@@ -2,7 +2,7 @@
 import { useT } from "@/hooks/i18n/useT";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,12 +47,17 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
   const [busy, setBusy] = useState(false);
   const [valores, setValores] = useState<Partial<Record<CampoDocumento, string>>>({});
   const [contatoId, setContatoId] = useState<string | null>(null);
+  const [previa, setPrevia] = useState<{ url: string; conteudo: string; payload: string } | null>(null);
   const documento = {
     titulo,
     destinatario,
     paginas: paginas.map((texto) => ({ texto })),
     assinaturas: imagens.filter((s) => s.png),
   };
+  const conteudoAtual = JSON.stringify({ documento, valores });
+  useEffect(() => {
+    return () => { if (previa) URL.revokeObjectURL(previa.url); };
+  }, [previa]);
   function aplicar(doc: PreviaDocumento) {
     setContatoId(null);
     setTitulo(doc.titulo);
@@ -90,11 +95,13 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
         throw new Error(body.error?.message ?? "Não foi possível gerar a prévia.");
       }
       const url = URL.createObjectURL(await response.blob());
+      setPrevia({ url, conteudo: conteudoAtual, payload: JSON.stringify(preenchido) });
       const anchor = document.createElement("a");
       anchor.href = url;
       anchor.download = "documento-previa.pdf";
+      document.body.appendChild(anchor);
       anchor.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      anchor.remove();
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Falha ao gerar o documento.");
     } finally {
@@ -122,6 +129,8 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
           selecionarContato={setContatoId}
           preencher={(campo, valor) => {
             if (campo.startsWith("cliente.")) setContatoId(null);
+            if (campo === "cliente.nome")
+              setDestinatario((atual) => atual.trim() ? atual : "{{cliente.nome}}");
             setValores((v) => ({ ...v, [campo]: valor }));
           }}
           inserir={(campo) =>
@@ -217,6 +226,15 @@ export function DocumentsClient({ podeUsarPng }: { podeUsarPng: boolean }) {
       <Button disabled={busy} onClick={() => void baixar()}>
         {busy ? t("Gerando PDF…") : t("Baixar prévia em PDF")}
       </Button>
+      {previa && previa.conteudo === conteudoAtual ? (
+        <form method="post" action="/api/v1/documents/preview" className="space-y-2">
+          <p role="status" className="text-sm">{t("Prévia pronta.")}</p>
+          <input type="hidden" name="documento" value={previa.payload} />
+          <Button type="submit" variant="outline">
+            {t("Baixar PDF gerado")}
+          </Button>
+        </form>
+      ) : null}
       {podeUsarPng ? (
         <ArquivosDocumentos
           preparar={() => preencherModelo(documento, valores)}

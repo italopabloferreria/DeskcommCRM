@@ -66,6 +66,39 @@ beforeEach(() => {
 });
 
 describe("requireRole — helper único (spec 13 §4)", () => {
+  it.each<[Role, Role, boolean]>([
+    ["viewer", "viewer", true],
+    ["viewer", "agent", false],
+    ["viewer", "manager", false],
+    ["viewer", "admin", false],
+    ["agent", "viewer", true],
+    ["agent", "agent", true],
+    ["agent", "manager", false],
+    ["agent", "admin", false],
+    ["manager", "viewer", true],
+    ["manager", "agent", true],
+    ["manager", "manager", true],
+    ["manager", "admin", false],
+    ["admin", "viewer", true],
+    ["admin", "agent", true],
+    ["admin", "manager", true],
+    ["admin", "admin", true],
+  ])("papel efetivo %s, requisito %s: permitido=%s", async (effective, required, allowed) => {
+    // Sessão administrativa desatualizada não pode prevalecer sobre o banco.
+    session("admin", { dbRole: effective });
+    const result = await requireRole(required);
+    expect(result.ok).toBe(allowed);
+    if (result.ok) {
+      expect(result.org.role).toBe(effective);
+      expect(result.org.orgId).toBe(ORG_ID);
+      expect(audit).not.toHaveBeenCalled();
+    } else {
+      expect(result.response.status).toBe(403);
+      expect((await result.response.json()).error.code).toBe("forbidden_role");
+      expect(audit).toHaveBeenCalledTimes(1);
+    }
+  });
+
   it("nega 401 unauthenticated sem sessão", async () => {
     session(null);
     const res = await requireRole("viewer");

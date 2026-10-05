@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { fail } from "@/lib/api/wrappers";
 import { requireSupportWrite } from "@/lib/impersonate/support";
 import { requireRole } from "@/lib/auth/require-role";
-import { lerJsonLimitado, previaSchema } from "@/lib/documentos/previa";
+import { lerFormularioPreviaLimitado, lerJsonLimitado, previaSchema } from "@/lib/documentos/previa";
 import { validarPngDaAssinatura } from "@/lib/documentos/png";
 import { renderizarPrevia } from "@/lib/documentos/previa-pdf";
 
@@ -17,11 +17,12 @@ export async function POST(request: Request): Promise<Response> {
   // O navegador envia Origin; sem ela não existe prova de origem confiável.
   if (request.headers.get("origin") !== new URL(request.url).origin)
     return fail("forbidden", "Origem do pedido inválida.", 403, { requestId });
-  if (!request.headers.get("content-type")?.startsWith("application/json"))
+  const formulario = request.headers.get("content-type")?.startsWith("application/x-www-form-urlencoded");
+  if (!formulario && !request.headers.get("content-type")?.startsWith("application/json"))
     return fail("validation_failed", "Envie um documento JSON.", 415, { requestId });
   let documento;
   try {
-    documento = previaSchema.parse(await lerJsonLimitado(request));
+    documento = previaSchema.parse(await (formulario ? lerFormularioPreviaLimitado(request) : lerJsonLimitado(request)));
     if (documento.assinaturas.length) {
       const admin = await requireRole("admin", {
         requestId,

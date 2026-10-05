@@ -13,8 +13,8 @@ export function linhasDoTexto(texto: string): string[] {
 }
 export const previaSchema = z
   .object({
-    titulo: z.string().trim().min(1).max(120),
-    destinatario: z.string().trim().min(1).max(180),
+    titulo: z.string().trim().min(1, "Informe o título do documento.").max(120),
+    destinatario: z.string().trim().min(1, "Informe o cliente ou destinatário.").max(180),
     paginas: z
       .array(
         z
@@ -82,6 +82,17 @@ export type PreviaDocumento = z.infer<typeof previaSchema>;
 
 /** Contagem real de bytes, mesmo quando Content-Length está ausente ou é falso. */
 export async function lerJsonLimitado(request: Request): Promise<unknown> {
+  return JSON.parse(await lerTextoLimitado(request));
+}
+
+export async function lerFormularioPreviaLimitado(request: Request): Promise<unknown> {
+  const campos = new URLSearchParams(await lerTextoLimitado(request));
+  if (campos.getAll("documento").length !== 1 || Array.from(campos.keys()).some((k) => k !== "documento"))
+    throw new Error("documento_corpo_invalido");
+  return JSON.parse(campos.get("documento")!);
+}
+
+async function lerTextoLimitado(request: Request): Promise<string> {
   const reader = request.body?.getReader();
   if (!reader) throw new Error("documento_corpo_invalido");
   const chunks: Uint8Array[] = [];
@@ -106,5 +117,5 @@ export async function lerJsonLimitado(request: Request): Promise<unknown> {
     bytes.set(chunk, offset);
     offset += chunk.length;
   });
-  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
 }

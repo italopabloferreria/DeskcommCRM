@@ -24,6 +24,7 @@ it("retorna 503 explícito sem abrir pool quando o serviço não está configura
     new NextRequest("http://localhost/api/v1/conversations/conversation/draft-reply"),
     { params: Promise.resolve({ id: "conversation" }) },
   );
+  if (!response) throw new Error("A rota deve retornar uma resposta HTTP");
   expect(response.status).toBe(503);
   expect((await response.json()).error.code).toBe("service_unavailable");
   expect(mocks.pool).not.toHaveBeenCalled();
@@ -31,13 +32,12 @@ it("retorna 503 explícito sem abrir pool quando o serviço não está configura
 });
 it("não expõe configuração nem consulta pool a quem não tem acesso", async () => {
   mocks.role.mockResolvedValue({ ok: false, response: new Response(null, { status: 403 }) });
-  expect(
-    (
-      await GET(new NextRequest("http://localhost/api/v1/conversations/x/draft-reply"), {
-        params: Promise.resolve({ id: "x" }),
-      })
-    ).status,
-  ).toBe(403);
+  const response = await GET(
+    new NextRequest("http://localhost/api/v1/conversations/x/draft-reply"),
+    { params: Promise.resolve({ id: "x" }) },
+  );
+  if (!response) throw new Error("A rota deve retornar uma resposta HTTP");
+  expect(response.status).toBe(403);
   expect(mocks.db).not.toHaveBeenCalled();
   expect(mocks.pool).not.toHaveBeenCalled();
 });

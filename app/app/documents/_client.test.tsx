@@ -8,6 +8,30 @@ vi.mock("./_arquivos", () => ({ ArquivosDocumentos: () => null }));
 
 afterEach(() => vi.unstubAllGlobals());
 describe("documentos com imagens manuais", () => {
+  it("oferece download da prévia pronta e retira o link quando o conteúdo muda", async () => {
+    const revoke = vi.fn();
+    vi.stubGlobal("URL", { createObjectURL: () => "blob:previa-teste", revokeObjectURL: revoke });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(["%PDF-teste"]) }));
+    const { unmount } = render(<DocumentsClient podeUsarPng={false} />);
+    fireEvent.change(screen.getByLabelText("Cliente ou destinatário"), { target: { value: "Cliente fictício" } });
+    fireEvent.change(screen.getByLabelText("Texto da página 1"), { target: { value: "Conteúdo fictício." } });
+    fireEvent.click(screen.getByRole("button", { name: "Baixar prévia em PDF" }));
+    const link = await screen.findByRole("button", { name: "Baixar PDF gerado" });
+    expect(link.closest("form")?.getAttribute("action")).toBe("/api/v1/documents/preview");
+    expect(link.closest("form")?.getAttribute("method")).toBe("post");
+    fireEvent.change(screen.getByLabelText("Título"), { target: { value: "Documento alterado" } });
+    expect(screen.queryByRole("button", { name: "Baixar PDF gerado" })).toBeNull();
+    unmount();
+    expect(revoke).toHaveBeenCalledWith("blob:previa-teste");
+  });
+  it("preenche destinatário vazio pelo campo de cliente e preserva destinatário informado", () => {
+    render(<DocumentsClient podeUsarPng />);
+    fireEvent.change(screen.getByLabelText("Nome do cliente"), { target: { value: "Cliente fictício" } });
+    expect((screen.getByLabelText("Cliente ou destinatário") as HTMLInputElement).value).toBe("{{cliente.nome}}");
+    fireEvent.change(screen.getByLabelText("Cliente ou destinatário"), { target: { value: "Destinatário específico" } });
+    fireEvent.change(screen.getByLabelText("Nome do cliente"), { target: { value: "Outro cliente fictício" } });
+    expect((screen.getByLabelText("Cliente ou destinatário") as HTMLInputElement).value).toBe("Destinatário específico");
+  });
   it("salva texto e imagens e restaura a versão escolhida", async () => {
     const model = {
       id: "22222222-2222-4222-8222-222222222222",

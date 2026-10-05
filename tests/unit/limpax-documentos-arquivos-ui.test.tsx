@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ArquivosDocumentos } from "@/app/app/documents/_arquivos";
 import type { PreviaDocumento } from "@/lib/documentos/previa";
+import { previaSchema } from "@/lib/documentos/previa";
 
 vi.mock("@/hooks/i18n/useT", () => ({ useT: () => (texto: string) => texto }));
 vi.mock("@/hooks/i18n/useLocaleDeData", () => ({ useTagDeIdioma: () => "pt-BR" }));
@@ -36,6 +37,12 @@ const posts = () =>
     .map(([, init]) => JSON.parse(init.body));
 
 describe("Arquivo preenchido no CRM", () => {
+  it("orienta sobre destinatário ausente quando o preenchimento lança validação", async () => {
+    render(<ArquivosDocumentos preparar={() => previaSchema.parse({ ...doc, destinatario: "" })} contatoId={null} />);
+    fireEvent.click(screen.getByRole("button", { name: "Salvar PDF no CRM" }));
+    expect((await screen.findByRole("alert")).textContent).toBe("Informe o cliente ou destinatário.");
+    expect(posts()).toHaveLength(0);
+  });
   it("mantém o recibo após falha e muda o recibo ao selecionar outro contato", async () => {
     const { rerender } = render(<ArquivosDocumentos preparar={() => doc} contatoId={contatoA} />);
     fireEvent.click(screen.getByRole("button", { name: "Salvar PDF no CRM" }));

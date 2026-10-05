@@ -81,7 +81,9 @@ export function ArquivosDocumentos({
       await action(abort.signal);
     } catch (error) {
       if (!abort.signal.aborted && mounted.current)
-        setErro(error instanceof Error ? error.message : "Falha ao arquivar o documento.");
+        setErro(error instanceof z.ZodError
+          ? error.issues[0]?.message ?? "Revise os campos do documento."
+          : error instanceof Error ? error.message : "Falha ao arquivar o documento.");
     } finally {
       if (mounted.current) setBusy(false);
     }

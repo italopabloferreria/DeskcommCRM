@@ -1,19 +1,21 @@
-## Versão atual para instalar — 04/10/2026
+## Versão atual para instalar — 05/10/2026
 
 O estado desta seção prevalece sobre os rascunhos e gates históricos abaixo. A rede pública Oracle já existe, mas as duas tentativas A1 2/12 e 1/6 em São Paulo AD-1 recusaram por capacidade insuficiente. Nenhuma VPS/IP/SSH/HTTPS existe; manter custo zero e aguardar capacidade, sem trocar automaticamente para recurso pago.
 
-Imagens atuais: revisão `59713f3fb6db7011640d7b4ac78fc6211b1a49bf`, manifesto `docs/releases/limpax/59713f3fb-arm.json`. Run https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37255540881 SUCCESS: gates e testes de documentos, lint/fragmentos, assets OCR, Compose real, suite shell completa, builds e sondas ARM antes da publicação. GHCR anônimo confirmou metadados linux/arm64, origem do fork e revisão nas três imagens por digest, sem baixar camadas. Não equivale a banco/WhatsApp/fluxos reais aprovados.
+Imagens atuais: revisão `827d57d427b59a313ea0c807d79fa44b5c02e8d0`, manifesto `docs/releases/limpax/827d57d42-arm.json`. Run https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37271284402 SUCCESS. Três imagens próprias ARM publicadas por digest e acessíveis anonimamente. Aplicação dessa revisão exercitada com banco/Auth/Storage restaurados no bloco 2; WhatsApp e hospedagem pública ainda não validados.
 
 Num clone novo na futura VPS, copiar o manifesto **antes** de fixar a revisão das imagens. O HEAD documental posterior não passa na guarda exata do runtime. Exemplo após clone da branch `vertical/limpax`, origem conferida e árvore limpa:
 
 ```bash
 install -d -m 700 /opt/limpaxcrm-releases
-cp docs/releases/limpax/59713f3fb-arm.json /opt/limpaxcrm-releases/59713f3fb-arm.json
-git checkout --detach 59713f3fb6db7011640d7b4ac78fc6211b1a49bf
-node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/59713f3fb-arm.json
+cp docs/releases/limpax/827d57d42-arm.json /opt/limpaxcrm-releases/827d57d42-arm.json
+git checkout --detach 827d57d427b59a313ea0c807d79fa44b5c02e8d0
+node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/827d57d42-arm.json
 ```
 
-São instruções preparadas; nenhum checkout/apply de VPS realizado. Configuração privada completa e URLs HTTPS autorizadas antecedem `--plan`/`--apply`. A carga real já foi reconciliada: 4.050 contatos, 5.050 linhas originais e 11 lotes. O backup pós-importação foi restaurado em PostgreSQL isolado; dados de origem e permissões conferidos em 222 tabelas e 632 políticas. Login Auth e aplicação com a cópia restaurada ainda não foram exercitados. Modelos e PDFs têm cópia privada separada do Storage. G13 permanece aberto: faltam aceite geral/perfis, decisão sobre vínculos históricos e ambiente hospedado com HTTPS/WhatsApp. Next local 3000 mantido; Docker desligado após a recuperação. O restante deste arquivo é histórico; não instalar revisão antiga por seguir exemplos abaixo.
+São instruções preparadas; nenhum checkout/apply de VPS realizado. Configuração privada completa e URLs HTTPS autorizadas antecedem `--plan`/`--apply`. Blocos 1 e 2 concluídos: perfis reais, contatos/documentos e recuperação com login e PDF comprovados. Backup limpo após remoção do teste pessoal preserva 4.050 contatos importados, 5.050 linhas e 11 lotes; 222 tabelas e 632 políticas conferidas. Seis objetos privados recuperados, quatro PDFs íntegros. A VPS usará o Supabase operacional existente; a cópia local é prova de recuperação, não banco para substituir a base real. G13 permanece aberto: hospedagem/HTTPS/desempenho/WhatsApp e vínculos históricos não resolvidos. Next local 3000 mantido; seis contêineres temporários Limpax parados. Não alterar contêineres de outros projetos. O restante deste arquivo é histórico; não instalar revisão antiga por seguir exemplos abaixo.
+
+Bloco 3 iniciado em 05/10: sessão Oracle expirou e aguarda login pelo titular no Chrome. Capacidade não reconsultada nesta etapa; recusas anteriores não provam disponibilidade atual. Após entrar: conferir cota/uso e rede existente, preparar A1 gratuita, obter IP real, restringir SSH, configurar hostname temporário e instalar via runtime. Validar certificado público, redirecionamento HTTP, login/perfis, PDFs privados e serviços antes de parear número empresarial. Não abrir WAHA/Redis/Supabase ao público nem executar migrações/importação novamente.
 
 ## ARM aprovado no GitHub — 01/10/2026
 

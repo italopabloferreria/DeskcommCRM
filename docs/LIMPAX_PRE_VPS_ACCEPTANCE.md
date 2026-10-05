@@ -24,7 +24,7 @@ Verificação de 04/10/2026. G13 permanece aberto. Não representa autorização
 
 1. **Identidades históricas:** 868 linhas das outras abas examinadas; 14 correspondências somente por endereço, zero vínculos inequívocos pelo cruzamento efetuado. Responsável/equipe e nome da aba não são prova de cliente. Necessária decisão comercial para cliente/local; não excluir, mesclar ou atribuir atendimentos por suposição.
 2. **Recuperação de aplicação:** restauração do banco passou, mas login Auth e subida da aplicação usando a cópia isolada não foram exercitados. Snapshot restaurado antecede os novos modelos de teste; objetos Storage têm backup separado.
-3. **Aceite geral:** cadastro/edição/busca e perfis precisam da bancada completa de usuário. Testes focados não equivalem a esse aceite. Build e tipos integral não foram repetidos devido ao consumo de RAM já registrado.
+3. **Aceite geral:** cadastro/edição/busca e perfis precisam da bancada completa de usuário. Testes focados não equivalem a esse aceite. Build de produção ARM passou no GitHub na execução final abaixo; `pnpm typecheck` independente e aceite completo em ambiente fresco ainda não foram comprovados nesta rodada.
 4. **Desempenho:** eliminada consulta periódica de serviço ausente; otimização geral ainda não comprovada. Modo desenvolvimento compila sob demanda.
 5. **Prévia direta:** a espera de download por blob da prévia expirou no navegador interno; não afirmar que esse controle passou. O fluxo Salvar PDF no CRM → Baixar PDF arquivado passou, inclusive com preenchimento do modelo OCR.
 
@@ -40,3 +40,17 @@ GitHub: verificação ARM do commit88fbde5ec passou; publicação37253362489 par
 ## Diagnóstico da bancada de documentos — continuação 04/10
 Execução37255188247 passou no lint/fragmentos corrigidos e parou nos testes de documentos. Reprodução local:29passaram/2falharam/1erro; ambos na suíte antiga de modelos/imagens, pois a nova consulta inicial de PDFs arquivados consumia mocks sequenciais de modelos e criava alerta de URLrelativa dofetchNode. Fluxo realUI já passou. Ajuste restrito ao fixture: mock do componente ArquivosDocumentos nesta suíte; quatro casos e todas as assertions preservados; componente de arquivo tem suíte própria incluída na repetição. Não remover/excluir teste nem mudar produção para acomodar mock. Lint doarquivo e conferência35fragmentos passaram; aguardar9arquivos da repetição e novaCI. G13aberto.
 Bancada repetida:41testes em9arquivos passaram, incluindo arquivos privados, modelos e imagens. Assertions originais preservadas; lint e release:conferir35fragmentos passaram.
+
+## Resultado final da publicação — 04/10/2026
+
+Execução [37255540881](https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37255540881)
+concluída com sucesso para `59713f3fb6db7011640d7b4ac78fc6211b1a49bf`:
+gates de testes/lint/release, documentos/OCR, kit de instalação, três builds e
+sondas reais ARM antes da publicação. Acesso anônimo ao manifesto/configuração
+das três imagens confirmou linux/arm64, revisão e origem do fork, sem baixar
+camadas ou iniciar Docker local. Manifesto de instalação validado em
+`docs/releases/limpax/59713f3fb-arm.json`; roteiro Oracle atualizado.
+
+Guia inicial: [operação do CRM](LIMPAX_OPERACAO_INICIAL.md).
+Esta publicação prepara os artefatos para instalar; não é implantação,
+pareamento WhatsApp, teste do banco hospedado ou aprovação de G13.

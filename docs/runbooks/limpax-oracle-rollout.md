@@ -1,19 +1,19 @@
-## Versão atual para instalar — 01/10/2026
+## Versão atual para instalar — 04/10/2026
 
 O estado desta seção prevalece sobre os rascunhos e gates históricos abaixo. A rede pública Oracle já existe, mas as duas tentativas A1 2/12 e 1/6 em São Paulo AD-1 recusaram por capacidade insuficiente. Nenhuma VPS/IP/SSH/HTTPS existe; manter custo zero e aguardar capacidade, sem trocar automaticamente para recurso pago.
 
-Imagens atuais: revisão `2a35ef53cb4297c553b22b2e941eae536ae64e4f`, manifesto `docs/releases/limpax/2a35ef53c-arm.json`. Run https://github.com/italopabloferreria/DeskcommCRM/actions/runs/36947068509 SUCCESS: gates e testes de documentos, lint/fragmentos, assets OCR, Compose real, suite shell completa, builds e sondas ARM antes da publicação. GHCR anônimo confirmou metadados linux/arm64, origem do fork e revisão nas três imagens por digest, sem baixar camadas. Não equivale a banco/WhatsApp/fluxos reais aprovados.
+Imagens atuais: revisão `59713f3fb6db7011640d7b4ac78fc6211b1a49bf`, manifesto `docs/releases/limpax/59713f3fb-arm.json`. Run https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37255540881 SUCCESS: gates e testes de documentos, lint/fragmentos, assets OCR, Compose real, suite shell completa, builds e sondas ARM antes da publicação. GHCR anônimo confirmou metadados linux/arm64, origem do fork e revisão nas três imagens por digest, sem baixar camadas. Não equivale a banco/WhatsApp/fluxos reais aprovados.
 
 Num clone novo na futura VPS, copiar o manifesto **antes** de fixar a revisão das imagens. O HEAD documental posterior não passa na guarda exata do runtime. Exemplo após clone da branch `vertical/limpax`, origem conferida e árvore limpa:
 
 ```bash
 install -d -m 700 /opt/limpaxcrm-releases
-cp docs/releases/limpax/2a35ef53c-arm.json /opt/limpaxcrm-releases/2a35ef53c-arm.json
-git checkout --detach 2a35ef53cb4297c553b22b2e941eae536ae64e4f
-node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/2a35ef53c-arm.json
+cp docs/releases/limpax/59713f3fb-arm.json /opt/limpaxcrm-releases/59713f3fb-arm.json
+git checkout --detach 59713f3fb6db7011640d7b4ac78fc6211b1a49bf
+node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/59713f3fb-arm.json
 ```
 
-São instruções preparadas; nenhum checkout/apply de VPS realizado. Configuração privada completa e URLs HTTPS autorizadas antecedem `--plan`/`--apply`. Backup administrativo privado e restauração em instalação descartável, preflight/ROLLBACK e 0495 seguem gates antes de importação real. O kit de recuperação agora interrompe em SQL inválido e verifica gzip previamente; sua execução real ainda não foi provada. G13 aberto, serviços locais pesados OFF. O restante deste arquivo é histórico; não instalar a revisão antiga por seguir um exemplo abaixo.
+São instruções preparadas; nenhum checkout/apply de VPS realizado. Configuração privada completa e URLs HTTPS autorizadas antecedem `--plan`/`--apply`. A carga real já foi reconciliada: 4.050 contatos, 5.050 linhas originais e 11 lotes. O backup pós-importação foi restaurado em PostgreSQL isolado; dados de origem e permissões conferidos em 222 tabelas e 632 políticas. Login Auth e aplicação com a cópia restaurada ainda não foram exercitados. Modelos e PDFs têm cópia privada separada do Storage. G13 permanece aberto: faltam aceite geral/perfis, decisão sobre vínculos históricos e ambiente hospedado com HTTPS/WhatsApp. Next local 3000 mantido; Docker desligado após a recuperação. O restante deste arquivo é histórico; não instalar revisão antiga por seguir exemplos abaixo.
 
 ## ARM aprovado no GitHub — 01/10/2026
 

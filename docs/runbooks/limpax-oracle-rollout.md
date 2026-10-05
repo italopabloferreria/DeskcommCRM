@@ -2,15 +2,15 @@
 
 O estado desta seção prevalece sobre os rascunhos e gates históricos abaixo. A rede pública Oracle já existe, mas as duas tentativas A1 2/12 e 1/6 em São Paulo AD-1 recusaram por capacidade insuficiente. Nenhuma VPS/IP/SSH/HTTPS existe; manter custo zero e aguardar capacidade, sem trocar automaticamente para recurso pago.
 
-Imagens atuais: revisão `827d57d427b59a313ea0c807d79fa44b5c02e8d0`, manifesto `docs/releases/limpax/827d57d42-arm.json`. Run https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37271284402 SUCCESS. Três imagens próprias ARM publicadas por digest e acessíveis anonimamente. Aplicação dessa revisão exercitada com banco/Auth/Storage restaurados no bloco 2; WhatsApp e hospedagem pública ainda não validados.
+Imagens atuais: revisão `427b524b1ddda467d75d14bbdec1058db2cdda40`, manifesto `docs/releases/limpax/427b524b1-arm.json`. Run https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37274751700 SUCCESS. Três imagens próprias ARM publicadas por digest e acessíveis anonimamente. Esta revisão acrescenta observações da planilha ao Histórico principal do contato. CI e metadados ARM aprovados; recuperação autenticada do bloco 2 foi exercitada na revisão anterior827d57d42. Conferência visual autenticada deste ajuste, WhatsApp e hospedagem pública ainda não validados.
 
 Num clone novo na futura VPS, copiar o manifesto **antes** de fixar a revisão das imagens. O HEAD documental posterior não passa na guarda exata do runtime. Exemplo após clone da branch `vertical/limpax`, origem conferida e árvore limpa:
 
 ```bash
 install -d -m 700 /opt/limpaxcrm-releases
-cp docs/releases/limpax/827d57d42-arm.json /opt/limpaxcrm-releases/827d57d42-arm.json
-git checkout --detach 827d57d427b59a313ea0c807d79fa44b5c02e8d0
-node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/827d57d42-arm.json
+cp docs/releases/limpax/427b524b1-arm.json /opt/limpaxcrm-releases/427b524b1-arm.json
+git checkout --detach 427b524b1ddda467d75d14bbdec1058db2cdda40
+node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/427b524b1-arm.json
 ```
 
 São instruções preparadas; nenhum checkout/apply de VPS realizado. Configuração privada completa e URLs HTTPS autorizadas antecedem `--plan`/`--apply`. Blocos 1 e 2 concluídos: perfis reais, contatos/documentos e recuperação com login e PDF comprovados. Backup limpo após remoção do teste pessoal preserva 4.050 contatos importados, 5.050 linhas e 11 lotes; 222 tabelas e 632 políticas conferidas. Seis objetos privados recuperados, quatro PDFs íntegros. A VPS usará o Supabase operacional existente; a cópia local é prova de recuperação, não banco para substituir a base real. G13 permanece aberto: hospedagem/HTTPS/desempenho/WhatsApp e vínculos históricos não resolvidos. Next local 3000 mantido; seis contêineres temporários Limpax parados. Não alterar contêineres de outros projetos. O restante deste arquivo é histórico; não instalar revisão antiga por seguir exemplos abaixo.

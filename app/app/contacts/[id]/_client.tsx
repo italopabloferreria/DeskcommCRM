@@ -246,7 +246,7 @@ export function ContactDetailClient({ contactId }: Props) {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">{t("Visão geral")}</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="timeline">{t("Histórico")}</TabsTrigger>
           {!contact.is_anonymized && Boolean(contact.source_metadata?.workbook_origin) && (
             <TabsTrigger value="workbook">{t("Histórico da planilha")}</TabsTrigger>
           )}
@@ -365,7 +365,22 @@ export function ContactDetailClient({ contactId }: Props) {
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-4">
-          <TimelineView contactId={contactId} />
+          <div className="space-y-6">
+            {!contact.is_anonymized && Boolean(contact.source_metadata?.workbook_origin) && (
+              <section aria-labelledby="workbook-history-title" className="space-y-3">
+                <h2 id="workbook-history-title" className="text-lg font-semibold">
+                  {t("Histórico da planilha")}
+                </h2>
+                <WorkbookContactHistory contactId={contactId} />
+              </section>
+            )}
+            <section aria-labelledby="crm-history-title" className="space-y-3">
+              <h2 id="crm-history-title" className="text-lg font-semibold">
+                {t("Atividades no CRM")}
+              </h2>
+              <TimelineView contactId={contactId} />
+            </section>
+          </div>
         </TabsContent>
 
         {!contact.is_anonymized && Boolean(contact.source_metadata?.workbook_origin) && (

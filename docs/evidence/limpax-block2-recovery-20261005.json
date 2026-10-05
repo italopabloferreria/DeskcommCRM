@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-05",
+  "status": "completed_local_isolated_recovery",
+  "cleanup": {"messages": 27, "conversations": 3, "personal_channels": 1, "webhooks": 101, "events": 56, "empty_attempts_archived": 1, "remaining_messages": 0, "remaining_conversations": 0, "remaining_active_channels": 0},
+  "contacts_preserved": {"total": 4066, "imported": 4050},
+  "restore": {"tables": 222, "rls_policies": 632, "functions": 479, "default_acls": 24, "source_rows": 5050, "batches": 11, "missing": 0, "changed": 0, "canonical_catalog_equivalent": true, "check_constraint_cases": 900, "service_role_memberships": 4, "remote_writes": 0},
+  "storage": {"private_objects": 6, "verified_pdfs": 4, "sha256_verified": true, "anonymous_download_denied": true, "compatible_version": "v1.79.31"},
+  "application": {"existing_account_login": true, "ui_contacts_total": 4066, "ui_archived_pdfs": 4, "download_equals_backup": true, "fixture_text_verified": true, "ui_no_connections": true, "platform": "linux/arm64_emulated", "main_local_port": 3000},
+  "release": {"revision": "827d57d427b59a313ea0c807d79fa44b5c02e8d0", "ci_run": "37271284402", "conclusion": "success", "anonymous_images": 3, "manifest": "docs/releases/limpax/827d57d42-arm.json"},
+  "production_gate": "G13_open"
+}

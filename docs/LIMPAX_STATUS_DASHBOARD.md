@@ -1,6 +1,6 @@
 # LimpaxCRM — dashboard de acompanhamento
 
-Atualizado em 05/10/2026. Bloco 1 concluído: MVP funcional para apresentação local acompanhada. Fotografia das evidências; sem atualização automática. Produção não liberada: G13 aberto.
+Atualizado em 05/10/2026. Blocos 1 e 2 concluídos: MVP funcional para apresentação local acompanhada, recuperação integral exercitada. Fotografia das evidências; sem atualização automática. Produção não liberada: G13 aberto.
 
 ## Concluído e comprovado
 
@@ -8,17 +8,16 @@ Atualizado em 05/10/2026. Bloco 1 concluído: MVP funcional para apresentação 
 - Histórico da aba CADASTRO no contato; tela de revisão de identidades com 212 grupos candidatos, sem união automática.
 - Documentos: OCR de contrato fictício na interface, revisão, modelo reutilizável, preenchimento de cliente e PDF privado arquivado/baixado com integridade verificada.
 - Upload manual de PNG de assinatura e carimbo; posições e modelos persistidos. Testes usaram imagens sintéticas, não assinatura real.
-- Backup após importação restaurado em cópia isolada: 222 tabelas, 632 políticas e base esperada conferidos. Storage separado: cinco objetos, três PDFs íntegros.
-- Imagens ARM de aplicação, worker e scheduler publicadas; builds e sondas passaram. [CI aprovada](https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37255540881), revisão `59713f3fb`. Manifesto: `docs/releases/limpax/59713f3fb-arm.json`.
-- Local 3000 disponível; Docker/WAHA desligados. IA ausente tratada com indisponibilidade, sem polling repetido.
+- Conexão pessoal e histórico de teste removidos: 27 mensagens e três conversas; contatos preservados. Zero conexões ativas, conversas e mensagens restantes.
+- Backup limpo restaurado em cópia isolada: 222 tabelas, 632 políticas e base esperada conferidos. Auth e aplicação autenticados; seis objetos privados e quatro PDFs recuperados. Download no CRM restaurado idêntico ao backup.
+- Imagens ARM de aplicação, worker e scheduler atualizadas; builds e sondas passaram. [CI aprovada](https://github.com/italopabloferreria/DeskcommCRM/actions/runs/37271284402), revisão `827d57d42`. Manifesto: `docs/releases/limpax/827d57d42-arm.json`. Acesso anônimo às três imagens confirmado; aplicação instalada/testada da imagem.
+- Local 3000 disponível; bancada de recuperação encerrada. Nenhum WAHA/worker/scheduler Limpax ativo. IA ausente tratada com indisponibilidade, sem polling repetido.
 
 ## Próximo bloco executável
 
-1. Login Auth e aplicação contra ambiente restaurado; restauração do banco não comprova este fluxo.
-2. Atualizar a cópia de Storage para incluir os PDFs técnicos posteriores ao backup anterior.
-3. Medição geral de desempenho; modo desenvolvimento compila sob demanda.
+Bloco 3: instalar em hospedagem disponível com manifesto fixado; validar HTTPS/login/permissões, desempenho no destino e WhatsApp empresarial autorizado. Capacidade gratuita Oracle continua externa e sem prazo confirmado. Manter custo zero.
 
-O bloco 1 já comprovou cadastro/edição/busca, quatro perfis em sessões reais, isolamento entre organizações, download direto e leitura dos dois tipos de PDF. As evidências e os limites estão em `LIMPAX_BLOCO_1_ACEITE.md`.
+O bloco 1 comprovou cadastro/edição/busca, quatro perfis em sessões reais, isolamento entre organizações, download direto e leitura dos dois tipos de PDF. O bloco 2 comprovou recuperação com login e PDF na aplicação. Evidências e limites: `LIMPAX_BLOCO_1_ACEITE.md` e `LIMPAX_BLOCO_2_RECUPERACAO.md`. Emulação ARM no computador não mede desempenho da VPS.
 
 ## Decisões e dependências
 

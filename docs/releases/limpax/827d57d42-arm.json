@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "revision": "827d57d427b59a313ea0c807d79fa44b5c02e8d0",
+  "images": {
+    "app": "ghcr.io/italopabloferreria/limpaxcrm@sha256:0b3c0d62ad4603a3feced1ae81bee0908169f19244eb8d3b08a97c972b54515e",
+    "worker": "ghcr.io/italopabloferreria/limpaxcrm-worker@sha256:dc9da9bc00db895a16f55aa363247987b05b4e0524ff0d8130de0caef4638532",
+    "scheduler": "ghcr.io/italopabloferreria/limpaxcrm-scheduler@sha256:8302c23969f94a6cffdc3942784f4ac41db3bbdfc29eb8c35eddfabe702e3eae"
+  }
+}

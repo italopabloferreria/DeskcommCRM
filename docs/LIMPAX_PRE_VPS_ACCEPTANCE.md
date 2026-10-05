@@ -33,3 +33,6 @@ Docker foi iniciado exclusivamente para recuperação, com PostgreSQL isolado em
 ## Dependências de hospedagem e roadmap
 
 VPS gratuita, instalação, HTTPS e WhatsApp hospedado permanecem pendentes. DocuSign e domínio definitivo são etapas posteriores. Não é necessário criar registros reais fictícios nem remover dados existentes para terminar os testes.
+
+## Verificação de release — 04/10/2026
+GitHub: verificação ARM do commit88fbde5ec passou; publicação37253362489 parou em Conferir lint e fragmento. Reprodução local encontrou seis fragmentos .changes malformados (impacto corretivo fora do enum ou ausência de frontmatter). Corrigido somente formato/classificação e removidos headings inválidos; conferência release passou com33fragmentos. Workflow passa a disparar para .changes/**. Lint exato da etapa passou. Testes direcionados da publicação/versionamento em andamento; não afirmar publicação nova concluída atéCIconfirmar.

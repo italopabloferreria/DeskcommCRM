@@ -1,5 +1,5 @@
 ---
-impacto: corretivo
+impacto: nada_mudou
 secao: corrigido
 titulo: Análise completa de planilhas grandes e colunas vazias do Excel
 ---

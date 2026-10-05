@@ -6,6 +6,7 @@ on:
   push:
     branches: ["vertical/limpax"]
     paths:
+      - ".changes/**"
       - ".github/workflows/limpax-arm-release.yml"
       - "scripts/publish-limpax-arm-images.mjs"
       - "tests/unit/limpax-arm-publication.test.mjs"

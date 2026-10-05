@@ -2,6 +2,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DocumentsClient } from "./_client";
 
+// Esta suíte mede modelos e imagens. O arquivo privado tem sua própria suíte;
+// sua consulta inicial não deve consumir os mocks sequenciais dos modelos.
+vi.mock("./_arquivos", () => ({ ArquivosDocumentos: () => null }));
+
 afterEach(() => vi.unstubAllGlobals());
 describe("documentos com imagens manuais", () => {
   it("salva texto e imagens e restaura a versão escolhida", async () => {

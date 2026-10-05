@@ -13,7 +13,13 @@ import { ApiError } from "@/lib/api/types";
 import { ok, fail } from "@/lib/api/wrappers";
 import type { Actor } from "@/lib/api/handlers/types";
 import { requireRole } from "@/lib/auth/require-role";
-import { extractBearer, validateBearerToken, ensureRole, ensureScope, McpAuthError } from "@/lib/mcp/auth";
+import {
+  extractBearer,
+  validateBearerToken,
+  ensureRole,
+  ensureScope,
+  McpAuthError,
+} from "@/lib/mcp/auth";
 import { traduzir } from "@/lib/i18n/dicionario";
 import type { Idioma } from "@/lib/i18n/idiomas";
 import {
@@ -138,7 +144,7 @@ export async function GET(req: NextRequest): Promise<Response> {
   }
 
   try {
-    const { contacts, cursor, has_more } = await listContactsHandler(
+    const { contacts, cursor, has_more, total } = await listContactsHandler(
       supabase,
       {
         organization_id: organizationId,
@@ -148,7 +154,7 @@ export async function GET(req: NextRequest): Promise<Response> {
       },
       qsParsed.data,
     );
-    return ok(contacts, { requestId, meta: { cursor, has_more } });
+    return ok(contacts, { requestId, meta: { cursor, has_more, total } });
   } catch (err) {
     if (err instanceof ApiError) {
       return fail(err.code, err.message, err.status, { requestId });

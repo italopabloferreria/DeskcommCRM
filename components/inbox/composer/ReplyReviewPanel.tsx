@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/types";
 import { showApiError } from "@/components/feedback/ApiErrorToast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +34,8 @@ export function ReplyReviewPanel({
       apiClient.get<{ data: { drafts: Draft[] } }>(
         `/api/v1/conversations/${conversationId}/draft-reply`,
       ),
-    refetchInterval: 4000,
+    refetchInterval: (query) =>
+      query.state.error instanceof ApiError && query.state.error.status === 503 ? false : 4000,
     retry: false,
   });
   const [edits, setEdits] = useState<Record<string, string>>({}),
@@ -47,6 +49,7 @@ export function ReplyReviewPanel({
   // Antes: `drafts[0]`, o mais recente, QUALQUER que fosse o estado dele — então
   // uma sugestão rejeitada ficava na tela para sempre, sem botão de fechar.
   const draft = sugestaoParaMostrar(query.data?.data.drafts);
+  const unavailable = query.error instanceof ApiError && query.error.status === 503;
   const body = draft ? (edits[draft.id] ?? draft.edited_body ?? draft.original_body ?? "") : "";
   async function generate() {
     setNotice(null);
@@ -117,12 +120,17 @@ export function ReplyReviewPanel({
           type="button"
           variant="outline"
           size="sm"
-          disabled={disabled || busy}
+          disabled={disabled || busy || unavailable}
           onClick={generate}
         >
           {t(busy ? "Preparando…" : "Sugerir resposta")}
         </Button>
       </div>
+      {unavailable && (
+        <p role="status" className="text-xs text-muted-foreground">
+          {t("O serviço de sugestões de IA ainda não está configurado.")}
+        </p>
+      )}
       {draft && (
         <>
           <p className="text-xs text-muted-foreground">

@@ -127,6 +127,9 @@ export function ImportsListClient() {
     <div className="flex flex-col gap-4 p-4 md:p-6">
       <div>
         <h1 className="text-xl font-semibold">{t("Importações")}</h1>
+        <Link href="/app/imports/identity-review" className="text-sm underline">
+          {t("Revisar identidades da base importada")}
+        </Link>
         <p className="text-sm text-muted-foreground">
           {t("CSV ou XLSX para importação. XLSM para analisar as abas, sem executar macros.")}{" "}
           {t("Análise: até 10.000 linhas. Gravação CSV/XLSX: lotes de até 2.000 linhas.")}

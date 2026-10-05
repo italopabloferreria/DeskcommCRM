@@ -26,13 +26,22 @@ async function context(ctx: Ctx, requestId: string) {
     .eq("id", id)
     .maybeSingle();
   if (!conversation)
-    return { response: fail("not_found", t("Conversa não encontrada."), 404, { requestId }) } as const;
+    return {
+      response: fail("not_found", t("Conversa não encontrada."), 404, { requestId }),
+    } as const;
   return { auth, conversation, t } as const;
 }
 export async function GET(_req: NextRequest, ctx: Ctx) {
   const requestId = randomUUID(),
     c = await context(ctx, requestId);
   if ("response" in c) return c.response;
+  if (!process.env.SUPABASE_DB_URL)
+    return fail(
+      "service_unavailable",
+      c.t("O serviço de sugestões de IA ainda não está configurado."),
+      503,
+      { requestId },
+    );
   const { rows } = await getRequestPool().query(
     `select id,revision::text,original_body,edited_body,approved_body,proposals,feedback,error_code,created_at,
  case when status in ('generating','pending','approved') and not fn_reply_context_current(organization_id,id) then 'stale' else status end as status

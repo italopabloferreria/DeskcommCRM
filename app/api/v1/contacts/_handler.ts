@@ -87,6 +87,7 @@ export interface ListContactsResult {
   contacts: Contact[];
   cursor: string | null;
   has_more: boolean;
+  total?: number;
 }
 
 export async function listContactsHandler(
@@ -124,7 +125,9 @@ export async function listContactsHandler(
 
   let query = supabase
     .from("contacts")
-    .select(SELECT_COLS)
+    // Contagem antes do limite, com os mesmos filtros e RLS. Só a primeira
+    // página conta: nas seguintes o cursor faria o total parecer diminuir.
+    .select(SELECT_COLS, q.cursor ? undefined : { count: "exact" })
     .eq("organization_id", ctx.organization_id)
     // O placeholder de GRUPO (`kind='whatsapp_group'`) não é uma pessoa da
     // base: é o registro técnico que a conversa do grupo pendura para caber no
@@ -244,9 +247,7 @@ export async function listContactsHandler(
     }
     const op = asc ? "gt" : "lt";
     if (c.sort) {
-      query = query.or(
-        `${sortCol}.${op}.${c.sort},and(${sortCol}.eq.${c.sort},id.${op}.${c.id})`,
-      );
+      query = query.or(`${sortCol}.${op}.${c.sort},and(${sortCol}.eq.${c.sort},id.${op}.${c.id})`);
     } else {
       // Página na região de sort NULL (nulls last): pagina só por id.
       query = query.is(sortCol, null);
@@ -254,7 +255,7 @@ export async function listContactsHandler(
     }
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
   if (error) {
     throw new ApiError(500, "internal_error", undefined, ctx.requestId, error.message);
   }
@@ -276,7 +277,12 @@ export async function listContactsHandler(
     throw new ApiError(500, "internal_error", undefined, ctx.requestId, convErr);
   }
 
-  return { contacts, cursor: nextCursor, has_more: hasMore };
+  return {
+    contacts,
+    cursor: nextCursor,
+    has_more: hasMore,
+    ...(!q.cursor && typeof count === "number" ? { total: count } : {}),
+  };
 }
 
 /**
@@ -407,9 +413,11 @@ export async function getContactHandler(
     }
   }
 
-  const { contacts: enriched, error: convErr } = await withConversas(supabase, ctx.organization_id, [
-    contact,
-  ]);
+  const { contacts: enriched, error: convErr } = await withConversas(
+    supabase,
+    ctx.organization_id,
+    [contact],
+  );
   if (convErr) {
     throw new ApiError(500, "internal_error", undefined, ctx.requestId, convErr);
   }
@@ -596,7 +604,9 @@ export async function patchContactHandler(
   // O banco deriva a coluna sozinho — era só não escrever nela.
   if (input.email !== undefined) patch.email = input.email;
   if (input.phone_number !== undefined) {
-    patch.phone_number = input.phone_number ? canonicalPhoneBR(input.phone_number) : input.phone_number;
+    patch.phone_number = input.phone_number
+      ? canonicalPhoneBR(input.phone_number)
+      : input.phone_number;
   }
   if (input.birthdate !== undefined) patch.birthdate = input.birthdate;
   if (input.tags !== undefined) patch.tags = input.tags;
@@ -640,9 +650,10 @@ export async function patchContactHandler(
     );
   }
 
-  const tagServiceOrigin = input.tags !== undefined
-    ? await observeServiceOrigin(createAdminClient(), ctx.organization_id, contactId)
-    : null;
+  const tagServiceOrigin =
+    input.tags !== undefined
+      ? await observeServiceOrigin(createAdminClient(), ctx.organization_id, contactId)
+      : null;
   patch.updated_at = new Date().toISOString();
 
   const { data: updated, error: updErr } = await supabase
@@ -862,7 +873,10 @@ export async function deleteContactHandler(
       "state_conflict",
       { vinculos, por_tabela },
       ctx.requestId,
-      traduzir("Não foi possível excluir: o contato ainda tem registros vinculados.", ctx.idioma ?? "pt-BR"),
+      traduzir(
+        "Não foi possível excluir: o contato ainda tem registros vinculados.",
+        ctx.idioma ?? "pt-BR",
+      ),
     );
   }
 

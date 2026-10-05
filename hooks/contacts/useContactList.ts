@@ -4,14 +4,11 @@ import { apiClient } from "@/lib/api/client";
 import { showApiError } from "@/components/feedback/ApiErrorToast";
 import type { ContactOrderBy } from "@/lib/schemas/contacts";
 import type { Contact } from "@/lib/types/contacts";
-import {
-  type ModoDeEtiqueta,
-  marcadoresEscolhidos,
-} from "@/lib/inbox/marcador-da-conversa";
+import { type ModoDeEtiqueta, marcadoresEscolhidos } from "@/lib/inbox/marcador-da-conversa";
 
 interface ListResponse {
   data: Contact[];
-  meta?: { cursor?: string; has_more?: boolean };
+  meta?: { cursor?: string; has_more?: boolean; total?: number };
 }
 
 export interface ContactListFilters {
@@ -58,7 +55,6 @@ export function useContactList(filters: ContactListFilters) {
         throw err;
       }
     },
-    getNextPageParam: (lastPage) =>
-      lastPage.meta?.has_more ? lastPage.meta.cursor : undefined,
+    getNextPageParam: (lastPage) => (lastPage.meta?.has_more ? lastPage.meta.cursor : undefined),
   });
 }

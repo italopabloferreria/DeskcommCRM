@@ -85,10 +85,8 @@ export function ContactsListClient() {
   );
   const q = useContactList(filters);
 
-  const allContacts = useMemo(
-    () => q.data?.pages.flatMap((p) => p.data) ?? [],
-    [q.data],
-  );
+  const allContacts = useMemo(() => q.data?.pages.flatMap((p) => p.data) ?? [], [q.data]);
+  const totalContacts = q.data?.pages[0]?.meta?.total;
 
   const tagOptions = useMemo(() => {
     const set = new Set<string>();
@@ -156,7 +154,7 @@ export function ContactsListClient() {
         <div className="relative w-full sm:w-72">
           <MagnifyingGlass
             size={16}
-            className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="absolute top-1/2 left-2 -translate-y-1/2 text-muted-foreground"
             aria-hidden
           />
           <Input
@@ -294,12 +292,7 @@ export function ContactsListClient() {
       ) : q.isError ? (
         <Card className="p-6 text-center">
           <p className="text-sm text-error-fg">{t("Erro ao carregar contatos.")}</p>
-          <Button
-            size="sm"
-            variant="outline"
-            className="mt-2"
-            onClick={() => q.refetch()}
-          >
+          <Button size="sm" variant="outline" className="mt-2" onClick={() => q.refetch()}>
             {t("Tentar novamente")}
           </Button>
         </Card>
@@ -318,9 +311,18 @@ export function ContactsListClient() {
             />
           </Card>
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              {allContacts.length} {allContacts.length === 1 ? t("contato") : t("contatos")}
-              {q.hasNextPage ? ` ${t("carregados — há mais resultados")}` : ""}
+            <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+              {typeof totalContacts === "number" ? (
+                <>
+                  {t("Exibindo")} {allContacts.length} {t("de")} {totalContacts}{" "}
+                  {totalContacts === 1 ? t("contato") : t("contatos")}
+                </>
+              ) : (
+                <>
+                  {allContacts.length} {allContacts.length === 1 ? t("contato") : t("contatos")}
+                  {q.hasNextPage ? ` ${t("carregados — há mais resultados")}` : ""}
+                </>
+              )}
             </p>
             {q.hasNextPage && (
               <Button

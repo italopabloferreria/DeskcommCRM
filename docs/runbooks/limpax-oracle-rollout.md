@@ -1,3 +1,7 @@
+## Direção atual — VPS do cliente
+
+Titular decidiu apresentar localmente e solicitar contratação de VPS ao cliente. O [roteiro atual](limpax-client-vps-rollout.md) prevalece para a próxima instalação. Esta página conserva histórico Oracle e exemplos de versões anteriores. Revisão corrigida9d164e1ec tem CI37376993451 SUCCESS e manifesto próprio verificado; seguir roteiro atual, não os exemplos antigos abaixo. Nenhuma contratação ou cobrança autorizada ao agente.
+
 ## Versão atual para instalar — 05/10/2026
 
 O estado desta seção prevalece sobre os rascunhos e gates históricos abaixo. A rede pública Oracle já existe, mas as duas tentativas A1 2/12 e 1/6 em São Paulo AD-1 recusaram por capacidade insuficiente. Nenhuma VPS/IP/SSH/HTTPS existe; manter custo zero e aguardar capacidade, sem trocar automaticamente para recurso pago.

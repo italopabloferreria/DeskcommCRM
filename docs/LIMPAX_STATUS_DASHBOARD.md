@@ -19,7 +19,7 @@ Blocos1/2 concluídos. Bloco3 aguarda hospedagem. Oracle autenticada, tentativa 
 
 ## O que falta
 
-- Próximo executável: publicar/conferir imagens da revisão corrigida e preparar instalação para arquitetura da VPS contratada. Imagens ARM anteriores427b524b1 não contêm o debug atual.
+- Release corrigida9d164e1ec: CI37376993451 SUCCESS, três imagens ARM conferidas anonimamente e manifesto validado. Roteiro atual: [VPS do cliente](runbooks/limpax-client-vps-rollout.md). Próximo executável: confirmar arquitetura/hostname/acesso à VPS e preparar configuração privada antes do plano de instalação.
 - Externo: contratação e acesso à VPS. Depois instalar stack, validar HTTPS/login/perfis/PDFs/desempenho, conectar WhatsApp empresarial autorizado e fechar G13 antes de uso público.
 - Transição operacional: identificar registros ambíguos e vincular históricos das outras abas explicitamente; não inferir identidades nem estados por cores.
 - Roadmap: crm.limpaxdf.com.br, DocuSign configurado, retorno manual de arquivo assinado Gov.br, IA conforme configuração. Gov.br não possui integração automática implementada; DocuSign não conectado.

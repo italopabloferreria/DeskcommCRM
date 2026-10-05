@@ -1,3 +1,6 @@
+## Release corrigida pronta para instalação — 05/10/2026
+CI37376993451 concluída SUCCESS para9d164e1ecf825784f6447aed3f03e09d62b26957: gates de qualidade, kit de instalação, três builds ARM e sondas reais passaram. Consulta anônima dos três manifestos/configurações confirmou linux/arm64, origem do fork e revisão exata. Manifesto docs/releases/limpax/9d164e1ec-arm.json validado; nenhuma camada baixada, Docker local iniciado ou dado remoto alterado.
+Roteiro atual docs/runbooks/limpax-client-vps-rollout.md preparado para VPS do cliente. Titular decidiu apresentação local; nenhuma compra autorizada ao agente. Bloco de release concluído, MVP local apresentável; G13 permanece aberto. Próximo: acesso à VPS, confirmação de arquitetura e hostname, instalação e validação HTTPS/Auth/desempenho/WhatsApp. Se VPS Intel/AMD, validar caminho x86 antes de aplicar; runtime atual é exclusivo ARM.94 observações sem identidade e vínculo explícito das demais abas continuam pendentes, além do roadmap de domínio/DocuSign/Gov.br manual.
 # Auditoria local LimpaxCRM — 05/10/2026
 
 Escopo autorizado: depuração do MVP local enquanto cliente avalia contratar VPS. Skills: systematic-debugging, verification-before-completion e test-driven-development. Servidor Next existente3000 preservado, sem Docker/WAHA/build completo, sem migração nem alteração de dados de clientes.

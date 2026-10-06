@@ -89,10 +89,11 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    let denied: NextResponse;
     // API routes must respond with JSON envelope (contract: {error:{code,message}})
     // — never redirect HTML to JSON consumers. UI routes redirect to /login as before.
     if (pathname.startsWith("/api/")) {
-      return new NextResponse(
+      denied = new NextResponse(
         JSON.stringify({
           error: {
             code: "unauthenticated",
@@ -107,10 +108,14 @@ export async function proxy(request: NextRequest) {
           },
         },
       );
+    } else {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname + search);
+      denied = NextResponse.redirect(loginUrl);
     }
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname + search);
-    return NextResponse.redirect(loginUrl);
+    // Preserve invalid-session cleanup emitted by Supabase before denying access.
+    for (const cookie of response.cookies.getAll()) denied.cookies.set(cookie);
+    return denied;
   }
 
   // EPIC-11 S-11.07: validate impersonate cookie on /app/* paths. Middleware

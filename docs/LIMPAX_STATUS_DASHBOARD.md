@@ -25,3 +25,5 @@ Blocos1/2 concluídos. Bloco3 aguarda hospedagem. Oracle autenticada, tentativa 
 - Roadmap: crm.limpaxdf.com.br, DocuSign configurado, retorno manual de arquivo assinado Gov.br, IA conforme configuração. Gov.br não possui integração automática implementada; DocuSign não conectado.
 
 Compatibilidade06/10:37 testes de guardas passaram; runtime ARM recusa x64 antes de execução. Roteiro registra preparação específica para Intel/AMD; instalador upstream não deve ser usado como entrega das extensões Limpax.
+
+06/10: sessão inválida agora conserva limpeza de cookies no redirecionamento/401;26 testes, lint e typecheck passaram. Chrome autenticado em Contatos. Publicar nova imagem antes de instalar esta correção;9d164e1ec é anterior. Alternativa econômica inicial NVMe4 HostGator:2CPU/4GB,30,39 equivalente em36meses,1094,11 antecipados; recomendação para uso leve a validar, sem contratação.

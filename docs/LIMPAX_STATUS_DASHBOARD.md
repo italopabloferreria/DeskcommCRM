@@ -23,3 +23,5 @@ Blocos1/2 concluídos. Bloco3 aguarda hospedagem. Oracle autenticada, tentativa 
 - Externo: contratação e acesso à VPS. Depois instalar stack, validar HTTPS/login/perfis/PDFs/desempenho, conectar WhatsApp empresarial autorizado e fechar G13 antes de uso público.
 - Transição operacional: identificar registros ambíguos e vincular históricos das outras abas explicitamente; não inferir identidades nem estados por cores.
 - Roadmap: crm.limpaxdf.com.br, DocuSign configurado, retorno manual de arquivo assinado Gov.br, IA conforme configuração. Gov.br não possui integração automática implementada; DocuSign não conectado.
+
+Compatibilidade06/10:37 testes de guardas passaram; runtime ARM recusa x64 antes de execução. Roteiro registra preparação específica para Intel/AMD; instalador upstream não deve ser usado como entrega das extensões Limpax.

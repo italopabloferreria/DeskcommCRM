@@ -38,3 +38,19 @@ node scripts/limpax-arm-runtime.mjs --check-manifest /opt/limpaxcrm-releases/9d1
 ```
 
 Preparar `.env` privado e executar `--plan` com o mesmo manifesto; aplicar somente depois dos pré-requisitos acima. Estes comandos não foram executados em VPS; nenhum deploy foi realizado.
+## Compatibilidade Intel/AMD conferida — 06/10/2026
+
+Auditoria do código confirmou que `ubuntu-production-installer.sh` e `hostgator-setup-kit/_common.sh` aceitam x86_64/amd64, mas o namespace padrão do kit é `ghcr.io/melgarafael`. `docker-compose.prod.yml` também usa imagens upstream como fallback. Esse caminho não comprova presença das extensões Limpax: instalar a imagem original deixaria de entregar os ajustes próprios.
+
+Verificação nesta etapa:37 testes de runtime/publicação passaram em2 arquivos. Invocação controlada do runtime atual com Linux x64 foi recusada antes de qualquer comando, download ou serviço; guardas ARM mantidas. Next3000 pertence ao fork e respondeu HTTP200. Não houve build, Docker local, migração ou alteração de clientes.
+
+Para VPS Intel/AMD, executar sequência específica antes de instalar:
+
+1. Confirmar arquitetura e acesso da máquina contratada.
+2. Construir/publicar app, worker e scheduler Linux amd64 do fork, com a mesma revisão e namespace próprios; conferir digests, origem e sondas em runner remoto.
+3. Adaptar o caminho de runtime para arquitetura explícita e validada, preservando recusas de manifesto, projeto Supabase, configuração privada e portas internas. Não contornar guarda ARM nem emular silenciosamente.
+4. Conferir arquitetura/digests de WAHA, Redis, ponte Redis HTTP e Caddy; validar Compose com configuração fictícia antes de usar segredos reais.
+5. Transferir configuração operacional privada preservando chaves criptográficas atuais. O instalador gera chaves apenas quando ausentes; não partir de instalação nova com chaves diferentes para dados já criptografados.
+6. Registrar manifesto e só então executar plano/aplicação, seguido do aceite hospedado e G13.
+
+Resultado: ARM está preparado; Intel/AMD exige artefatos e runtime próprios, ainda não implementados. Nenhuma VPS foi selecionada/contratada; evitar publicar novas variantes antes da definição da máquina. Esta auditoria não certifica instalação x86 ou produção.
